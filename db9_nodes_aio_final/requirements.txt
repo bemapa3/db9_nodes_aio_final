@@ -1,0 +1,6 @@
+# Keep minimal for ComfyUI environments
+torch
+numpy
+Pillow
+# opencv-python — NOT needed: Canny edge detection is pure PyTorch in db9_tiling_aio.py
+# If your ComfyUI already has opencv-python-headless, adding opencv-python will conflict.

@@ -1,0 +1,3705 @@
+{
+  "id": "526fab5f-df8e-435f-bda8-49591690d57e",
+  "revision": 0,
+  "last_node_id": 207,
+  "last_link_id": 517,
+  "nodes": [
+    {
+      "id": 157,
+      "type": "SDVN Any Show",
+      "pos": [
+        1514.3393221470765,
+        -584.6141684227131
+      ],
+      "size": [
+        260.38568839097866,
+        241.25661932543892
+      ],
+      "flags": {},
+      "order": 40,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "any",
+          "type": "*",
+          "link": 379
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e4c47de102ba8c15f56b16f327b4fd17fe12fa71",
+        "Node name for S&R": "SDVN Any Show",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "True"
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 92,
+      "type": "SDVN Lora info",
+      "pos": [
+        152.20060641895918,
+        -454.7731030171326
+      ],
+      "size": [
+        387.1022838510502,
+        58
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "lora_path",
+          "type": "STRING",
+          "link": 218
+        }
+      ],
+      "outputs": [
+        {
+          "name": "info",
+          "type": "STRING",
+          "links": [
+            219
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e4c47de102ba8c15f56b16f327b4fd17fe12fa71",
+        "Node name for S&R": "SDVN Lora info",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "Full_Data"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 63,
+      "type": "SDVN Any Show",
+      "pos": [
+        871.327981910102,
+        -1143.939464922808
+      ],
+      "size": [
+        286.99791664340114,
+        173.1426505018053
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "any",
+          "type": "*",
+          "link": 370
+        }
+      ],
+      "outputs": [],
+      "title": "Debug_Info",
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e4c47de102ba8c15f56b16f327b4fd17fe12fa71",
+        "Node name for S&R": "SDVN Any Show",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "Emitted 6 tiles."
+      ],
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 73,
+      "type": "SDVN Any Show",
+      "pos": [
+        1792.8327648411687,
+        -582.3737609437501
+      ],
+      "size": [
+        210,
+        241.00896852093933
+      ],
+      "flags": {},
+      "order": 38,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "any",
+          "type": "*",
+          "link": 378
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e4c47de102ba8c15f56b16f327b4fd17fe12fa71",
+        "Node name for S&R": "SDVN Any Show",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "{'seam_score': 0.4642027275902884, 'ghost_score': 0.07272380217909813, 'failing_tiles': [0, 1, 2, 3, 4, 5], 'pair_scores': [{'tile_a': 4, 'tile_b': 5, 'dir': 'h', 'ssim': 0.21804320812225342, 'l2': 0.06898325681686401, 'ghost': 0.11549574136734009, 'severity': 0.5019567918777466}, {'tile_a': 2, 'tile_b': 5, 'dir': 'v', 'ssim': 0.39093905687332153, 'l2': 0.055203504860401154, 'ghost': 0.06259264051914215, 'severity': 0.32906094312667844}, {'tile_a': 3, 'tile_b': 4, 'dir': 'h', 'ssim': 0.5366246104240417, 'l2': 0.03507072478532791, 'ghost': 0.11361001431941986, 'severity': 0.18337538957595823}, {'tile_a': 0, 'tile_b': 1, 'dir': 'h', 'ssim': 0.5640438795089722, 'l2': 0.009640609845519066, 'ghost': 0.022018950432538986, 'severity': 0.1559561204910278}, {'tile_a': 0, 'tile_b': 3, 'dir': 'v', 'ssim': 0.6131351590156555, 'l2': 0.030139928683638573, 'ghost': 0.07940667867660522, 'severity': 0.10686484098434446}, {'tile_a': 1, 'tile_b': 4, 'dir': 'v', 'ssim': 0.7102755308151245, 'l2': 0.036939188838005066, 'ghost': 0.08239968866109848, 'severity': 0.009724469184875462}, {'tile_a': 1, 'tile_b': 2, 'dir': 'h', 'ssim': 0.7175194621086121, 'l2': 0.012665288522839546, 'ghost': 0.033542901277542114, 'severity': 0.002480537891387913}], 'recommend_rerun': True}"
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 116,
+      "type": "Fast Groups Bypasser (rgthree)",
+      "pos": [
+        2463.961684107368,
+        -251.82441878143578
+      ],
+      "size": [
+        691.0172811312626,
+        468.3083627863857
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "OPT_CONNECTION",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "matchColors": "",
+        "matchTitle": "",
+        "showNav": true,
+        "showAllGraphs": true,
+        "sort": "position",
+        "customSortAlphabet": "",
+        "toggleRestriction": "default",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.7"
+        }
+      },
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 156,
+      "type": "DB9TileQAPriority",
+      "pos": [
+        1518.4700744566599,
+        -857.8914153999306
+      ],
+      "size": [
+        466.2473089855157,
+        225.461856754039
+      ],
+      "flags": {},
+      "order": 36,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "final_image",
+          "type": "IMAGE",
+          "link": 376
+        },
+        {
+          "name": "tile_plan",
+          "type": "DB9_TILE_PLAN",
+          "link": 377
+        },
+        {
+          "name": "base_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "link": 380
+        }
+      ],
+      "outputs": [
+        {
+          "name": "qa_report",
+          "type": "DB9_QA_REPORT",
+          "links": [
+            378,
+            400
+          ]
+        },
+        {
+          "name": "debug_info",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "recommend_rerun",
+          "type": "BOOLEAN",
+          "links": [
+            379
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "bemapa3/db9_tiling_nodes_aio",
+        "ver": "424781663b8073f51e61deb01d77cd06c511a9b1",
+        "Node name for S&R": "DB9TileQAPriority",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        0.72,
+        0.12,
+        0.18,
+        1,
+        1,
+        1.25
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 93,
+      "type": "SDVN Any Show",
+      "pos": [
+        572.3359189158526,
+        -747.0624395345561
+      ],
+      "size": [
+        564.6929005095212,
+        405.5596250685945
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "any",
+          "type": "*",
+          "link": 219
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e4c47de102ba8c15f56b16f327b4fd17fe12fa71",
+        "Node name for S&R": "SDVN Any Show",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "Tag: upscale_mir\n\nTrigger_word: No data\n\nCopyright: No data\n\nUrl: No data\n\nDim: No data\n\nAlpha: No data\n\nUnet_lr: No data\n\nBatch_Size: No data\n\nEpochs: No data\n\nSteps: No data\n\nInfo_txt: \n\nformat: pt\ninfo: ''\nname: Lora_DB_upscale_mir\nsoftware: '{\"name\": \"ai-toolkit\", \"repo\": \"https://github.com/ostris/ai-toolkit\",\n  \"version\": \"0.7.27\"}'\nss_base_model_version: flux2_klein_9b\nss_output_name: Lora_DB_upscale_mir\nss_tag_frequency: '{\"1_upscale_mir\": {\"upscale_mir\": 1}}'\nsshs_legacy_hash: 32a59173\nsshs_model_hash: 1e79018e18508704018b24de1dcb52b98b42dfc362616af23bccd51328f23a7b\ntraining_info: '{\"step\": 3000, \"epoch\": 34}'\nversion: Train by trainlora.vn | stablediffusion.vn\n"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 162,
+      "type": "DB9TileResultMergeV2",
+      "pos": [
+        3160.6072786960367,
+        -1630.1860316122325
+      ],
+      "size": [
+        266.990234375,
+        86
+      ],
+      "flags": {},
+      "order": 46,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "full_base_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "link": 414
+        },
+        {
+          "name": "full_highlight_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "link": 415
+        },
+        {
+          "name": "rerun_base_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "link": 412
+        },
+        {
+          "name": "rerun_highlight_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "link": 413
+        }
+      ],
+      "outputs": [
+        {
+          "name": "base_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "links": [
+            416
+          ]
+        },
+        {
+          "name": "highlight_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "links": [
+            417
+          ]
+        },
+        {
+          "name": "debug_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "bemapa3/db9_tiling_nodes_aio",
+        "ver": "a97e6044ce1ae2a5184db683aebdabbe1ba8ccb4",
+        "Node name for S&R": "DB9TileResultMergeV2",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 165,
+      "type": "DB9HighlightPreserveCompositeCanny",
+      "pos": [
+        3161.151037733268,
+        -1453.3828966584183
+      ],
+      "size": [
+        463.053715666185,
+        262
+      ],
+      "flags": {},
+      "order": 47,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "base_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "link": 416
+        },
+        {
+          "name": "highlight_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "link": 417
+        },
+        {
+          "name": "tile_plan",
+          "type": "DB9_TILE_PLAN",
+          "link": 421
+        }
+      ],
+      "outputs": [
+        {
+          "name": "base_composite",
+          "type": "IMAGE",
+          "links": [
+            418
+          ]
+        },
+        {
+          "name": "highlight_composite",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "final_image",
+          "type": "IMAGE",
+          "links": []
+        },
+        {
+          "name": "debug_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "bemapa3/db9_tiling_nodes_aio",
+        "ver": "424781663b8073f51e61deb01d77cd06c511a9b1",
+        "Node name for S&R": "DB9HighlightPreserveCompositeCanny",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "add",
+        0.95,
+        0.08,
+        0.18,
+        0.85,
+        0.12,
+        0.22
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 48,
+      "type": "SDVN Apply Kontext Reference",
+      "pos": [
+        148.8726009015923,
+        -923.0422534536626
+      ],
+      "size": [
+        387.79821110384705,
+        160
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 61
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 62
+        },
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 362
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "mask",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "links": [
+            75,
+            76
+          ]
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            78
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "3a7e72fb97b3d5c63db1c39e60de2bf5513f9730",
+        "Node name for S&R": "SDVN Apply Kontext Reference",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        0
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 36,
+      "type": "SDVN Upscale Image",
+      "pos": [
+        -149.75441758730878,
+        -1133.327026228327
+      ],
+      "size": [
+        270,
+        154
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 42
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "widget": {
+            "name": "width"
+          },
+          "link": 47
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "widget": {
+            "name": "height"
+          },
+          "link": 48
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            359,
+            360,
+            403,
+            419,
+            432
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e4c47de102ba8c15f56b16f327b4fd17fe12fa71",
+        "Node name for S&R": "SDVN Upscale Image",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "Maxsize",
+        "None",
+        3,
+        1024,
+        1024
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 54,
+      "type": "SDVN KSampler",
+      "pos": [
+        1179.578886147711,
+        -1225.9037368853137
+      ],
+      "size": [
+        309.69747369670927,
+        881.8193791182214
+      ],
+      "flags": {},
+      "order": 28,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 96
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 75
+        },
+        {
+          "name": "negative",
+          "shape": 7,
+          "type": "CONDITIONING",
+          "link": 76
+        },
+        {
+          "name": "latent_image",
+          "shape": 7,
+          "type": "LATENT",
+          "link": 78
+        },
+        {
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": 79
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": null
+        },
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            368
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e4c47de102ba8c15f56b16f327b4fd17fe12fa71",
+        "Node name for S&R": "SDVN KSampler",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "Auto",
+        "Denoise",
+        1,
+        10,
+        8,
+        "euler",
+        "simple",
+        781648712377267,
+        "fixed",
+        false,
+        1024,
+        1024,
+        3.5
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 50,
+      "type": "SDVN Load Lora Filter",
+      "pos": [
+        -152.80746183380973,
+        -681.397130507486
+      ],
+      "size": [
+        268.9056119773535,
+        298.9094997735581
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "shape": 7,
+          "type": "MODEL",
+          "link": 63
+        },
+        {
+          "name": "clip",
+          "shape": 7,
+          "type": "CLIP",
+          "link": 64
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            96,
+            448
+          ]
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "links": [
+            65
+          ]
+        },
+        {
+          "name": "lora_path",
+          "type": "STRING",
+          "links": [
+            218
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "171eb3fc033e7c1bc71acfff4d13b009a9827618",
+        "Node name for S&R": "SDVN Load Lora Filter",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        true,
+        "",
+        "model.safetensors",
+        "",
+        "Lora/Lora_DB_upscale_mir/Lora_DB_upscale_mir.safetensors",
+        0.8,
+        1
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 51,
+      "type": "SDVN CLIP Text Encode Simple",
+      "pos": [
+        149.11909588605846,
+        -734.6732825577467
+      ],
+      "size": [
+        390,
+        228
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 65
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            61,
+            436
+          ]
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e6e818f39b49684a362d096fb8eaca50405bd7d2",
+        "Node name for S&R": "SDVN CLIP Text Encode Simple",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "Upscale tăng cường chi tiết hình ảnh, làm rõ chi tiết, upscale_mir,BBB_Upscale_002,",
+        "None",
+        "None",
+        199556481271438,
+        "fixed",
+        null
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 49,
+      "type": "SDVN Load Checkpoint",
+      "pos": [
+        -146.02243667773075,
+        -921.3400739804044
+      ],
+      "size": [
+        270,
+        190
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            63
+          ]
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "links": [
+            64
+          ]
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "links": [
+            62,
+            79,
+            437,
+            451
+          ]
+        },
+        {
+          "name": "ckpt_path",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "171eb3fc033e7c1bc71acfff4d13b009a9827618",
+        "Node name for S&R": "SDVN Load Checkpoint",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        true,
+        "",
+        "model.safetensors",
+        "Flux2-klein-9b.safetensors"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 175,
+      "type": "Reroute",
+      "pos": [
+        1947.3967469332447,
+        -2080.7566661278393
+      ],
+      "size": [
+        75,
+        26
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "",
+          "type": "*",
+          "link": 451
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "VAE",
+          "links": [
+            452,
+            454
+          ]
+        }
+      ],
+      "properties": {
+        "showOutputText": false,
+        "horizontal": false,
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      }
+    },
+    {
+      "id": 173,
+      "type": "VAEDecode",
+      "pos": [
+        2816.9942921971774,
+        -2020.3626100633478
+      ],
+      "size": [
+        144.4765625,
+        46
+      ],
+      "flags": {},
+      "order": 44,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 455
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 454
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            443
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.3",
+        "Node name for S&R": "VAEDecode",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 41,
+      "type": "SDVN Simple Any Input",
+      "pos": [
+        150.35901287288402,
+        -1129.2735791999205
+      ],
+      "size": [
+        377.7147391514152,
+        146.80302191486862
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "any",
+          "shape": 6,
+          "type": "*",
+          "links": [
+            47,
+            48
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "090cde3cd229a59b9c53550ab71dc3a76ff4d143",
+        "Node name for S&R": "SDVN Simple Any Input",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.7"
+        }
+      },
+      "widgets_values": [
+        "4000"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 166,
+      "type": "SDVN Save Image",
+      "pos": [
+        3772.4324663864695,
+        -1496.821488953782
+      ],
+      "size": [
+        626.9462615131778,
+        534.8940811015117
+      ],
+      "flags": {},
+      "order": 48,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 418
+        },
+        {
+          "name": "compare_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 419
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e4c47de102ba8c15f56b16f327b4fd17fe12fa71",
+        "Node name for S&R": "SDVN Save Image",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "BBB-Tiled Upscale"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 176,
+      "type": "DB9TileColorNormalize",
+      "pos": [
+        2098.0436804665815,
+        -719.2276008169798
+      ],
+      "size": [
+        288.39565124511716,
+        126
+      ],
+      "flags": {},
+      "order": 34,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "base_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "link": 456
+        }
+      ],
+      "outputs": [
+        {
+          "name": "base_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "links": [
+            457
+          ]
+        },
+        {
+          "name": "debug_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "bemapa3/db9_tiling_nodes_aio",
+        "ver": "74355a16853bdec0a5cf0520e260f2626f8d25ac",
+        "Node name for S&R": "DB9TileColorNormalize",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        0.75,
+        0.12,
+        0.08
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 155,
+      "type": "DB9HighlightPreserveCompositeCanny",
+      "pos": [
+        1512.3628729810337,
+        -1166.7426566507847
+      ],
+      "size": [
+        463.053715666185,
+        262
+      ],
+      "flags": {},
+      "order": 35,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "base_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "link": 457
+        },
+        {
+          "name": "highlight_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "link": 372
+        },
+        {
+          "name": "tile_plan",
+          "type": "DB9_TILE_PLAN",
+          "link": 458
+        }
+      ],
+      "outputs": [
+        {
+          "name": "base_composite",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "highlight_composite",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "final_image",
+          "type": "IMAGE",
+          "links": [
+            376,
+            431
+          ]
+        },
+        {
+          "name": "debug_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "bemapa3/db9_tiling_nodes_aio",
+        "ver": "424781663b8073f51e61deb01d77cd06c511a9b1",
+        "Node name for S&R": "DB9HighlightPreserveCompositeCanny",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "add",
+        0.9,
+        0.08,
+        0.18,
+        0.9,
+        0.12,
+        0.18
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 171,
+      "type": "Image Comparer (rgthree)",
+      "pos": [
+        2084.978744097819,
+        -1393.4260844619712
+      ],
+      "size": [
+        558.1132355252611,
+        561.3482909030404
+      ],
+      "flags": {},
+      "order": 37,
+      "mode": 0,
+      "inputs": [
+        {
+          "dir": 3,
+          "name": "image_a",
+          "type": "IMAGE",
+          "link": 431
+        },
+        {
+          "dir": 3,
+          "name": "image_b",
+          "type": "IMAGE",
+          "link": 432
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "aux_id": "rgthree/rgthree-comfy",
+        "ver": "683836c46e898668936c433502504cc0627482c5",
+        "comparer_mode": "Slide",
+        "cnr_id": "rgthree-comfy",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        [
+          {
+            "name": "A",
+            "selected": true,
+            "url": "/api/view?filename=rgthree.compare._temp_zzgdx_00001_.png&type=temp&subfolder=&rand=0.89690541175376"
+          },
+          {
+            "name": "B",
+            "selected": true,
+            "url": "/api/view?filename=rgthree.compare._temp_zzgdx_00002_.png&type=temp&subfolder=&rand=0.7705804894628405"
+          }
+        ]
+      ]
+    },
+    {
+      "id": 152,
+      "type": "DB9TilePlanV2",
+      "pos": [
+        569.7246143034871,
+        -1145.0728792228722
+      ],
+      "size": [
+        282.439453125,
+        350
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 359
+        }
+      ],
+      "outputs": [
+        {
+          "name": "tile_plan",
+          "type": "DB9_TILE_PLAN",
+          "links": [
+            361,
+            377,
+            401,
+            421,
+            458
+          ]
+        },
+        {
+          "name": "total_tiles",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "chosen_tile_size",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "cols",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "rows",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "debug_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "bemapa3/db9_tiling_nodes_aio",
+        "ver": "424781663b8073f51e61deb01d77cd06c511a9b1",
+        "Node name for S&R": "DB9TilePlanV2",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        1536,
+        2048,
+        "auto",
+        128,
+        true,
+        "reflect",
+        150817,
+        "fixed_with_grid_offset",
+        "2048,1920,1792,1664,1536"
+      ],
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 168,
+      "type": "SDVN Apply Kontext Reference",
+      "pos": [
+        2183.3615891886284,
+        -2180.6206216547057
+      ],
+      "size": [
+        387.79821110384705,
+        160
+      ],
+      "flags": {},
+      "order": 42,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 436
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 437
+        },
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 433
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "mask",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "links": [
+            459,
+            460
+          ]
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            453
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "3a7e72fb97b3d5c63db1c39e60de2bf5513f9730",
+        "Node name for S&R": "SDVN Apply Kontext Reference",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        0
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 159,
+      "type": "DB9TilePriorityRerunPlanner",
+      "pos": [
+        1566.7635157210318,
+        -1905.4811323552583
+      ],
+      "size": [
+        334.54296875,
+        214
+      ],
+      "flags": {},
+      "order": 39,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "tile_plan",
+          "type": "DB9_TILE_PLAN",
+          "link": 401
+        },
+        {
+          "name": "qa_report",
+          "type": "DB9_QA_REPORT",
+          "link": 400
+        }
+      ],
+      "outputs": [
+        {
+          "name": "should_continue",
+          "type": "BOOLEAN",
+          "links": null
+        },
+        {
+          "name": "rerun_plan",
+          "type": "DB9_TILE_PLAN",
+          "links": [
+            402
+          ]
+        },
+        {
+          "name": "rerun_indices",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "debug_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "bemapa3/db9_tiling_nodes_aio",
+        "ver": "a97e6044ce1ae2a5184db683aebdabbe1ba8ccb4",
+        "Node name for S&R": "DB9TilePriorityRerunPlanner",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        1,
+        2,
+        3,
+        true,
+        "attempt_offset"
+      ]
+    },
+    {
+      "id": 174,
+      "type": "SDVN KSampler",
+      "pos": [
+        2668.8711799338794,
+        -1885.9619487726159
+      ],
+      "size": [
+        309.69747369670927,
+        881.8193791182214
+      ],
+      "flags": {},
+      "order": 43,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 448
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 459
+        },
+        {
+          "name": "negative",
+          "shape": 7,
+          "type": "CONDITIONING",
+          "link": 460
+        },
+        {
+          "name": "latent_image",
+          "shape": 7,
+          "type": "LATENT",
+          "link": 453
+        },
+        {
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": 452
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            455
+          ]
+        },
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e4c47de102ba8c15f56b16f327b4fd17fe12fa71",
+        "Node name for S&R": "SDVN KSampler",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "Auto",
+        "Denoise",
+        0.5,
+        10,
+        8,
+        "euler",
+        "simple",
+        781648712377267,
+        "fixed",
+        false,
+        1024,
+        1024,
+        3.5
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 153,
+      "type": "DB9TileBatchEmitterV2",
+      "pos": [
+        875.8000559731086,
+        -920.0694009455895
+      ],
+      "size": [
+        272.72539376948487,
+        127.19684456079051
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 360
+        },
+        {
+          "name": "tile_plan",
+          "type": "DB9_TILE_PLAN",
+          "link": 361
+        }
+      ],
+      "outputs": [
+        {
+          "name": "tile_images",
+          "type": "IMAGE",
+          "links": [
+            362
+          ]
+        },
+        {
+          "name": "tile_meta",
+          "type": "DB9_TILE_META_STACK",
+          "links": [
+            369
+          ]
+        },
+        {
+          "name": "debug_info",
+          "type": "STRING",
+          "links": [
+            370
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "bemapa3/db9_tiling_nodes_aio",
+        "ver": "424781663b8073f51e61deb01d77cd06c511a9b1",
+        "Node name for S&R": "DB9TileBatchEmitterV2",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [],
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 178,
+      "type": "PreviewImage",
+      "pos": [
+        2033.7686529820871,
+        -1877.7342229034564
+      ],
+      "size": [
+        149.8166717529297,
+        26
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.3",
+        "Node name for S&R": "PreviewImage",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 154,
+      "type": "DB9TileResultCollectorV2",
+      "pos": [
+        1447.447786137592,
+        -1485.3224904145166
+      ],
+      "size": [
+        460.48475679064836,
+        238
+      ],
+      "flags": {},
+      "order": 30,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "processed_tiles",
+          "type": "IMAGE",
+          "link": 368
+        },
+        {
+          "name": "tile_meta",
+          "type": "DB9_TILE_META_STACK",
+          "link": 369
+        }
+      ],
+      "outputs": [
+        {
+          "name": "base_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "links": [
+            380,
+            414,
+            456
+          ]
+        },
+        {
+          "name": "highlight_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "links": [
+            372,
+            415
+          ]
+        },
+        {
+          "name": "debug_stack",
+          "type": "DB9_TILE_DEBUG_STACK",
+          "links": null
+        },
+        {
+          "name": "debug_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "bemapa3/db9_tiling_nodes_aio",
+        "ver": "424781663b8073f51e61deb01d77cd06c511a9b1",
+        "Node name for S&R": "DB9TileResultCollectorV2",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        true,
+        9,
+        0.72,
+        1,
+        0.22,
+        0.1
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 163,
+      "type": "DB9TileResultCollectorV2",
+      "pos": [
+        3123.742671836913,
+        -1980.337826852626
+      ],
+      "size": [
+        323.0859375,
+        238
+      ],
+      "flags": {},
+      "order": 45,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "processed_tiles",
+          "type": "IMAGE",
+          "link": 443
+        },
+        {
+          "name": "tile_meta",
+          "type": "DB9_TILE_META_STACK",
+          "link": 410
+        }
+      ],
+      "outputs": [
+        {
+          "name": "base_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "links": [
+            412
+          ]
+        },
+        {
+          "name": "highlight_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "links": [
+            413
+          ]
+        },
+        {
+          "name": "debug_stack",
+          "type": "DB9_TILE_DEBUG_STACK",
+          "links": null
+        },
+        {
+          "name": "debug_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "title": "DB9 Tile Result Collector V2 - Return",
+      "properties": {
+        "aux_id": "bemapa3/db9_tiling_nodes_aio",
+        "ver": "a97e6044ce1ae2a5184db683aebdabbe1ba8ccb4",
+        "Node name for S&R": "DB9TileResultCollectorV2",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        true,
+        9,
+        0.72,
+        1,
+        0.15,
+        0.08
+      ]
+    },
+    {
+      "id": 160,
+      "type": "DB9TileBatchEmitterSubsetV2",
+      "pos": [
+        1985.746181932644,
+        -1538.45473863087
+      ],
+      "size": [
+        387.21113346257914,
+        70.7568139983714
+      ],
+      "flags": {},
+      "order": 41,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 403
+        },
+        {
+          "name": "tile_plan",
+          "type": "DB9_TILE_PLAN",
+          "link": 402
+        }
+      ],
+      "outputs": [
+        {
+          "name": "tile_images",
+          "type": "IMAGE",
+          "links": [
+            426,
+            433
+          ]
+        },
+        {
+          "name": "tile_meta",
+          "type": "DB9_TILE_META_STACK",
+          "links": [
+            410
+          ]
+        },
+        {
+          "name": "debug_info",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "bemapa3/db9_tiling_nodes_aio",
+        "ver": "a97e6044ce1ae2a5184db683aebdabbe1ba8ccb4",
+        "Node name for S&R": "DB9TileBatchEmitterSubsetV2",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 33,
+      "type": "SDVN Load Image",
+      "pos": [
+        -145.4201058164497,
+        -1625.2834934136004
+      ],
+      "size": [
+        270,
+        382.00000000000006
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            42
+          ]
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": []
+        },
+        {
+          "name": "img_path",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "14615456e595dd15de243ad23693115c483f466b",
+        "Node name for S&R": "SDVN Load Image",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.7"
+        },
+        "image": "clipspace/clipspace-painted-masked-1773468325698.png [input]"
+      },
+      "widgets_values": [
+        false,
+        "https://www.pinterest.com/pin/764345368045816960/",
+        "Viewzz_Champress_MLiving_N03.jpg",
+        "image"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 180,
+      "type": "SDVN Load Image",
+      "pos": [
+        -110.28149327320662,
+        498.7370437439736
+      ],
+      "size": [
+        270,
+        382.00000000000006
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            461
+          ]
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": []
+        },
+        {
+          "name": "img_path",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "14615456e595dd15de243ad23693115c483f466b",
+        "Node name for S&R": "SDVN Load Image",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.7"
+        },
+        "image": "clipspace/clipspace-painted-masked-1773468325698.png [input]"
+      },
+      "widgets_values": [
+        false,
+        "https://www.pinterest.com/pin/764345368045816960/",
+        "I8_HeroView_001.jpg",
+        "image"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 187,
+      "type": "SDVN Lora info",
+      "pos": [
+        187.33921896220227,
+        1669.2474341404413
+      ],
+      "size": [
+        387.1022838510502,
+        58
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "lora_path",
+          "type": "STRING",
+          "link": 469
+        }
+      ],
+      "outputs": [
+        {
+          "name": "info",
+          "type": "STRING",
+          "links": [
+            470
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e4c47de102ba8c15f56b16f327b4fd17fe12fa71",
+        "Node name for S&R": "SDVN Lora info",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "Full_Data"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 188,
+      "type": "SDVN Any Show",
+      "pos": [
+        607.4745314590957,
+        1376.9580976230177
+      ],
+      "size": [
+        564.6929005095212,
+        405.5596250685945
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "any",
+          "type": "*",
+          "link": 470
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e4c47de102ba8c15f56b16f327b4fd17fe12fa71",
+        "Node name for S&R": "SDVN Any Show",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "Tag: upscale_mir\n\nTrigger_word: No data\n\nCopyright: No data\n\nUrl: No data\n\nDim: No data\n\nAlpha: No data\n\nUnet_lr: No data\n\nBatch_Size: No data\n\nEpochs: No data\n\nSteps: No data\n\nInfo_txt: \n\nformat: pt\ninfo: ''\nname: Lora_DB_upscale_mir\nsoftware: '{\"name\": \"ai-toolkit\", \"repo\": \"https://github.com/ostris/ai-toolkit\",\n  \"version\": \"0.7.27\"}'\nss_base_model_version: flux2_klein_9b\nss_output_name: Lora_DB_upscale_mir\nss_tag_frequency: '{\"1_upscale_mir\": {\"upscale_mir\": 1}}'\nsshs_legacy_hash: 32a59173\nsshs_model_hash: 1e79018e18508704018b24de1dcb52b98b42dfc362616af23bccd51328f23a7b\ntraining_info: '{\"step\": 3000, \"epoch\": 34}'\nversion: Train by trainlora.vn | stablediffusion.vn\n"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 195,
+      "type": "SDVN Any Show",
+      "pos": [
+        198.4666872026713,
+        480.0576466930384
+      ],
+      "size": [
+        564.6929005095212,
+        405.5596250685945
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "any",
+          "type": "*",
+          "link": 483
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        },
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e4c47de102ba8c15f56b16f327b4fd17fe12fa71",
+        "Node name for S&R": "SDVN Any Show",
+        "cnr_id": "sdvn_comfy_node"
+      },
+      "widgets_values": [
+        "TilePlanV2: 1536px, overlap=160, grid=3x2, total=6 | Emitted 6 tiles."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 196,
+      "type": "SDVN Any Show",
+      "pos": [
+        1588.203767371288,
+        1682.7878813125021
+      ],
+      "size": [
+        564.6929005095212,
+        405.5596250685945
+      ],
+      "flags": {},
+      "order": 33,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "any",
+          "type": "*",
+          "link": 484
+        }
+      ],
+      "outputs": [],
+      "title": "Debug_Info",
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        },
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e4c47de102ba8c15f56b16f327b4fd17fe12fa71",
+        "Node name for S&R": "SDVN Any Show",
+        "cnr_id": "sdvn_comfy_node"
+      },
+      "widgets_values": [
+        "Collected 6 tiles. | TileColorNormalize: tiles=6, strength=0.75, crop=0.12, max_luma_shift=0.08 | Composite Canny done. | QA Priority: failing_pairs=4, failing_tiles=5"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 197,
+      "type": "SDVN Any Show",
+      "pos": [
+        2177.6785970973197,
+        1684.3297358672316
+      ],
+      "size": [
+        564.6929005095212,
+        405.5596250685945
+      ],
+      "flags": {},
+      "order": 32,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "any",
+          "type": "*",
+          "link": 485
+        }
+      ],
+      "outputs": [],
+      "title": "Debug_stack",
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        },
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e4c47de102ba8c15f56b16f327b4fd17fe12fa71",
+        "Node name for S&R": "SDVN Any Show",
+        "cnr_id": "sdvn_comfy_node"
+      },
+      "widgets_values": [
+        "[{'tile_mean_luma': 0.43676382303237915, 'tile_std_luma': 0.16286486387252808, 'highlight_energy': 0.0, 'seed': 0}, {'tile_mean_luma': 0.44963815808296204, 'tile_std_luma': 0.1718589961528778, 'highlight_energy': 1.926116965478286e-06, 'seed': 17}, {'tile_mean_luma': 0.5021414160728455, 'tile_std_luma': 0.15443648397922516, 'highlight_energy': 6.194028969730425e-07, 'seed': 34}, {'tile_mean_luma': 0.5026290416717529, 'tile_std_luma': 0.18761907517910004, 'highlight_energy': 0.0, 'seed': 131}, {'tile_mean_luma': 0.45789486169815063, 'tile_std_luma': 0.19119401276111603, 'highlight_energy': 0.0, 'seed': 148}, {'tile_mean_luma': 0.5029383301734924, 'tile_std_luma': 0.16006700694561005, 'highlight_energy': 0.0, 'seed': 165}]"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 184,
+      "type": "SDVN Apply Kontext Reference",
+      "pos": [
+        805.9626039188789,
+        901.3025208322716
+      ],
+      "size": [
+        387.79821110384705,
+        160
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 464
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 465
+        },
+        {
+          "name": "image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 477
+        },
+        {
+          "name": "image2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "mask",
+          "shape": 7,
+          "type": "MASK",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "links": [
+            472,
+            473
+          ]
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            474
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "3a7e72fb97b3d5c63db1c39e60de2bf5513f9730",
+        "Node name for S&R": "SDVN Apply Kontext Reference",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        0
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 186,
+      "type": "SDVN CLIP Text Encode Simple",
+      "pos": [
+        184.25770842930154,
+        1389.3472545998272
+      ],
+      "size": [
+        390,
+        228
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 468
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            464
+          ]
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e6e818f39b49684a362d096fb8eaca50405bd7d2",
+        "Node name for S&R": "SDVN CLIP Text Encode Simple",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "Upscale tăng cường chi tiết hình ảnh, làm rõ chi tiết, upscale_mir,BBB_Upscale_002,",
+        "None",
+        "None",
+        199556481271438,
+        "fixed",
+        null
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 183,
+      "type": "SDVN Load Checkpoint",
+      "pos": [
+        -110.88382413448767,
+        1202.6804631771695
+      ],
+      "size": [
+        270,
+        190
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            466
+          ]
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "links": [
+            467
+          ]
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "links": [
+            465,
+            475
+          ]
+        },
+        {
+          "name": "ckpt_path",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "171eb3fc033e7c1bc71acfff4d13b009a9827618",
+        "Node name for S&R": "SDVN Load Checkpoint",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        true,
+        "",
+        "model.safetensors",
+        "Flux2-klein-9b.safetensors"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 181,
+      "type": "SDVN Upscale Image",
+      "pos": [
+        -114.6158050440657,
+        990.6935109292469
+      ],
+      "size": [
+        270,
+        154
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 461
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "widget": {
+            "name": "width"
+          },
+          "link": 462
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "widget": {
+            "name": "height"
+          },
+          "link": 463
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            476,
+            487
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e4c47de102ba8c15f56b16f327b4fd17fe12fa71",
+        "Node name for S&R": "SDVN Upscale Image",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "Maxsize",
+        "None",
+        3,
+        1024,
+        1024
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 189,
+      "type": "SDVN KSampler",
+      "pos": [
+        1214.717498690954,
+        898.1168002722602
+      ],
+      "size": [
+        309.69747369670927,
+        881.8193791182214
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 471
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 472
+        },
+        {
+          "name": "negative",
+          "shape": 7,
+          "type": "CONDITIONING",
+          "link": 473
+        },
+        {
+          "name": "latent_image",
+          "shape": 7,
+          "type": "LATENT",
+          "link": 474
+        },
+        {
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": 475
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": null
+        },
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            478
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "e4c47de102ba8c15f56b16f327b4fd17fe12fa71",
+        "Node name for S&R": "SDVN KSampler",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        }
+      },
+      "widgets_values": [
+        "Auto",
+        "Denoise",
+        0.9,
+        4,
+        8,
+        "euler",
+        "simple",
+        781648712377267,
+        "fixed",
+        false,
+        1024,
+        1024,
+        3.5
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 191,
+      "type": "DB9TilePrep",
+      "pos": [
+        213.0281545701665,
+        929.0892238026752
+      ],
+      "size": [
+        380.55942482053547,
+        395.3911955202758
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 476
+        }
+      ],
+      "outputs": [
+        {
+          "name": "tile_images",
+          "type": "IMAGE",
+          "links": [
+            477
+          ]
+        },
+        {
+          "name": "tile_meta",
+          "type": "DB9_TILE_META_STACK",
+          "links": [
+            481
+          ]
+        },
+        {
+          "name": "tile_plan",
+          "type": "DB9_TILE_PLAN",
+          "links": [
+            482
+          ]
+        },
+        {
+          "name": "total_tiles",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "chosen_tile_size",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "cols",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "rows",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "debug_info",
+          "type": "STRING",
+          "links": [
+            483
+          ]
+        }
+      ],
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "aux_id": "bemapa3/db9_nodes_aio_final",
+        "ver": "3aca7aa6dc6359fb200fa4beb0bd6ed0592e9c94",
+        "Node name for S&R": "DB9TilePrep"
+      },
+      "widgets_values": [
+        1536,
+        2048,
+        "auto",
+        128,
+        true,
+        "replicate",
+        0,
+        "fixed_with_grid_offset",
+        "2048,1920,1792,1664,1536"
+      ]
+    },
+    {
+      "id": 182,
+      "type": "SDVN Simple Any Input",
+      "pos": [
+        -511.0465741919056,
+        995.8252325994613
+      ],
+      "size": [
+        377.7147391514152,
+        146.80302191486862
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "any",
+          "shape": 6,
+          "type": "*",
+          "links": [
+            462,
+            463
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "090cde3cd229a59b9c53550ab71dc3a76ff4d143",
+        "Node name for S&R": "SDVN Simple Any Input",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.7"
+        }
+      },
+      "widgets_values": [
+        "6000"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 207,
+      "type": "Note",
+      "pos": [
+        1926.9368466819,
+        1327.8905185811604
+      ],
+      "size": [
+        411.2004413448253,
+        292.2809862153374
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "center pior str:\n- Tăng cao: lộ seam cứng\n- Giảm: mềm seam"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 198,
+      "type": "Image Comparer (rgthree)",
+      "pos": [
+        1979.3851557014289,
+        777.0079863184764
+      ],
+      "size": [
+        380.5607484386445,
+        363.73407332966985
+      ],
+      "flags": {},
+      "order": 31,
+      "mode": 0,
+      "inputs": [
+        {
+          "dir": 3,
+          "name": "image_a",
+          "type": "IMAGE",
+          "link": 486
+        },
+        {
+          "dir": 3,
+          "name": "image_b",
+          "type": "IMAGE",
+          "link": 487
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "aux_id": "rgthree/rgthree-comfy",
+        "ver": "683836c46e898668936c433502504cc0627482c5",
+        "comparer_mode": "Slide"
+      },
+      "widgets_values": [
+        [
+          {
+            "name": "A",
+            "selected": true,
+            "url": "/api/view?filename=rgthree.compare._temp_gfhbm_00101_.png&type=temp&subfolder=&rand=0.02139998442536506"
+          },
+          {
+            "name": "B",
+            "selected": true,
+            "url": "/api/view?filename=rgthree.compare._temp_gfhbm_00102_.png&type=temp&subfolder=&rand=0.908819927766516"
+          }
+        ]
+      ]
+    },
+    {
+      "id": 192,
+      "type": "DB9SeamFinish",
+      "pos": [
+        1580.744646541268,
+        902.4830085344624
+      ],
+      "size": [
+        340.12890625,
+        722
+      ],
+      "flags": {},
+      "order": 29,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "processed_tiles",
+          "type": "IMAGE",
+          "link": 478
+        },
+        {
+          "name": "tile_meta",
+          "type": "DB9_TILE_META_STACK",
+          "link": 481
+        },
+        {
+          "name": "tile_plan",
+          "type": "DB9_TILE_PLAN",
+          "link": 482
+        }
+      ],
+      "outputs": [
+        {
+          "name": "final_image",
+          "type": "IMAGE",
+          "links": [
+            486
+          ]
+        },
+        {
+          "name": "base_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "links": []
+        },
+        {
+          "name": "highlight_tiles",
+          "type": "DB9_TILE_IMAGE_STACK",
+          "links": []
+        },
+        {
+          "name": "qa_report",
+          "type": "DB9_QA_REPORT",
+          "links": []
+        },
+        {
+          "name": "recommend_rerun",
+          "type": "BOOLEAN",
+          "links": null
+        },
+        {
+          "name": "base_composite",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "highlight_composite",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "debug_stack",
+          "type": "DB9_TILE_DEBUG_STACK",
+          "links": [
+            485
+          ]
+        },
+        {
+          "name": "debug_info",
+          "type": "STRING",
+          "links": [
+            484
+          ]
+        }
+      ],
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "aux_id": "bemapa3/db9_nodes_aio_final",
+        "ver": "3aca7aa6dc6359fb200fa4beb0bd6ed0592e9c94",
+        "Node name for S&R": "DB9SeamFinish"
+      },
+      "widgets_values": [
+        true,
+        11,
+        0.72,
+        1,
+        0.18,
+        0.1,
+        0,
+        0.45,
+        0,
+        "add",
+        0,
+        0.08,
+        0,
+        0,
+        0.95,
+        2,
+        0.72,
+        1,
+        2,
+        0.5,
+        0.5,
+        2
+      ]
+    },
+    {
+      "id": 185,
+      "type": "SDVN Load Lora Filter",
+      "pos": [
+        -117.66884929056664,
+        1442.6234066500879
+      ],
+      "size": [
+        268.9056119773535,
+        298.9094997735581
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "shape": 7,
+          "type": "MODEL",
+          "link": 466
+        },
+        {
+          "name": "clip",
+          "shape": 7,
+          "type": "CLIP",
+          "link": 467
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            471
+          ]
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "links": [
+            468
+          ]
+        },
+        {
+          "name": "lora_path",
+          "type": "STRING",
+          "links": [
+            469
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "StableDiffusionVN/SDVN_Comfy_node",
+        "ver": "171eb3fc033e7c1bc71acfff4d13b009a9827618",
+        "Node name for S&R": "SDVN Load Lora Filter",
+        "cnr_id": "sdvn_comfy_node",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        true,
+        "",
+        "model.safetensors",
+        "",
+        "Lora/Lora_DB_upscale_mir/Lora_DB_upscale_mir.safetensors",
+        0.8,
+        1
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      42,
+      33,
+      0,
+      36,
+      0,
+      "IMAGE"
+    ],
+    [
+      47,
+      41,
+      0,
+      36,
+      1,
+      "INT"
+    ],
+    [
+      48,
+      41,
+      0,
+      36,
+      2,
+      "INT"
+    ],
+    [
+      61,
+      51,
+      0,
+      48,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      62,
+      49,
+      2,
+      48,
+      1,
+      "VAE"
+    ],
+    [
+      63,
+      49,
+      0,
+      50,
+      0,
+      "MODEL"
+    ],
+    [
+      64,
+      49,
+      1,
+      50,
+      1,
+      "CLIP"
+    ],
+    [
+      65,
+      50,
+      1,
+      51,
+      0,
+      "CLIP"
+    ],
+    [
+      75,
+      48,
+      0,
+      54,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      76,
+      48,
+      0,
+      54,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      78,
+      48,
+      3,
+      54,
+      3,
+      "LATENT"
+    ],
+    [
+      79,
+      49,
+      2,
+      54,
+      4,
+      "VAE"
+    ],
+    [
+      96,
+      50,
+      0,
+      54,
+      0,
+      "MODEL"
+    ],
+    [
+      218,
+      50,
+      2,
+      92,
+      0,
+      "STRING"
+    ],
+    [
+      219,
+      92,
+      0,
+      93,
+      0,
+      "STRING"
+    ],
+    [
+      359,
+      36,
+      0,
+      152,
+      0,
+      "IMAGE"
+    ],
+    [
+      360,
+      36,
+      0,
+      153,
+      0,
+      "IMAGE"
+    ],
+    [
+      361,
+      152,
+      0,
+      153,
+      1,
+      "DB9_TILE_PLAN"
+    ],
+    [
+      362,
+      153,
+      0,
+      48,
+      2,
+      "IMAGE"
+    ],
+    [
+      368,
+      54,
+      1,
+      154,
+      0,
+      "IMAGE"
+    ],
+    [
+      369,
+      153,
+      1,
+      154,
+      1,
+      "DB9_TILE_META_STACK"
+    ],
+    [
+      370,
+      153,
+      2,
+      63,
+      0,
+      "STRING"
+    ],
+    [
+      372,
+      154,
+      1,
+      155,
+      1,
+      "DB9_TILE_IMAGE_STACK"
+    ],
+    [
+      376,
+      155,
+      2,
+      156,
+      0,
+      "IMAGE"
+    ],
+    [
+      377,
+      152,
+      0,
+      156,
+      1,
+      "DB9_TILE_PLAN"
+    ],
+    [
+      378,
+      156,
+      0,
+      73,
+      0,
+      "DB9_QA_REPORT"
+    ],
+    [
+      379,
+      156,
+      2,
+      157,
+      0,
+      "BOOLEAN"
+    ],
+    [
+      380,
+      154,
+      0,
+      156,
+      2,
+      "DB9_TILE_IMAGE_STACK"
+    ],
+    [
+      400,
+      156,
+      0,
+      159,
+      1,
+      "DB9_QA_REPORT"
+    ],
+    [
+      401,
+      152,
+      0,
+      159,
+      0,
+      "DB9_TILE_PLAN"
+    ],
+    [
+      402,
+      159,
+      1,
+      160,
+      1,
+      "DB9_TILE_PLAN"
+    ],
+    [
+      403,
+      36,
+      0,
+      160,
+      0,
+      "IMAGE"
+    ],
+    [
+      410,
+      160,
+      1,
+      163,
+      1,
+      "DB9_TILE_META_STACK"
+    ],
+    [
+      412,
+      163,
+      0,
+      162,
+      2,
+      "DB9_TILE_IMAGE_STACK"
+    ],
+    [
+      413,
+      163,
+      1,
+      162,
+      3,
+      "DB9_TILE_IMAGE_STACK"
+    ],
+    [
+      414,
+      154,
+      0,
+      162,
+      0,
+      "DB9_TILE_IMAGE_STACK"
+    ],
+    [
+      415,
+      154,
+      1,
+      162,
+      1,
+      "DB9_TILE_IMAGE_STACK"
+    ],
+    [
+      416,
+      162,
+      0,
+      165,
+      0,
+      "DB9_TILE_IMAGE_STACK"
+    ],
+    [
+      417,
+      162,
+      1,
+      165,
+      1,
+      "DB9_TILE_IMAGE_STACK"
+    ],
+    [
+      418,
+      165,
+      0,
+      166,
+      0,
+      "IMAGE"
+    ],
+    [
+      419,
+      36,
+      0,
+      166,
+      1,
+      "IMAGE"
+    ],
+    [
+      421,
+      152,
+      0,
+      165,
+      2,
+      "DB9_TILE_PLAN"
+    ],
+    [
+      431,
+      155,
+      2,
+      171,
+      0,
+      "IMAGE"
+    ],
+    [
+      432,
+      36,
+      0,
+      171,
+      1,
+      "IMAGE"
+    ],
+    [
+      433,
+      160,
+      0,
+      168,
+      2,
+      "IMAGE"
+    ],
+    [
+      436,
+      51,
+      0,
+      168,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      437,
+      49,
+      2,
+      168,
+      1,
+      "VAE"
+    ],
+    [
+      443,
+      173,
+      0,
+      163,
+      0,
+      "IMAGE"
+    ],
+    [
+      448,
+      50,
+      0,
+      174,
+      0,
+      "MODEL"
+    ],
+    [
+      451,
+      49,
+      2,
+      175,
+      0,
+      "VAE"
+    ],
+    [
+      452,
+      175,
+      0,
+      174,
+      4,
+      "VAE"
+    ],
+    [
+      453,
+      168,
+      3,
+      174,
+      3,
+      "LATENT"
+    ],
+    [
+      454,
+      175,
+      0,
+      173,
+      1,
+      "VAE"
+    ],
+    [
+      455,
+      174,
+      0,
+      173,
+      0,
+      "LATENT"
+    ],
+    [
+      456,
+      154,
+      0,
+      176,
+      0,
+      "DB9_TILE_IMAGE_STACK"
+    ],
+    [
+      457,
+      176,
+      0,
+      155,
+      0,
+      "DB9_TILE_IMAGE_STACK"
+    ],
+    [
+      458,
+      152,
+      0,
+      155,
+      2,
+      "DB9_TILE_PLAN"
+    ],
+    [
+      459,
+      168,
+      0,
+      174,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      460,
+      168,
+      0,
+      174,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      461,
+      180,
+      0,
+      181,
+      0,
+      "IMAGE"
+    ],
+    [
+      462,
+      182,
+      0,
+      181,
+      1,
+      "INT"
+    ],
+    [
+      463,
+      182,
+      0,
+      181,
+      2,
+      "INT"
+    ],
+    [
+      464,
+      186,
+      0,
+      184,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      465,
+      183,
+      2,
+      184,
+      1,
+      "VAE"
+    ],
+    [
+      466,
+      183,
+      0,
+      185,
+      0,
+      "MODEL"
+    ],
+    [
+      467,
+      183,
+      1,
+      185,
+      1,
+      "CLIP"
+    ],
+    [
+      468,
+      185,
+      1,
+      186,
+      0,
+      "CLIP"
+    ],
+    [
+      469,
+      185,
+      2,
+      187,
+      0,
+      "STRING"
+    ],
+    [
+      470,
+      187,
+      0,
+      188,
+      0,
+      "STRING"
+    ],
+    [
+      471,
+      185,
+      0,
+      189,
+      0,
+      "MODEL"
+    ],
+    [
+      472,
+      184,
+      0,
+      189,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      473,
+      184,
+      0,
+      189,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      474,
+      184,
+      3,
+      189,
+      3,
+      "LATENT"
+    ],
+    [
+      475,
+      183,
+      2,
+      189,
+      4,
+      "VAE"
+    ],
+    [
+      476,
+      181,
+      0,
+      191,
+      0,
+      "IMAGE"
+    ],
+    [
+      477,
+      191,
+      0,
+      184,
+      2,
+      "IMAGE"
+    ],
+    [
+      478,
+      189,
+      1,
+      192,
+      0,
+      "IMAGE"
+    ],
+    [
+      481,
+      191,
+      1,
+      192,
+      1,
+      "DB9_TILE_META_STACK"
+    ],
+    [
+      482,
+      191,
+      2,
+      192,
+      2,
+      "DB9_TILE_PLAN"
+    ],
+    [
+      483,
+      191,
+      7,
+      195,
+      0,
+      "STRING"
+    ],
+    [
+      484,
+      192,
+      8,
+      196,
+      0,
+      "STRING"
+    ],
+    [
+      485,
+      192,
+      7,
+      197,
+      0,
+      "DB9_TILE_DEBUG_STACK"
+    ],
+    [
+      486,
+      192,
+      0,
+      198,
+      0,
+      "IMAGE"
+    ],
+    [
+      487,
+      181,
+      0,
+      198,
+      1,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 3.5241236644856686,
+      "offset": [
+        -1773.571369647338,
+        -834.7124756458371
+      ]
+    },
+    "info": {
+      "name": "DB9 Batch Tiler v1.3 — 1-Click Full Pipeline",
+      "author": "i8 Studio AI Research",
+      "description": "Bấm Queue 1 lần. DB9BatchTiler tự chia tile, chạy KSampler, ColorMatch, ghép canvas, output.",
+      "version": "1.3"
+    },
+    "workflowRendererVersion": "LG",
+    "ue_links": [],
+    "links_added_by_ue": [],
+    "frontendVersion": "1.39.19"
+  },
+  "version": 0.4
+}
