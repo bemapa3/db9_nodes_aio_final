@@ -1,0 +1,361 @@
+{
+  "version": "0.4.2",
+  "categories": {
+    "Quality": [
+      {
+        "id": "neg_low_quality",
+        "category": "Quality",
+        "label": "Chất lượng thấp",
+        "labelEn": "Low quality",
+        "icon": "📉",
+        "prompt": "low quality, low resolution, low detail, jpeg artifacts, compression artifacts, pixelated",
+        "default": true
+      },
+      {
+        "id": "neg_blurry",
+        "category": "Quality",
+        "label": "Mờ / out of focus",
+        "labelEn": "Blurry / out of focus",
+        "icon": "🌫️",
+        "prompt": "blurry, out of focus, motion blur, defocused, soft focus, hazy",
+        "default": true
+      },
+      {
+        "id": "neg_noisy",
+        "category": "Quality",
+        "label": "Nhiễu hạt",
+        "labelEn": "Noisy / grainy",
+        "icon": "📺",
+        "prompt": "noisy, heavy grain, color noise, chroma noise, banding, posterization",
+        "default": false
+      },
+      {
+        "id": "neg_oversaturated",
+        "category": "Quality",
+        "label": "Bão hoà quá đà",
+        "labelEn": "Oversaturated",
+        "icon": "🎨",
+        "prompt": "oversaturated, neon colors, garish color, color cast, blown highlights, crushed shadows",
+        "default": false
+      },
+      {
+        "id": "neg_overexposed",
+        "category": "Quality",
+        "label": "Cháy sáng / tối",
+        "labelEn": "Over/underexposed",
+        "icon": "💡",
+        "prompt": "overexposed, blown out highlights, underexposed, muddy shadows, bad exposure",
+        "default": false
+      }
+    ],
+    "People": [
+      {
+        "id": "neg_bad_anatomy",
+        "category": "People",
+        "label": "Sai giải phẫu",
+        "labelEn": "Bad anatomy",
+        "icon": "🧍",
+        "prompt": "bad anatomy, deformed body, disproportionate limbs, twisted limbs, missing limbs, extra limbs",
+        "default": true
+      },
+      {
+        "id": "neg_bad_hands",
+        "category": "People",
+        "label": "Tay/ngón tay xấu",
+        "labelEn": "Bad hands / fingers",
+        "icon": "🖐️",
+        "prompt": "bad hands, mutated hands, extra fingers, missing fingers, fused fingers, malformed fingers",
+        "default": true
+      },
+      {
+        "id": "neg_bad_face",
+        "category": "People",
+        "label": "Khuôn mặt méo",
+        "labelEn": "Bad face",
+        "icon": "😵",
+        "prompt": "deformed face, asymmetric face, distorted face, melted face, cross-eyed, ugly face",
+        "default": false
+      },
+      {
+        "id": "neg_extra_people",
+        "category": "People",
+        "label": "Người thừa",
+        "labelEn": "Extra people",
+        "icon": "👥",
+        "prompt": "extra people, crowded with strangers, duplicate persons, cloned faces",
+        "default": false
+      },
+      {
+        "id": "neg_no_people",
+        "category": "People",
+        "label": "Không có người",
+        "labelEn": "No people",
+        "icon": "🚫",
+        "prompt": "no people, no humans, no figures, empty of any human presence",
+        "default": false
+      }
+    ],
+    "Architectural": [
+      {
+        "id": "neg_warped_geometry",
+        "category": "Architectural",
+        "label": "Hình học méo",
+        "labelEn": "Warped geometry",
+        "icon": "📐",
+        "prompt": "warped geometry, bent walls, crooked lines, leaning verticals, distorted perspective, wonky structure",
+        "default": true
+      },
+      {
+        "id": "neg_impossible_structure",
+        "category": "Architectural",
+        "label": "Kết cấu phi lý",
+        "labelEn": "Impossible structure",
+        "icon": "🏚️",
+        "prompt": "impossible structure, floating elements, unsupported cantilever, structurally illogical, escher-like geometry",
+        "default": false
+      },
+      {
+        "id": "neg_wrong_scale",
+        "category": "Architectural",
+        "label": "Sai tỉ lệ",
+        "labelEn": "Wrong scale",
+        "icon": "📏",
+        "prompt": "wrong scale, oversized doors, tiny windows, bad human scale, inconsistent proportions",
+        "default": false
+      },
+      {
+        "id": "neg_misaligned",
+        "category": "Architectural",
+        "label": "Lệch tâm / mạch",
+        "labelEn": "Misaligned joints",
+        "icon": "🧱",
+        "prompt": "misaligned joints, broken tile grid, wavy mortar lines, uneven facade panels",
+        "default": false
+      },
+      {
+        "id": "neg_bad_perspective",
+        "category": "Architectural",
+        "label": "Sai phối cảnh",
+        "labelEn": "Bad perspective",
+        "icon": "🔺",
+        "prompt": "bad perspective, multiple vanishing points, broken horizon, fisheye distortion, lens warp",
+        "default": true
+      }
+    ],
+    "RenderArtifacts": [
+      {
+        "id": "neg_seams",
+        "category": "RenderArtifacts",
+        "label": "Đường nối lộ",
+        "labelEn": "Visible seams",
+        "icon": "🪡",
+        "prompt": "visible seams, tiling artifacts, repeating texture pattern, obvious texture seams",
+        "default": false
+      },
+      {
+        "id": "neg_zfighting",
+        "category": "RenderArtifacts",
+        "label": "Z-fighting",
+        "labelEn": "Z-fighting / clipping",
+        "icon": "⚡",
+        "prompt": "z-fighting, mesh clipping, intersecting geometry, overlapping surfaces flickering",
+        "default": false
+      },
+      {
+        "id": "neg_bad_shadows",
+        "category": "RenderArtifacts",
+        "label": "Đổ bóng sai",
+        "labelEn": "Wrong shadows",
+        "icon": "🌑",
+        "prompt": "wrong shadows, missing shadows, double shadows, shadow direction inconsistent with light source",
+        "default": false
+      },
+      {
+        "id": "neg_aliasing",
+        "category": "RenderArtifacts",
+        "label": "Răng cưa",
+        "labelEn": "Aliasing / jaggies",
+        "icon": "📊",
+        "prompt": "aliasing, jagged edges, stair-step lines, low anti-aliasing",
+        "default": false
+      },
+      {
+        "id": "neg_glitch",
+        "category": "RenderArtifacts",
+        "label": "Glitch / lỗi",
+        "labelEn": "Glitches",
+        "icon": "🐛",
+        "prompt": "rendering glitches, missing textures, white untextured surfaces, broken UV mapping, render error patches",
+        "default": false
+      },
+      {
+        "id": "neg_watermark",
+        "category": "RenderArtifacts",
+        "label": "Watermark / chữ",
+        "labelEn": "Watermark / text",
+        "icon": "©️",
+        "prompt": "watermark, signature, logo, text overlay, caption, copyright mark, stock photo watermark",
+        "default": true
+      }
+    ],
+    "StyleUnwanted": [
+      {
+        "id": "neg_cartoon",
+        "category": "StyleUnwanted",
+        "label": "Cartoon / anime",
+        "labelEn": "Cartoon / anime",
+        "icon": "🎭",
+        "prompt": "cartoon, anime, manga, cel-shaded, comic style, illustration, drawing, painted look (when photoreal requested)",
+        "default": false
+      },
+      {
+        "id": "neg_3d_plastic",
+        "category": "StyleUnwanted",
+        "label": "Cảm giác nhựa CGI",
+        "labelEn": "Plastic CGI look",
+        "icon": "🪀",
+        "prompt": "plastic cgi look, fake-looking 3d render, video game graphics, unreal engine demo, toy-like materials",
+        "default": true
+      },
+      {
+        "id": "neg_oversharpened",
+        "category": "StyleUnwanted",
+        "label": "Sắc nét quá đà",
+        "labelEn": "Oversharpened HDR",
+        "icon": "🔆",
+        "prompt": "oversharpened, halo edges, hdr tonemapping artifacts, unrealistic clarity, over-processed",
+        "default": false
+      },
+      {
+        "id": "neg_vignette_heavy",
+        "category": "StyleUnwanted",
+        "label": "Vignette nặng",
+        "labelEn": "Heavy vignette",
+        "icon": "⭕",
+        "prompt": "heavy vignette, dark corners, instagram filter, retro filter overlay",
+        "default": false
+      },
+      {
+        "id": "neg_bokeh_fake",
+        "category": "StyleUnwanted",
+        "label": "Bokeh giả",
+        "labelEn": "Fake bokeh",
+        "icon": "💫",
+        "prompt": "fake portrait-mode bokeh, edge artifacts on out-of-focus areas, computational depth-of-field errors",
+        "default": false
+      }
+    ],
+    "ContentUnwanted": [
+      {
+        "id": "neg_text_signs",
+        "category": "ContentUnwanted",
+        "label": "Chữ / biển hiệu sai",
+        "labelEn": "Garbled text / signs",
+        "icon": "🔤",
+        "prompt": "garbled text, fake letters, nonsense signage, illegible writing on signs, misspelled words",
+        "default": true
+      },
+      {
+        "id": "neg_clutter",
+        "category": "ContentUnwanted",
+        "label": "Đồ vật lộn xộn",
+        "labelEn": "Clutter",
+        "icon": "🗑️",
+        "prompt": "clutter, messy props, random objects, junk on surfaces, distracting background items",
+        "default": false
+      },
+      {
+        "id": "neg_brand_logos",
+        "category": "ContentUnwanted",
+        "label": "Logo thương hiệu",
+        "labelEn": "Brand logos",
+        "icon": "®️",
+        "prompt": "brand logos, recognizable trademarks, brand names visible, copyrighted brand artwork",
+        "default": false
+      },
+      {
+        "id": "neg_modern_intrusion",
+        "category": "ContentUnwanted",
+        "label": "Vật hiện đại lạc bối cảnh",
+        "labelEn": "Anachronistic items",
+        "icon": "📱",
+        "prompt": "anachronistic objects, items inappropriate for the period, out-of-context modern tech",
+        "default": false
+      },
+      {
+        "id": "neg_weather_wrong",
+        "category": "ContentUnwanted",
+        "label": "Thời tiết sai",
+        "labelEn": "Wrong weather",
+        "icon": "🌧️",
+        "prompt": "wrong weather, unwanted rain, unwanted snow, fog when not requested, stormy sky",
+        "default": false
+      }
+    ],
+    "RealEstate": [
+      {
+        "id": "neg_dirty_surfaces",
+        "category": "RealEstate",
+        "label": "Bẩn / vết bẩn",
+        "labelEn": "Dirty surfaces",
+        "icon": "🧽",
+        "prompt": "dirty surfaces, stains, scuff marks, dust, smudges, grime, fingerprints on glass",
+        "default": true
+      },
+      {
+        "id": "neg_aged_furniture",
+        "category": "RealEstate",
+        "label": "Đồ cũ / hỏng",
+        "labelEn": "Aged or broken furniture",
+        "icon": "🪑",
+        "prompt": "old worn furniture, broken furniture, faded fabric, sagging cushions, scratched wood",
+        "default": false
+      },
+      {
+        "id": "neg_cluttered_listing",
+        "category": "RealEstate",
+        "label": "Bừa bộn",
+        "labelEn": "Cluttered listing",
+        "icon": "📚",
+        "prompt": "personal items visible, family photos, toys on floor, unmade beds, dishes in sink, laundry visible",
+        "default": true
+      },
+      {
+        "id": "neg_empty_room",
+        "category": "RealEstate",
+        "label": "Phòng trống không staging",
+        "labelEn": "Empty unstaged room",
+        "icon": "📦",
+        "prompt": "completely empty room, no furniture, unstaged, bare walls, missing decor",
+        "default": false
+      },
+      {
+        "id": "neg_dated_decor",
+        "category": "RealEstate",
+        "label": "Nội thất lỗi thời",
+        "labelEn": "Dated decor",
+        "icon": "📺",
+        "prompt": "dated 80s 90s decor, popcorn ceiling, wall-to-wall carpet stained, brass everything, floral wallpaper",
+        "default": false
+      },
+      {
+        "id": "neg_bad_staging",
+        "category": "RealEstate",
+        "label": "Staging kém",
+        "labelEn": "Bad staging",
+        "icon": "🛋️",
+        "prompt": "bad furniture arrangement, oversized furniture, poorly scaled rugs, awkward furniture placement",
+        "default": false
+      },
+      {
+        "id": "neg_construction_debris",
+        "category": "RealEstate",
+        "label": "Mảnh vụn xây dựng",
+        "labelEn": "Construction debris",
+        "icon": "🚧",
+        "prompt": "construction debris, exposed wires, unfinished walls, missing trim, paint drips, tools left out",
+        "default": false
+      }
+    ]
+  }
+}

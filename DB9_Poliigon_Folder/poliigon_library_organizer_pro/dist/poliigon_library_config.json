@@ -1,0 +1,29 @@
+{
+  "custom_presets": [
+    "!!_ASPHAL",
+    "!!_BRICK"
+  ],
+  "dynamic_presets": [
+    "Asphalt",
+    "Brick",
+    "Concrete",
+    "Wood",
+    "Stone",
+    "Rock",
+    "Ground",
+    "Sand",
+    "Gravel",
+    "Mud",
+    "Snow",
+    "Metal",
+    "Roof",
+    "Wall",
+    "Floor",
+    "Unsorted",
+    "!!_ASPHAL",
+    "!!_BRICK"
+  ],
+  "library_root": "K:/My Drive/Polligon Full 2026",
+  "sort_by": "Name A-Z",
+  "watch_folder": "K:/My Drive/Polligon Full 2026/!!_CHUA LOC"
+}

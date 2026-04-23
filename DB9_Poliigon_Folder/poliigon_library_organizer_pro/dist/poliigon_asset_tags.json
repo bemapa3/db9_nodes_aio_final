@@ -1,0 +1,1634 @@
+{
+  ".poliigon_library_state": [
+    "brick",
+    "wall"
+  ],
+  "Asphalt": [
+    "asphalt",
+    "brick",
+    "clean",
+    "concrete",
+    "damaged",
+    "desert",
+    "dirt",
+    "dirty",
+    "ground",
+    "road",
+    "rough",
+    "sand",
+    "soil",
+    "stone",
+    "wall",
+    "wet"
+  ],
+  "Brick": [
+    "brick",
+    "concrete",
+    "plaster",
+    "rough",
+    "smooth",
+    "stone",
+    "wall"
+  ],
+  "Concrete": [
+    "brick",
+    "concrete",
+    "gravel",
+    "pebble",
+    "plaster",
+    "stone",
+    "wall"
+  ],
+  "Ground": [
+    "brick",
+    "dirt",
+    "gravel",
+    "ground",
+    "pebble",
+    "soil",
+    "wall"
+  ],
+  "Stone": [
+    "brick",
+    "plaster",
+    "stone",
+    "wall"
+  ],
+  "AsphaltPaved002": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "AsphaltPaved003": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "AsphaltPaved004": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "AsphaltPaved006": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "AsphaltRoad001": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "BrickWallSmoothEcruCommonBond001": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "smooth",
+    "wall"
+  ],
+  "BrickWallSmoothEcruEnglishBond001": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "smooth",
+    "wall"
+  ],
+  "BrickWallSmoothEcruStraightBond001": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "smooth",
+    "wall"
+  ],
+  "BricksDragfacedRunning006": [
+    "2k",
+    "4k",
+    "brick",
+    "wall"
+  ],
+  "BricksDragfacedRunning007": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "wall"
+  ],
+  "BricksDragfacedRunning008": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "wall"
+  ],
+  "BricksDragfacedStack002": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "wall"
+  ],
+  "BricksDragfacedStack007": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "wall"
+  ],
+  "BricksFlashedBuff001": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "wall"
+  ],
+  "BricksPaintedBlack001": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "wall"
+  ],
+  "BricksRomanBuff001": [
+    "16k",
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "wall"
+  ],
+  "BricksRomanCream001": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "wall"
+  ],
+  "BricksRusticatedBlack001": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "wall"
+  ],
+  "BricksSmoothRunning001": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "smooth",
+    "wall"
+  ],
+  "BricksSmoothStacked001": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "smooth",
+    "wall"
+  ],
+  "BricksStandardBlack001": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "wall"
+  ],
+  "CityStreetAsphaltGenericClean001": [
+    "2k",
+    "4k",
+    "asphalt",
+    "clean",
+    "road"
+  ],
+  "CityStreetAsphaltGenericCracked001": [
+    "2k",
+    "4k",
+    "asphalt",
+    "road"
+  ],
+  "CityStreetAsphaltGenericCracked002": [
+    "2k",
+    "4k",
+    "asphalt",
+    "road"
+  ],
+  "CityStreetAsphaltGenericCracked003": [
+    "2k",
+    "4k",
+    "asphalt",
+    "road"
+  ],
+  "CityStreetAsphaltGenericDamaged001": [
+    "2k",
+    "4k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "CityStreetAsphaltGenericDamaged002": [
+    "2k",
+    "4k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "CityStreetAsphaltGenericDamaged003": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "CityStreetAsphaltGenericWorn001": [
+    "2k",
+    "4k",
+    "asphalt",
+    "road"
+  ],
+  "CityStreetAsphaltGenericWorn002": [
+    "2k",
+    "4k",
+    "asphalt",
+    "road"
+  ],
+  "CityStreetRoadAsphaltFourLaneClean001": [
+    "2k",
+    "4k",
+    "asphalt",
+    "clean",
+    "road"
+  ],
+  "CityStreetRoadAsphaltFourLaneDamaged001": [
+    "2k",
+    "4k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "CityStreetRoadAsphaltFourLaneDamaged002": [
+    "2k",
+    "4k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "CityStreetRoadAsphaltFourLaneDamaged003": [
+    "2k",
+    "4k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "CityStreetRoadAsphaltFourLaneWorn001": [
+    "2k",
+    "4k",
+    "asphalt",
+    "road"
+  ],
+  "CityStreetRoadAsphaltFourLaneWorn002": [
+    "2k",
+    "4k",
+    "asphalt",
+    "road"
+  ],
+  "CityStreetRoadAsphaltFourLaneWorn003": [
+    "2k",
+    "4k",
+    "asphalt",
+    "road"
+  ],
+  "CityStreetRoadAsphaltSingleLaneClean001": [
+    "2k",
+    "4k",
+    "asphalt",
+    "clean",
+    "road"
+  ],
+  "CityStreetRoadAsphaltSingleLaneDamaged001": [
+    "2k",
+    "4k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "CityStreetRoadAsphaltSingleLaneDamaged002": [
+    "2k",
+    "4k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "CityStreetRoadAsphaltSingleLaneDamaged003": [
+    "2k",
+    "4k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "CityStreetRoadAsphaltSingleLaneWorn001": [
+    "2k",
+    "4k",
+    "asphalt",
+    "road"
+  ],
+  "CityStreetRoadAsphaltSingleLaneWorn002": [
+    "2k",
+    "4k",
+    "asphalt",
+    "road"
+  ],
+  "CityStreetRoadAsphaltSingleLaneWorn003": [
+    "2k",
+    "4k",
+    "asphalt",
+    "road"
+  ],
+  "CityStreetRoadAsphaltTwoLaneClean001": [
+    "2k",
+    "4k",
+    "asphalt",
+    "clean",
+    "road"
+  ],
+  "CityStreetRoadAsphaltTwoLaneDamaged001": [
+    "2k",
+    "4k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "CityStreetRoadAsphaltTwoLaneDamaged002": [
+    "2k",
+    "4k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "CityStreetRoadAsphaltTwoLaneDamaged003": [
+    "2k",
+    "4k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "CityStreetRoadAsphaltTwoLaneWorn001": [
+    "2k",
+    "4k",
+    "asphalt",
+    "road"
+  ],
+  "CityStreetRoadAsphaltTwoLaneWorn002": [
+    "2k",
+    "4k",
+    "asphalt",
+    "road"
+  ],
+  "CityStreetRoadAsphaltTwoLaneWorn003": [
+    "2k",
+    "4k",
+    "asphalt",
+    "road"
+  ],
+  "ConcreteBlocksBlackSplitFace001": [
+    "2k",
+    "4k",
+    "8k",
+    "concrete",
+    "stone"
+  ],
+  "ConcreteBlocksHorizontallyScored001": [
+    "2k",
+    "4k",
+    "8k",
+    "concrete",
+    "stone"
+  ],
+  "ConcreteBlocksMulticolored001": [
+    "2k",
+    "4k",
+    "8k",
+    "concrete",
+    "stone"
+  ],
+  "ConcreteBlocksPebble001": [
+    "2k",
+    "4k",
+    "8k",
+    "concrete",
+    "stone"
+  ],
+  "ConcreteBlocksTanSplitFace001": [
+    "2k",
+    "4k",
+    "8k",
+    "concrete",
+    "stone"
+  ],
+  "GroundAsphalt003": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_AsphaltAggregateMatte_8686": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltAggregateMatte_8806": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltAggregate_8805": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltBleachedCracked_11641": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltClean_9218": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "clean",
+    "road"
+  ],
+  "Poliigon_AsphaltDamagedLeaves_9217": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "Poliigon_AsphaltDamagedLeaves_9220": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "Poliigon_AsphaltDamagedWorn_9216": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "Poliigon_AsphaltDamagedWorn_9227": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "Poliigon_AsphaltDamaged_8493": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "Poliigon_AsphaltDamaged_9602": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "Poliigon_AsphaltMatteParking_9613": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltMatteParking_9621": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltNew_8492": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltNew_8676": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadCracked_8682": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadCracked_9225": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadCracked_9226": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadCracked_9614": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadCracked_9615": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadCracked_9616": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadCracked_9804": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadDamaged_9617": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "damaged",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadMatte_8694": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadMatte_8848": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadMatte_8849": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadMatte_8850": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadMatte_9214": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadMatte_9222": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadMatte_9604": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadMatte_9605": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadMatte_9606": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadMatte_9607": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadMatte_9608": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadMatte_9609": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadMatte_9610": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadNew_8701": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadNew_8706": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadNew_8729": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadNew_9612": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadWorn_8709": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadWorn_8711": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadWorn_8823": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadWorn_8825": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadWorn_8826": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadWorn_8827": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadWorn_8828": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadWorn_8829": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadWorn_9342": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadWorn_9448": [
+    "16k",
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadWorn_9488": [
+    "16k",
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltRoadWorn_9601": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltSidewalkDirty_8681": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirty",
+    "road"
+  ],
+  "Poliigon_AsphaltSidewalkMatte_9529": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltSidewalkPainted_8679": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltSidewalkPainted_8680": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltSidewalkPainted_8853": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltSidewalk_9660": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltWetDebris_8712": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road",
+    "wet"
+  ],
+  "Poliigon_AsphaltWornDusty_11623": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltWornLeaves_9611": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltWorn_11619": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltWorn_11791": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltWorn_11867": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_AsphaltWorn_8661": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_BrickBlockStraight_8456": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "wall"
+  ],
+  "Poliigon_BrickReclaimedCommon_8498": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "wall"
+  ],
+  "Poliigon_BrickReclaimedEnglish_8503": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "wall"
+  ],
+  "Poliigon_BrickReclaimedStraight_8504": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "wall"
+  ],
+  "Poliigon_BrickSlimRunning_9188": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "wall"
+  ],
+  "Poliigon_BrickWallCommon_8548": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallCommon_8833": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallCommon_8834": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallCommon_8835": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallCommon_8836": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallCommon_8869": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallCommon_8872": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallCommon_8897": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallCommon_9117": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallEnglish_8550": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallEnglish_8838": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallEnglish_8839": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallEnglish_8840": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallEnglish_8841": [
+    "16k",
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallEnglish_8870": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallEnglish_8873": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallFaux_9373": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallFaux_9490": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallGrunge_9930": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallOld_10695": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallStraight_8549": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallStraight_8843": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallStraight_8844": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallStraight_8845": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallStraight_8846": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallStraight_8871": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallStraight_8874": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_BrickWallWeathered_10601": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "plaster",
+    "wall"
+  ],
+  "Poliigon_ConcreteBlockStacked_8569": [
+    "2k",
+    "4k",
+    "8k",
+    "concrete",
+    "stone"
+  ],
+  "Poliigon_ConcreteBricksRough_10566": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "concrete",
+    "rough",
+    "stone",
+    "wall"
+  ],
+  "Poliigon_ConcreteRoadSalted_8822": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "concrete",
+    "road",
+    "stone"
+  ],
+  "Poliigon_ConcreteSidewalkCracked_8705": [
+    "2k",
+    "4k",
+    "concrete",
+    "stone"
+  ],
+  "Poliigon_ConcreteSidewalkGravel_8787": [
+    "2k",
+    "4k",
+    "8k",
+    "concrete",
+    "gravel",
+    "pebble",
+    "stone"
+  ],
+  "Poliigon_ConcreteSidewalk_8660": [
+    "2k",
+    "4k",
+    "8k",
+    "concrete",
+    "stone"
+  ],
+  "Poliigon_ConcreteWallBlock_9377": [
+    "2k",
+    "4k",
+    "8k",
+    "concrete",
+    "plaster",
+    "stone",
+    "wall"
+  ],
+  "Poliigon_ConcreteWallBlock_9506": [
+    "2k",
+    "4k",
+    "8k",
+    "concrete",
+    "plaster",
+    "stone",
+    "wall"
+  ],
+  "Poliigon_ConcreteWallBlock_9507": [
+    "16k",
+    "2k",
+    "4k",
+    "8k",
+    "concrete",
+    "plaster",
+    "stone",
+    "wall"
+  ],
+  "Poliigon_ConcreteWornMatte_8677": [
+    "2k",
+    "4k",
+    "8k",
+    "concrete",
+    "stone"
+  ],
+  "Poliigon_GroundAsphaltCoarse_10185": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltCracked_10195": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltCracked_10198": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltCracked_9956": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltCracked_9960": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltDamaged_10041": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "damaged",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltDamaged_10851": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "damaged",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltDamaged_8877": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "damaged",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltEroded_10717": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltEroded_10833": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltEroded_10951": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltLeaves_10323": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltLeaves_9870": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltLight_10710": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltPatchy_11023": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltRough_10392": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "rough",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltRough_10548": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "rough",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltRough_10720": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "rough",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltRough_9408": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "rough",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltRough_9417": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "rough",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltRough_9585": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "rough",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltRough_9784": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "rough",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltSandy_8864": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "desert",
+    "dirt",
+    "ground",
+    "road",
+    "sand",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltWorn_10835": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphaltWorn_10836": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphalt_10012": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphalt_10186": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphalt_10194": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphalt_10342": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphalt_9904": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundAsphalt_9948": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "dirt",
+    "ground",
+    "road",
+    "soil"
+  ],
+  "Poliigon_GroundDirtPath_9962": [
+    "2k",
+    "4k",
+    "8k",
+    "dirt",
+    "ground",
+    "soil"
+  ],
+  "Poliigon_GroundGravelGrass_9195": [
+    "2k",
+    "4k",
+    "8k",
+    "dirt",
+    "gravel",
+    "ground",
+    "pebble",
+    "soil"
+  ],
+  "Poliigon_RoadRepairPatchAtlas_10734": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_RoadRepairPatchAtlas_10735": [
+    "2k",
+    "4k",
+    "8k",
+    "asphalt",
+    "road"
+  ],
+  "Poliigon_StoneBrickRunningBond_9884": [
+    "2k",
+    "4k",
+    "8k",
+    "brick",
+    "stone",
+    "wall"
+  ],
+  "Poliigon_StoneWallCinderblock_9351": [
+    "2k",
+    "4k",
+    "8k",
+    "plaster",
+    "stone",
+    "wall"
+  ]
+}

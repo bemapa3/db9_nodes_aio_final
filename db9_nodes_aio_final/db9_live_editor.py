@@ -28,6 +28,7 @@ except Exception:
 
 LIVE_EDITOR_SESSIONS = {}
 SESSION_TTL_SEC = 7200
+PREVIEW_MAX_SIDE = 1408
 
 
 def _now():
@@ -80,6 +81,19 @@ def resize_to(img_bhwc, target_h, target_w):
     x = img_bhwc.permute(0, 3, 1, 2)
     x = F.interpolate(x, size=(target_h, target_w), mode="bilinear", align_corners=False)
     return x.permute(0, 2, 3, 1)
+
+
+def resize_longest_side(img_bhwc, max_side):
+    if max_side <= 0:
+        return img_bhwc
+    _, h, w, _ = img_bhwc.shape
+    longest = max(h, w)
+    if longest <= max_side:
+        return img_bhwc
+    scale = float(max_side) / float(longest)
+    target_h = max(1, int(round(h * scale)))
+    target_w = max(1, int(round(w * scale)))
+    return resize_to(img_bhwc, target_h, target_w)
 
 
 def match_size(a_bhwc, b_bhwc):
@@ -306,11 +320,40 @@ def save_tensor(img_bhwc, filename_prefix, save_mode, output_format, jpeg_qualit
     return path
 
 
+def build_preview_images(image, reference):
+    preview_image = resize_longest_side(image, PREVIEW_MAX_SIDE)
+    preview_reference = resize_longest_side(reference, PREVIEW_MAX_SIDE)
+    preview_image, preview_reference = match_size(preview_image, preview_reference)
+    preview_reference = broadcast_batch(preview_image, preview_reference)
+    return preview_image, preview_reference
+
+
+def render_full_current(sess):
+    with torch.no_grad():
+        return apply_all(sess["original_image"], sess["last_params"])
+
+
+def update_session_settings(sess, data):
+    if "filename_prefix" in data and data.get("filename_prefix") is not None:
+        sess["filename_prefix"] = str(data.get("filename_prefix") or "DB9_Live_Edit")
+    if "autosave" in data and data.get("autosave") is not None:
+        sess["autosave"] = bool(data.get("autosave"))
+    if "autosave_delay_ms" in data and data.get("autosave_delay_ms") is not None:
+        sess["autosave_delay_ms"] = int(data.get("autosave_delay_ms"))
+    if "save_mode" in data and data.get("save_mode") is not None:
+        sess["save_mode"] = str(data.get("save_mode"))
+    if "output_format" in data and data.get("output_format") is not None:
+        sess["output_format"] = str(data.get("output_format"))
+    if "jpeg_quality" in data and data.get("jpeg_quality") is not None:
+        sess["jpeg_quality"] = int(data.get("jpeg_quality"))
+
+
 class DB9LiveToneEditor:
     RETURN_TYPES = ("IMAGE", "STRING", "STRING")
     RETURN_NAMES = ("image_out", "session_id", "debug_info")
     FUNCTION = "open_live_editor"
     CATEGORY = "DB9/AIO"
+    OUTPUT_NODE = True
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -349,13 +392,16 @@ class DB9LiveToneEditor:
 
         image, ref = match_size(image, ref)
         ref = broadcast_batch(image, ref)
+        preview_image, preview_ref = build_preview_images(image, ref)
 
         session_id = _make_session_id()
         LIVE_EDITOR_SESSIONS[session_id] = {
             "original_image": image.clone(),
             "reference_image": ref.clone(),
-            "current_image": image.clone(),
-            "compare_image": image.clone(),
+            "preview_original_image": preview_image.clone(),
+            "preview_reference_image": preview_ref.clone(),
+            "current_image": preview_image.clone(),
+            "compare_image": preview_image.clone(),
             "last_params": _default_params(),
             "filename_prefix": filename_prefix,
             "autosave": bool(autosave),
@@ -368,7 +414,15 @@ class DB9LiveToneEditor:
             "updated_at": _now(),
         }
 
-        return image, session_id, f"DB9 live editor session={session_id} enabled={bool(enable_live_editor)}"
+        debug_info = f"DB9 live editor session={session_id} enabled={bool(enable_live_editor)}"
+        return {
+            "ui": {
+                "session_id": [session_id],
+                "debug_info": [debug_info],
+                "enable_live_editor": [bool(enable_live_editor)],
+            },
+            "result": (image, session_id, debug_info),
+        }
 
 
 if HAVE_SERVER and getattr(PromptServer, "instance", None) is not None:
@@ -388,9 +442,54 @@ if HAVE_SERVER and getattr(PromptServer, "instance", None) is not None:
             {
                 "ok": True,
                 "session_id": session_id,
-                "width": int(img.shape[2]),
-                "height": int(img.shape[1]),
+                "width": int(sess["original_image"].shape[2]),
+                "height": int(sess["original_image"].shape[1]),
+                "preview_width": int(img.shape[2]),
+                "preview_height": int(img.shape[1]),
                 "has_reference": True,
+                "filename_prefix": sess["filename_prefix"],
+                "autosave": bool(sess["autosave"]),
+                "autosave_delay_ms": int(sess["autosave_delay_ms"]),
+                "save_mode": sess["save_mode"],
+                "output_format": sess["output_format"],
+                "jpeg_quality": int(sess["jpeg_quality"]),
+            }
+        )
+
+    @routes.post("/db9/live_editor/session/find_latest")
+    async def db9_live_find_latest(request):
+        cleanup_sessions()
+        data = await request.json()
+        filename_prefix = data.get("filename_prefix")
+        max_age_sec = float(data.get("max_age_sec", 1800))
+        now = _now()
+
+        candidates = []
+        for session_id, sess in LIVE_EDITOR_SESSIONS.items():
+            updated_at = float(sess.get("updated_at", sess.get("created_at", now)))
+            if max_age_sec > 0 and now - updated_at > max_age_sec:
+                continue
+            if filename_prefix and sess.get("filename_prefix") != filename_prefix:
+                continue
+            candidates.append((updated_at, session_id, sess))
+
+        if not candidates and filename_prefix:
+            for session_id, sess in LIVE_EDITOR_SESSIONS.items():
+                updated_at = float(sess.get("updated_at", sess.get("created_at", now)))
+                if max_age_sec > 0 and now - updated_at > max_age_sec:
+                    continue
+                candidates.append((updated_at, session_id, sess))
+
+        if not candidates:
+            return web.json_response({"ok": False, "error": "session_not_found"}, status=404)
+
+        _, session_id, sess = max(candidates, key=lambda item: item[0])
+        return web.json_response(
+            {
+                "ok": True,
+                "session_id": session_id,
+                "filename_prefix": sess.get("filename_prefix"),
+                "updated_at": sess.get("updated_at"),
             }
         )
 
@@ -404,9 +503,9 @@ if HAVE_SERVER and getattr(PromptServer, "instance", None) is not None:
             return web.Response(status=404, text="session_not_found")
 
         if kind == "original":
-            img = sess["original_image"]
+            img = sess["preview_original_image"]
         elif kind == "reference":
-            img = sess["reference_image"]
+            img = sess["preview_reference_image"]
         elif kind == "compare":
             img = sess.get("compare_image", sess["current_image"])
         else:
@@ -424,10 +523,12 @@ if HAVE_SERVER and getattr(PromptServer, "instance", None) is not None:
 
         data = await request.json()
         params = data.get("params", {})
+        update_session_settings(sess, data)
         merged = sess["last_params"].copy()
         merged.update(params)
         sess["last_params"] = merged
-        sess["current_image"] = apply_all(sess["original_image"], merged)
+        with torch.no_grad():
+            sess["current_image"] = apply_all(sess["preview_original_image"], merged)
         sess["updated_at"] = _now()
 
         return web.json_response(
@@ -452,7 +553,7 @@ if HAVE_SERVER and getattr(PromptServer, "instance", None) is not None:
         difference_gain = float(data.get("difference_gain", 4.0))
 
         sess["compare_image"] = make_compare_image(
-            sess["reference_image"],
+            sess["preview_reference_image"],
             sess["current_image"],
             mode=mode,
             split_position=split_position,
@@ -476,12 +577,13 @@ if HAVE_SERVER and getattr(PromptServer, "instance", None) is not None:
             return web.json_response({"ok": False, "error": "session_not_found"}, status=404)
 
         data = await request.json()
+        update_session_settings(sess, data)
         prefix = data.get("filename_prefix", sess["filename_prefix"])
         save_mode = data.get("save_mode", sess["save_mode"])
         output_format = data.get("output_format", sess["output_format"])
         jpeg_quality = int(data.get("jpeg_quality", sess["jpeg_quality"]))
 
-        path = save_tensor(sess["current_image"], prefix, save_mode, output_format, jpeg_quality)
+        path = save_tensor(render_full_current(sess), prefix, save_mode, output_format, jpeg_quality)
         sess["last_saved_path"] = path
         sess["updated_at"] = _now()
 
@@ -495,8 +597,10 @@ if HAVE_SERVER and getattr(PromptServer, "instance", None) is not None:
         if not sess:
             return web.json_response({"ok": False, "error": "session_not_found"}, status=404)
 
+        data = await request.json()
+        update_session_settings(sess, data)
         path = save_tensor(
-            sess["current_image"],
+            render_full_current(sess),
             sess["filename_prefix"],
             sess["save_mode"],
             sess["output_format"],
@@ -516,8 +620,8 @@ if HAVE_SERVER and getattr(PromptServer, "instance", None) is not None:
             return web.json_response({"ok": False, "error": "session_not_found"}, status=404)
 
         sess["last_params"] = _default_params()
-        sess["current_image"] = sess["original_image"].clone()
-        sess["compare_image"] = sess["original_image"].clone()
+        sess["current_image"] = sess["preview_original_image"].clone()
+        sess["compare_image"] = sess["preview_original_image"].clone()
         sess["updated_at"] = _now()
 
         return web.json_response(

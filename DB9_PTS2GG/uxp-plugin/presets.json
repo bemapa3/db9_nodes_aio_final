@@ -1,0 +1,2354 @@
+{
+  "version": "0.4.2",
+  "generatedAt": "2026-04-23T06:13:21.738Z",
+  "categories": {
+    "Style": [
+      {
+        "id": "hyperreal_clean",
+        "category": "Style",
+        "label": "Hyperreal Clean",
+        "labelEn": "Hyperreal Clean (Brick Visual)",
+        "icon": "✨",
+        "prompt": "Photorealistic architectural visualization in the style of Brick Visual Hungary: ultra-clean composition, perfectly balanced exposure, sharp materials, subtle film grain, neutral white balance, hero-shot framing with crisp shadows and authentic material reflections.",
+        "tags": [
+          "archviz",
+          "hero",
+          "realistic"
+        ],
+        "default": false
+      },
+      {
+        "id": "moody_cinematic",
+        "category": "Style",
+        "label": "Moody Cinematic",
+        "labelEn": "Moody Cinematic (MIR)",
+        "icon": "🎬",
+        "prompt": "Cinematic architectural visualization in the style of MIR Oslo: dramatic low-key lighting, deep atmospheric haze, rich shadows, painterly color grading with teal-orange tones, anamorphic lens feel, storytelling mood.",
+        "tags": [
+          "archviz",
+          "cinematic",
+          "moody"
+        ],
+        "default": true
+      },
+      {
+        "id": "soft_natural",
+        "category": "Style",
+        "label": "Soft Natural",
+        "labelEn": "Soft Natural (Plompmozes)",
+        "icon": "🌿",
+        "prompt": "Natural soft daylight architectural render in the style of Plompmozes: diffuse overcast light, gentle pastel palette, hand-crafted collage feel, subtle imperfections, calm domestic atmosphere.",
+        "tags": [
+          "archviz",
+          "soft",
+          "collage"
+        ],
+        "default": false
+      },
+      {
+        "id": "high_contrast_editorial",
+        "category": "Style",
+        "label": "High Contrast Editorial",
+        "labelEn": "High Contrast Editorial",
+        "icon": "📰",
+        "prompt": "High-contrast editorial architectural photography: bold black-and-white tonal range, magazine-grade composition, strong directional light, sharp geometric framing, Architectural Digest style.",
+        "tags": [
+          "editorial",
+          "contrast"
+        ],
+        "default": false
+      },
+      {
+        "id": "overcast_realism",
+        "category": "Style",
+        "label": "Overcast Realism",
+        "labelEn": "Overcast Realism",
+        "icon": "☁️",
+        "prompt": "Overcast daylight realism: flat soft shadows, cool desaturated palette, true-to-life materials, documentary photography aesthetic, no harsh sun.",
+        "tags": [
+          "realistic",
+          "overcast"
+        ],
+        "default": false
+      },
+      {
+        "id": "painterly_concept",
+        "category": "Style",
+        "label": "Painterly Concept",
+        "labelEn": "Painterly Concept",
+        "icon": "🎨",
+        "prompt": "Painterly architectural concept art: visible brushstrokes, atmospheric perspective, loose impressionistic detail, mood-driven palette, evokes Turner and modern matte painting.",
+        "tags": [
+          "concept",
+          "painterly"
+        ],
+        "default": false
+      },
+      {
+        "id": "monochrome_ink",
+        "category": "Style",
+        "label": "Monochrome Ink",
+        "labelEn": "Monochrome Ink",
+        "icon": "🖤",
+        "prompt": "Monochrome ink wash architectural illustration: black sumi-e brushwork, white negative space, minimal lines, contemplative oriental aesthetic.",
+        "tags": [
+          "ink",
+          "mono"
+        ],
+        "default": false
+      },
+      {
+        "id": "japanese_architectural",
+        "category": "Style",
+        "label": "Japanese Architectural",
+        "labelEn": "Japanese Architectural",
+        "icon": "⛩️",
+        "prompt": "Japanese architectural photography aesthetic: zen minimalism, shoji-filtered light, tatami textures, wabi-sabi imperfection, Kengo Kuma material palette of timber and washi.",
+        "tags": [
+          "japanese",
+          "zen"
+        ],
+        "default": false
+      },
+      {
+        "id": "scandinavian_sketch",
+        "category": "Style",
+        "label": "Scandinavian Sketch",
+        "labelEn": "Scandinavian Sketch",
+        "icon": "✏️",
+        "prompt": "Scandinavian architectural sketch render: hand-drawn pencil lines combined with watercolor washes, light Nordic palette, BIG/Henning Larsen presentation style.",
+        "tags": [
+          "sketch",
+          "scandi"
+        ],
+        "default": false
+      },
+      {
+        "id": "bauhaus_poster",
+        "category": "Style",
+        "label": "Bauhaus Poster",
+        "labelEn": "Bauhaus Poster",
+        "icon": "🟥",
+        "prompt": "Bauhaus poster architectural style: primary color blocks, geometric flat shapes, sans-serif typography sensibility, modernist composition with strong red/blue/yellow accents.",
+        "tags": [
+          "poster",
+          "bauhaus"
+        ],
+        "default": false
+      },
+      {
+        "id": "isometric_cutaway",
+        "category": "Style",
+        "label": "Isometric Cutaway",
+        "labelEn": "Isometric Cutaway",
+        "icon": "📐",
+        "prompt": "Isometric architectural cutaway diagram: 30-degree axonometric projection, exposed interior layers, technical illustration clarity, infographic legibility.",
+        "tags": [
+          "diagram",
+          "iso"
+        ],
+        "default": false
+      },
+      {
+        "id": "blueprint_tech",
+        "category": "Style",
+        "label": "Blueprint Tech",
+        "labelEn": "Blueprint Tech",
+        "icon": "📘",
+        "prompt": "Technical blueprint architectural rendering: white linework on cyan blueprint paper, dimensional annotations, drafting precision, engineering documentation aesthetic.",
+        "tags": [
+          "blueprint",
+          "tech"
+        ],
+        "default": false
+      },
+      {
+        "id": "wes_anderson",
+        "category": "Style",
+        "label": "Wes Anderson",
+        "labelEn": "Wes Anderson Symmetry",
+        "icon": "🎞️",
+        "prompt": "Wes Anderson cinematography style: perfectly symmetrical centered composition, pastel candy palette, flat frontal framing, whimsical storybook atmosphere, 1.85:1 cinema feel.",
+        "tags": [
+          "cinematic",
+          "symmetry"
+        ],
+        "default": false
+      },
+      {
+        "id": "blade_runner_2049",
+        "category": "Style",
+        "label": "Blade Runner 2049",
+        "labelEn": "Blade Runner 2049",
+        "icon": "🌆",
+        "prompt": "Blade Runner 2049 cinematography by Roger Deakins: monolithic forms, oppressive haze, monochrome amber or teal palette, neon volumetric beams cutting smoke, dystopian sublime.",
+        "tags": [
+          "cinematic",
+          "sci-fi"
+        ],
+        "default": false
+      },
+      {
+        "id": "nordic_noir",
+        "category": "Style",
+        "label": "Nordic Noir",
+        "labelEn": "Nordic Noir",
+        "icon": "🕯️",
+        "prompt": "Nordic noir cinematic visualization: cold desaturated blues, lingering rain, low winter sun, melancholic stillness, Scandinavian crime drama atmosphere.",
+        "tags": [
+          "cinematic",
+          "noir"
+        ],
+        "default": false
+      },
+      {
+        "id": "ghibli_architecture",
+        "category": "Style",
+        "label": "Ghibli Architecture",
+        "labelEn": "Ghibli Architecture",
+        "icon": "🏯",
+        "prompt": "Studio Ghibli architectural illustration: hand-painted backgrounds, lush organic detail, magical realism, warm nostalgic palette, Miyazaki environment art.",
+        "tags": [
+          "concept",
+          "anime"
+        ],
+        "default": false
+      },
+      {
+        "id": "a24_indie",
+        "category": "Style",
+        "label": "A24 Indie Film",
+        "labelEn": "A24 Indie Film",
+        "icon": "🎥",
+        "prompt": "A24 indie film visual style: naturalistic 35mm grain, muted earthy palette, intimate handheld framing, authentic lived-in spaces, contemplative pacing.",
+        "tags": [
+          "cinematic",
+          "indie"
+        ],
+        "default": false
+      },
+      {
+        "id": "hyperreal_dbox",
+        "category": "Style",
+        "label": "Hyperreal Editorial (Dbox)",
+        "labelEn": "Hyperreal Editorial (Dbox)",
+        "icon": "💠",
+        "prompt": "Dbox hyperreal editorial archviz: marketing-grade precision, luminous soft-box sky, meticulous material PBR, aspirational lifestyle staging, luxury real-estate magazine finish.",
+        "tags": [
+          "archviz",
+          "editorial",
+          "luxury"
+        ],
+        "default": false
+      },
+      {
+        "id": "twilight_hayes",
+        "category": "Style",
+        "label": "Twilight Magic Hour (Hayes Davidson)",
+        "labelEn": "Twilight Magic Hour (Hayes Davidson)",
+        "icon": "🌇",
+        "prompt": "Hayes Davidson twilight magic hour: sky transitioning to violet-cyan, interior lights warmly on, subtle reflection on glazing, tripod-crisp long exposure feel, classic real-estate hero.",
+        "tags": [
+          "archviz",
+          "hero",
+          "twilight"
+        ],
+        "default": true
+      },
+      {
+        "id": "bw_architectural_poetry",
+        "category": "Style",
+        "label": "B&W Architectural Poetry",
+        "labelEn": "Black & White Architectural Poetry",
+        "icon": "◼️",
+        "prompt": "Black-and-white architectural poetry: fine-art monochrome with rich tonal transitions, dramatic shadow play, emphasis on geometry and light, Hélène Binet influence.",
+        "tags": [
+          "bw",
+          "fineart"
+        ],
+        "default": false
+      },
+      {
+        "id": "vintage_portra",
+        "category": "Style",
+        "label": "Vintage Film (Portra 400)",
+        "labelEn": "Vintage Film Stock (Kodak Portra 400)",
+        "icon": "🎞",
+        "prompt": "Kodak Portra 400 vintage film look: warm skin tones, soft highlight roll-off, subtle film grain, slightly lifted shadows, analog magazine nostalgia.",
+        "tags": [
+          "film",
+          "vintage"
+        ],
+        "default": false
+      },
+      {
+        "id": "polaroid_snapshot",
+        "category": "Style",
+        "label": "Polaroid Snapshot",
+        "labelEn": "Polaroid Snapshot",
+        "icon": "📸",
+        "prompt": "Polaroid snapshot aesthetic: slightly washed colors, soft focus, centered composition, small white border feel, instant-camera immediacy.",
+        "tags": [
+          "film",
+          "vintage",
+          "casual"
+        ],
+        "default": false
+      },
+      {
+        "id": "dreamy_pastel",
+        "category": "Style",
+        "label": "Dreamy Pastel",
+        "labelEn": "Dreamy Pastel",
+        "icon": "🌸",
+        "prompt": "Dreamy pastel painterly style: cotton-candy pink and mint palette, soft bloom, hazy diffused light, fairytale ambient mood.",
+        "tags": [
+          "pastel",
+          "dreamy"
+        ],
+        "default": false
+      },
+      {
+        "id": "heroic_natgeo",
+        "category": "Style",
+        "label": "Heroic Wide (NatGeo)",
+        "labelEn": "Heroic Wide-Angle (National Geographic)",
+        "icon": "🌍",
+        "prompt": "National Geographic heroic wide-angle: immersive environmental storytelling, dramatic natural light, 24mm breadth, saturated adventure palette.",
+        "tags": [
+          "editorial",
+          "wide"
+        ],
+        "default": false
+      },
+      {
+        "id": "neo_futurist",
+        "category": "Style",
+        "label": "Tilted Neo-Futurist",
+        "labelEn": "Tilted Neo-Futurist",
+        "icon": "🔺",
+        "prompt": "Neo-futurist tilted-frame visualization: dynamic diagonal composition, chrome reflective surfaces, parametric curves, cyberpunk-adjacent bright neons over night city.",
+        "tags": [
+          "futurist",
+          "tilt"
+        ],
+        "default": false
+      },
+      {
+        "id": "brutalism_highcontrast",
+        "category": "Style",
+        "label": "Brutalism High-Contrast",
+        "labelEn": "High-Contrast Brutalism",
+        "icon": "🧱",
+        "prompt": "High-contrast brutalist architecture: raw concrete monoliths, harsh low-sun shadows, overexposed skies, dramatic chiaroscuro.",
+        "tags": [
+          "brutalist",
+          "contrast"
+        ],
+        "default": false
+      },
+      {
+        "id": "gritty_documentary",
+        "category": "Style",
+        "label": "Gritty Documentary",
+        "labelEn": "Gritty Documentary",
+        "icon": "📷",
+        "prompt": "Gritty documentary photography: handheld honesty, muted grading, available-light only, street-reportage authenticity.",
+        "tags": [
+          "documentary",
+          "gritty"
+        ],
+        "default": false
+      },
+      {
+        "id": "editorial_wallpaper",
+        "category": "Style",
+        "label": "Editorial Magazine (Wallpaper)",
+        "labelEn": "Editorial Magazine (Wallpaper*/Dezeen)",
+        "icon": "📖",
+        "prompt": "Editorial magazine spread aesthetic from Wallpaper* and Dezeen: sharp clean composition, product-shot precision, neutral studio tones, high-end design publication finish.",
+        "tags": [
+          "editorial",
+          "magazine"
+        ],
+        "default": false
+      },
+      {
+        "id": "ad_hero",
+        "category": "Style",
+        "label": "Architectural Digest Hero",
+        "labelEn": "Architectural Digest Hero",
+        "icon": "🏆",
+        "prompt": "Architectural Digest hero-shot: luxurious staging, perfectly lit interiors, magazine double-page composition, aspirational domestic grandeur.",
+        "tags": [
+          "editorial",
+          "luxury"
+        ],
+        "default": false
+      },
+      {
+        "id": "concept_sketch",
+        "category": "Style",
+        "label": "Concept Sketch",
+        "labelEn": "Concept Art Sketch",
+        "icon": "🖊️",
+        "prompt": "Concept art architectural sketch: loose pencil and digital-paint hybrid, rough massing, exploratory feel, design-presentation mid-stage.",
+        "tags": [
+          "sketch",
+          "concept"
+        ],
+        "default": false
+      },
+      {
+        "id": "watercolor_loose",
+        "category": "Style",
+        "label": "Watercolor Loose",
+        "labelEn": "Watercolor Loose",
+        "icon": "🖌️",
+        "prompt": "Loose watercolor architectural rendering: bleeding pigment edges, paper grain texture, light transparent washes, informal handcrafted warmth.",
+        "tags": [
+          "sketch",
+          "watercolor"
+        ],
+        "default": false
+      }
+    ],
+    "Mood": [
+      {
+        "id": "golden_hour",
+        "category": "Mood",
+        "label": "Golden Hour",
+        "labelEn": "Golden Hour",
+        "icon": "🌅",
+        "prompt": "Warm golden hour lighting: low sun at 15 degrees, long raking shadows, amber rim light on facades, glowing dust particles in the air.",
+        "tags": [
+          "lighting",
+          "warm"
+        ],
+        "default": false
+      },
+      {
+        "id": "blue_hour",
+        "category": "Mood",
+        "label": "Blue Hour",
+        "labelEn": "Blue Hour",
+        "icon": "🌃",
+        "prompt": "Blue hour twilight: deep cobalt sky, interior tungsten lights warmly glowing through windows, balanced 50/50 ambient-to-artificial ratio.",
+        "tags": [
+          "lighting",
+          "twilight"
+        ],
+        "default": false
+      },
+      {
+        "id": "magic_hour",
+        "category": "Mood",
+        "label": "Magic Hour",
+        "labelEn": "Magic Hour",
+        "icon": "🌆",
+        "prompt": "Magic hour five minutes after sunset: sky cyan-violet gradient, every interior glowing warm, exterior landscape lights just turning on, perfect archviz twilight.",
+        "tags": [
+          "lighting",
+          "twilight",
+          "hero"
+        ],
+        "default": true
+      },
+      {
+        "id": "high_noon",
+        "category": "Mood",
+        "label": "High Noon",
+        "labelEn": "High Noon",
+        "icon": "☀️",
+        "prompt": "High noon overhead sunlight: short hard shadows, intense top-down illumination, high dynamic range, crisp bright facades.",
+        "tags": [
+          "lighting",
+          "daylight"
+        ],
+        "default": false
+      },
+      {
+        "id": "dawn_mist",
+        "category": "Mood",
+        "label": "Dawn Mist",
+        "labelEn": "Dawn Mist",
+        "icon": "🌫️",
+        "prompt": "Dawn mist atmosphere: soft pre-sunrise gradient, ground-hugging fog, faint pink horizon, dewy surfaces, hushed tranquility.",
+        "tags": [
+          "lighting",
+          "mist"
+        ],
+        "default": false
+      },
+      {
+        "id": "midnight",
+        "category": "Mood",
+        "label": "Midnight",
+        "labelEn": "Midnight",
+        "icon": "🌙",
+        "prompt": "Deep midnight scene: moonlit silver highlights, navy shadows, glowing interior pools of warm light, quiet nocturnal mood.",
+        "tags": [
+          "lighting",
+          "night"
+        ],
+        "default": false
+      },
+      {
+        "id": "overcast",
+        "category": "Mood",
+        "label": "Overcast",
+        "labelEn": "Overcast",
+        "icon": "☁️",
+        "prompt": "Even overcast lighting: large softbox sky, no harsh shadows, true material colors, neutral diffuse illumination.",
+        "tags": [
+          "lighting",
+          "overcast"
+        ],
+        "default": false
+      },
+      {
+        "id": "after_rain",
+        "category": "Mood",
+        "label": "After Rain",
+        "labelEn": "After Rain",
+        "icon": "🌧️",
+        "prompt": "Just-after-rain mood: glistening wet surfaces, mirror-like puddle reflections, fresh saturated colors, residual mist, breaking sunlight.",
+        "tags": [
+          "weather",
+          "rain"
+        ],
+        "default": false
+      },
+      {
+        "id": "heavy_snow",
+        "category": "Mood",
+        "label": "Heavy Snow",
+        "labelEn": "Heavy Snow",
+        "icon": "❄️",
+        "prompt": "Heavy snowfall: thick white accumulation on rooftops and ground, falling flakes blurring distance, muffled silent atmosphere, cold blue cast.",
+        "tags": [
+          "weather",
+          "snow"
+        ],
+        "default": false
+      },
+      {
+        "id": "serene",
+        "category": "Mood",
+        "label": "Serene",
+        "labelEn": "Serene",
+        "icon": "🕊️",
+        "prompt": "Serene contemplative mood: soft balanced light, calm horizon, minimal motion, meditative stillness.",
+        "tags": [
+          "mood",
+          "calm"
+        ],
+        "default": false
+      },
+      {
+        "id": "energetic",
+        "category": "Mood",
+        "label": "Energetic",
+        "labelEn": "Energetic",
+        "icon": "⚡",
+        "prompt": "Energetic dynamic mood: bright vibrant palette, strong directional light, sense of motion and activity, optimistic uplifting feel.",
+        "tags": [
+          "mood",
+          "energetic"
+        ],
+        "default": false
+      },
+      {
+        "id": "mysterious",
+        "category": "Mood",
+        "label": "Mysterious",
+        "labelEn": "Mysterious",
+        "icon": "🔮",
+        "prompt": "Mysterious atmosphere: low-key lighting, deep shadows hiding details, fog and silhouettes, intriguing unresolved narrative.",
+        "tags": [
+          "mood",
+          "mystery"
+        ],
+        "default": false
+      },
+      {
+        "id": "romantic",
+        "category": "Mood",
+        "label": "Romantic",
+        "labelEn": "Romantic",
+        "icon": "💕",
+        "prompt": "Romantic mood: warm candlelight tones, soft bokeh, intimate human scale, dreamy diffused glow.",
+        "tags": [
+          "mood",
+          "romantic"
+        ],
+        "default": false
+      },
+      {
+        "id": "epic",
+        "category": "Mood",
+        "label": "Epic",
+        "labelEn": "Epic",
+        "icon": "🏔️",
+        "prompt": "Epic cinematic mood: dramatic scale, towering perspective, sweeping skies, heroic golden god rays.",
+        "tags": [
+          "mood",
+          "epic"
+        ],
+        "default": false
+      },
+      {
+        "id": "melancholic",
+        "category": "Mood",
+        "label": "Melancholic",
+        "labelEn": "Melancholic",
+        "icon": "🥀",
+        "prompt": "Melancholic mood: muted desaturated palette, soft rain, autumn light, quiet emotional weight.",
+        "tags": [
+          "mood",
+          "melancholy"
+        ],
+        "default": false
+      },
+      {
+        "id": "futuristic",
+        "category": "Mood",
+        "label": "Futuristic",
+        "labelEn": "Futuristic",
+        "icon": "🚀",
+        "prompt": "Futuristic mood: neon accents, holographic displays, sleek metallic surfaces, sci-fi atmospheric volumetrics.",
+        "tags": [
+          "mood",
+          "futuristic"
+        ],
+        "default": false
+      },
+      {
+        "id": "clear_sunny",
+        "category": "Mood",
+        "label": "Clear Sunny",
+        "labelEn": "Clear Sunny",
+        "icon": "🌞",
+        "prompt": "Clear sunny day: deep blue sky with no clouds, sharp shadows, vivid saturated colors, optimistic bright atmosphere.",
+        "tags": [
+          "weather",
+          "sunny"
+        ],
+        "default": false
+      },
+      {
+        "id": "heavy_clouds",
+        "category": "Mood",
+        "label": "Heavy Clouds",
+        "labelEn": "Heavy Clouds",
+        "icon": "🌥️",
+        "prompt": "Heavy dramatic cloudscape: towering cumulus formations, shifting cloud shadows on landscape, moody but luminous sky.",
+        "tags": [
+          "weather",
+          "clouds"
+        ],
+        "default": false
+      },
+      {
+        "id": "thunderstorm",
+        "category": "Mood",
+        "label": "Thunderstorm",
+        "labelEn": "Thunderstorm",
+        "icon": "⛈️",
+        "prompt": "Thunderstorm scene: dark roiling clouds, distant lightning flash illumination, sheets of rain, dramatic tension.",
+        "tags": [
+          "weather",
+          "storm"
+        ],
+        "default": false
+      },
+      {
+        "id": "light_rain",
+        "category": "Mood",
+        "label": "Light Rain",
+        "labelEn": "Light Rain",
+        "icon": "🌦️",
+        "prompt": "Light gentle rain: fine drizzle, soft reflections, subtle ripples in puddles, mellow grey-green palette.",
+        "tags": [
+          "weather",
+          "rain"
+        ],
+        "default": false
+      },
+      {
+        "id": "tropical_humid",
+        "category": "Mood",
+        "label": "Tropical Humid",
+        "labelEn": "Tropical Humid",
+        "icon": "🌴",
+        "prompt": "Tropical humid air: heat haze shimmer, lush moisture-laden atmosphere, warm green palette, monsoon afterglow.",
+        "tags": [
+          "weather",
+          "tropical"
+        ],
+        "default": false
+      }
+    ],
+    "Camera": [
+      {
+        "id": "cam_eye_level",
+        "category": "Camera",
+        "label": "Eye-Level 35mm",
+        "labelEn": "Eye-Level Human Viewpoint",
+        "icon": "👁️",
+        "prompt": "Eye-level human viewpoint at 1.6m height, 35mm equivalent lens, natural neutral perspective, vertical lines parallel.",
+        "tags": [
+          "camera",
+          "natural"
+        ],
+        "default": true
+      },
+      {
+        "id": "cam_worms_eye",
+        "category": "Camera",
+        "label": "Worm’s-Eye",
+        "labelEn": "Worm’s-Eye Low Angle",
+        "icon": "🪱",
+        "prompt": "Worm’s-eye low angle looking dramatically upward, 24mm wide lens, exaggerated vertical convergence for monumental scale.",
+        "tags": [
+          "camera",
+          "dramatic"
+        ],
+        "default": false
+      },
+      {
+        "id": "cam_drone_aerial",
+        "category": "Camera",
+        "label": "Drone Aerial",
+        "labelEn": "Bird’s-Eye Drone Aerial",
+        "icon": "🚁",
+        "prompt": "Bird’s-eye drone aerial view at 200m altitude, 50mm telephoto compression, property and surroundings visible from above.",
+        "tags": [
+          "camera",
+          "aerial"
+        ],
+        "default": false
+      },
+      {
+        "id": "cam_two_point_exterior",
+        "category": "Camera",
+        "label": "Two-Point Exterior",
+        "labelEn": "Two-Point Exterior Perspective",
+        "icon": "📐",
+        "prompt": "Two-point exterior architectural perspective, 24mm wide, vertical lines corrected (tilt-shift architectural), hero corner view.",
+        "tags": [
+          "camera",
+          "exterior"
+        ],
+        "default": false
+      },
+      {
+        "id": "cam_one_point_interior",
+        "category": "Camera",
+        "label": "One-Point Interior",
+        "labelEn": "One-Point Interior Perspective",
+        "icon": "🚪",
+        "prompt": "One-point interior perspective with central vanishing point, 28mm wide lens, symmetrical depth into the room.",
+        "tags": [
+          "camera",
+          "interior"
+        ],
+        "default": false
+      },
+      {
+        "id": "cam_three_point_upward",
+        "category": "Camera",
+        "label": "Three-Point Hero",
+        "labelEn": "Three-Point Dramatic Upward",
+        "icon": "🔺",
+        "prompt": "Three-point dramatic upward hero shot, 16mm ultra-wide, vertigo-inducing vertical exaggeration, heroic skyscraper perspective.",
+        "tags": [
+          "camera",
+          "dramatic"
+        ],
+        "default": false
+      },
+      {
+        "id": "cam_hero_threequarter",
+        "category": "Camera",
+        "label": "Hero ¾ Corner",
+        "labelEn": "Hero Three-Quarter Corner",
+        "icon": "📸",
+        "prompt": "Hero three-quarter corner angle, 35mm balanced lens, showing two sides of the building with natural perspective.",
+        "tags": [
+          "camera",
+          "hero"
+        ],
+        "default": false
+      },
+      {
+        "id": "cam_ortho_elevation",
+        "category": "Camera",
+        "label": "Ortho Elevation",
+        "labelEn": "Pure Orthographic Elevation",
+        "icon": "📏",
+        "prompt": "Pure orthographic front elevation, zero perspective distortion, technical drawing projection with photoreal textures.",
+        "tags": [
+          "camera",
+          "technical"
+        ],
+        "default": false
+      },
+      {
+        "id": "cam_section_cut",
+        "category": "Camera",
+        "label": "Section Cut",
+        "labelEn": "Section Cut Perspective",
+        "icon": "🔪",
+        "prompt": "Section cut perspective: building sliced open, dollhouse interior visible, each floor revealed in cross-section.",
+        "tags": [
+          "camera",
+          "section"
+        ],
+        "default": false
+      },
+      {
+        "id": "cam_telephoto_85",
+        "category": "Camera",
+        "label": "Telephoto 85mm",
+        "labelEn": "Telephoto Compression 85mm",
+        "icon": "🔭",
+        "prompt": "Telephoto 85mm compression: background layers stacked, parallax flattened, subject isolated against compressed context.",
+        "tags": [
+          "camera",
+          "telephoto"
+        ],
+        "default": false
+      },
+      {
+        "id": "cam_wide_interior_16",
+        "category": "Camera",
+        "label": "Wide Interior 16mm",
+        "labelEn": "Wide Interior 16mm",
+        "icon": "📷",
+        "prompt": "Wide-angle interior at 16mm: room feels expansive and airy, classic real-estate listing look, slight corner stretch accepted.",
+        "tags": [
+          "camera",
+          "interior",
+          "wide"
+        ],
+        "default": false
+      },
+      {
+        "id": "cam_standard_50",
+        "category": "Camera",
+        "label": "Standard 50mm",
+        "labelEn": "Standard 50mm",
+        "icon": "🎯",
+        "prompt": "Standard 50mm normal lens, no distortion, neutral human-eye perspective, balanced proportions.",
+        "tags": [
+          "camera",
+          "neutral"
+        ],
+        "default": false
+      },
+      {
+        "id": "cam_tilt_shift",
+        "category": "Camera",
+        "label": "Tilt-Shift Miniature",
+        "labelEn": "Tilt-Shift Miniature Effect",
+        "icon": "🔍",
+        "prompt": "Tilt-shift miniature effect with selective focus band, scene appears toy-like, color-saturated bokeh above and below sharp strip.",
+        "tags": [
+          "camera",
+          "tiltshift"
+        ],
+        "default": false
+      },
+      {
+        "id": "cam_phone_pov",
+        "category": "Camera",
+        "label": "Phone POV Portrait",
+        "labelEn": "Phone POV Portrait Orientation",
+        "icon": "📱",
+        "prompt": "Phone POV portrait orientation, casual handheld property-tour vibe, slight lens warp at edges.",
+        "tags": [
+          "camera",
+          "casual"
+        ],
+        "default": false
+      },
+      {
+        "id": "cam_dollhouse_iso",
+        "category": "Camera",
+        "label": "Dollhouse Isometric",
+        "labelEn": "Dollhouse Cutaway Isometric",
+        "icon": "🏠",
+        "prompt": "Dollhouse cutaway isometric view, full floor plan visible from 30-degree elevated angle, all rooms exposed.",
+        "tags": [
+          "camera",
+          "iso",
+          "floorplan"
+        ],
+        "default": false
+      },
+      {
+        "id": "cam_pedestrian_28",
+        "category": "Camera",
+        "label": "Pedestrian 28mm",
+        "labelEn": "Pedestrian POV 28mm",
+        "icon": "🚶",
+        "prompt": "Ground-level pavement perspective, pedestrian POV at 1.6m, 28mm wide lens, street-life context around building base.",
+        "tags": [
+          "camera",
+          "street"
+        ],
+        "default": false
+      },
+      {
+        "id": "cam_helicopter_oblique",
+        "category": "Camera",
+        "label": "Helicopter Oblique",
+        "labelEn": "Helicopter Aerial Oblique",
+        "icon": "🚁",
+        "prompt": "Helicopter aerial oblique, 45-degree downward angle, 70mm lens, rooftops and facades both visible.",
+        "tags": [
+          "camera",
+          "aerial"
+        ],
+        "default": false
+      },
+      {
+        "id": "cam_twilight_longexp",
+        "category": "Camera",
+        "label": "Twilight Long Exposure",
+        "labelEn": "Twilight Long Exposure 30s",
+        "icon": "⏱️",
+        "prompt": "Twilight blue-hour exterior on tripod, 30-second long exposure, interior lights on, traces of moving cars, classic real-estate hero technique.",
+        "tags": [
+          "camera",
+          "twilight",
+          "hero"
+        ],
+        "default": false
+      }
+    ],
+    "People": [
+      {
+        "id": "business_pro_sparse",
+        "category": "People",
+        "label": "Business (Sparse)",
+        "labelEn": "Business Professional (Sparse)",
+        "icon": "👔",
+        "prompt": "Sparse scattering of business professionals in tailored suits walking purposefully, briefcases and laptops, weekday morning energy, 2-3 figures.",
+        "tags": [
+          "people",
+          "business"
+        ],
+        "default": false
+      },
+      {
+        "id": "business_pro_moderate",
+        "category": "People",
+        "label": "Business (Moderate)",
+        "labelEn": "Business Professional (Moderate)",
+        "icon": "👔",
+        "prompt": "Moderate density of business professionals in formal corporate attire, mixed gender and ethnicity, business district atmosphere, 6-10 figures interacting naturally.",
+        "tags": [
+          "people",
+          "business"
+        ],
+        "default": false
+      },
+      {
+        "id": "business_pro_busy",
+        "category": "People",
+        "label": "Business (Busy)",
+        "labelEn": "Business Professional (Busy)",
+        "icon": "👔",
+        "prompt": "Busy crowd of business professionals during peak hours, suits and smart casual mix, dynamic walking poses, 15-25 figures, financial-district vibe.",
+        "tags": [
+          "people",
+          "business",
+          "crowd"
+        ],
+        "default": false
+      },
+      {
+        "id": "casual_urban_sparse",
+        "category": "People",
+        "label": "Casual Urban (Sparse)",
+        "labelEn": "Casual Urban (Sparse)",
+        "icon": "🧥",
+        "prompt": "Sparse casual urban dwellers in modern streetwear, relaxed pace, 2-4 figures.",
+        "tags": [
+          "people",
+          "casual"
+        ],
+        "default": false
+      },
+      {
+        "id": "casual_urban_moderate",
+        "category": "People",
+        "label": "Casual Urban (Moderate)",
+        "labelEn": "Casual Urban (Moderate)",
+        "icon": "🧥",
+        "prompt": "Moderate casual urban crowd in trendy streetwear, diverse ages, candid lifestyle poses, 7-12 figures.",
+        "tags": [
+          "people",
+          "casual"
+        ],
+        "default": false
+      },
+      {
+        "id": "casual_urban_busy",
+        "category": "People",
+        "label": "Casual Urban (Busy)",
+        "labelEn": "Casual Urban (Busy)",
+        "icon": "🧥",
+        "prompt": "Busy urban street life, eclectic streetwear, vibrant city energy, 20+ figures, weekend afternoon vibe.",
+        "tags": [
+          "people",
+          "casual",
+          "crowd"
+        ],
+        "default": false
+      },
+      {
+        "id": "family_life",
+        "category": "People",
+        "label": "Family Life",
+        "labelEn": "Family Life",
+        "icon": "👨‍👩‍👧",
+        "prompt": "Families with young children, parents holding hands with kids, strollers, casual weekend wear, warm domestic atmosphere, 3-5 family groups.",
+        "tags": [
+          "people",
+          "family"
+        ],
+        "default": false
+      },
+      {
+        "id": "retail_shoppers",
+        "category": "People",
+        "label": "Retail Shoppers",
+        "labelEn": "Retail Shoppers",
+        "icon": "🛍️",
+        "prompt": "Retail shoppers with branded shopping bags, browsing window displays, fashionable casual wear, 8-15 figures.",
+        "tags": [
+          "people",
+          "retail"
+        ],
+        "default": false
+      },
+      {
+        "id": "tourists",
+        "category": "People",
+        "label": "Tourists",
+        "labelEn": "Tourists",
+        "icon": "📷",
+        "prompt": "Tourists with cameras and small backpacks, looking up at architecture, casual layered clothing, diverse international mix, 6-12 figures.",
+        "tags": [
+          "people",
+          "tourist"
+        ],
+        "default": false
+      },
+      {
+        "id": "fitness",
+        "category": "People",
+        "label": "Fitness",
+        "labelEn": "Fitness",
+        "icon": "🏃",
+        "prompt": "Fitness enthusiasts jogging and stretching in athletic wear, healthy active lifestyle, morning energy, 4-8 figures.",
+        "tags": [
+          "people",
+          "fitness"
+        ],
+        "default": false
+      },
+      {
+        "id": "elderly",
+        "category": "People",
+        "label": "Elderly",
+        "labelEn": "Elderly",
+        "icon": "👵",
+        "prompt": "Elderly residents walking calmly, some with walking canes, dignified pace, comfortable clothing, 3-6 figures.",
+        "tags": [
+          "people",
+          "elderly"
+        ],
+        "default": false
+      },
+      {
+        "id": "cultural_crowd",
+        "category": "People",
+        "label": "Cultural Crowd",
+        "labelEn": "Cultural Crowd",
+        "icon": "🎭",
+        "prompt": "Cultural event crowd in smart-casual attire, conversing in small groups with drinks in hand, gallery-opening atmosphere, 12-20 figures.",
+        "tags": [
+          "people",
+          "cultural"
+        ],
+        "default": false
+      },
+      {
+        "id": "nightlife",
+        "category": "People",
+        "label": "Nightlife",
+        "labelEn": "Nightlife",
+        "icon": "🍸",
+        "prompt": "Nightlife crowd in stylish evening wear, glowing phone screens, neon ambient light on faces, 10-18 figures.",
+        "tags": [
+          "people",
+          "nightlife"
+        ],
+        "default": false
+      },
+      {
+        "id": "remote_workers",
+        "category": "People",
+        "label": "Remote Workers",
+        "labelEn": "Remote Workers",
+        "icon": "💻",
+        "prompt": "Remote workers with laptops at outdoor cafes, headphones, casual creative attire, focused or chatting, 4-7 figures.",
+        "tags": [
+          "people",
+          "workers"
+        ],
+        "default": false
+      },
+      {
+        "id": "children_playing",
+        "category": "People",
+        "label": "Children Playing",
+        "labelEn": "Children Playing",
+        "icon": "🧒",
+        "prompt": "Small children playing in a safe shared space, running and laughing, bright casual kidswear, 3-6 children with occasional adult nearby.",
+        "tags": [
+          "people",
+          "children"
+        ],
+        "default": false
+      },
+      {
+        "id": "asian_residential",
+        "category": "People",
+        "label": "Asian Residential Families",
+        "labelEn": "Asian Urban Residential Families",
+        "icon": "🏮",
+        "prompt": "Asian urban residential family scene: parents with young children, grandparents, casual weekend lifestyle in Vietnamese/SEA apartment complex setting, 5-8 figures.",
+        "tags": [
+          "people",
+          "asian",
+          "family"
+        ],
+        "default": true
+      },
+      {
+        "id": "construction_workers",
+        "category": "People",
+        "label": "Construction Workers",
+        "labelEn": "Construction Workers",
+        "icon": "👷",
+        "prompt": "Construction workers in hi-vis vests and hard hats, blueprints in hand, active building-site activity, 3-5 figures.",
+        "tags": [
+          "people",
+          "construction"
+        ],
+        "default": false
+      },
+      {
+        "id": "cafe_patrons",
+        "category": "People",
+        "label": "Cafe Patrons",
+        "labelEn": "Cafe Patrons",
+        "icon": "☕",
+        "prompt": "Cafe patrons seated at outdoor tables with coffee cups and pastries, laptops and books, relaxed conversation, 6-10 figures.",
+        "tags": [
+          "people",
+          "cafe"
+        ],
+        "default": false
+      },
+      {
+        "id": "no_people",
+        "category": "People",
+        "label": "No People",
+        "labelEn": "Empty (No People)",
+        "icon": "🚫",
+        "prompt": "Architectural scene with no people present, clean hero composition focused entirely on space and light.",
+        "tags": [
+          "people",
+          "empty"
+        ],
+        "default": false
+      },
+      {
+        "id": "staff_hospitality",
+        "category": "People",
+        "label": "Hospitality Staff",
+        "labelEn": "Hospitality Staff",
+        "icon": "🤵",
+        "prompt": "Hospitality staff in crisp uniforms greeting guests, concierge and bellhop scenario, 2-4 figures, luxury hotel entrance feel.",
+        "tags": [
+          "people",
+          "hospitality"
+        ],
+        "default": false
+      }
+    ],
+    "Objects": [
+      {
+        "id": "scandi_minimal",
+        "category": "Objects",
+        "label": "Scandinavian Minimal",
+        "labelEn": "Scandinavian Minimal",
+        "icon": "🪑",
+        "prompt": "Scandinavian minimalist furniture: pale oak wood, off-white linen upholstery, slender Hans Wegner-style chairs, single sculptural pendant, Marimekko textile accent, hygge clutter-free warmth.",
+        "tags": [
+          "furniture",
+          "scandi"
+        ],
+        "default": false
+      },
+      {
+        "id": "midcentury_modern",
+        "category": "Objects",
+        "label": "Mid-Century Modern",
+        "labelEn": "Mid-Century Modern",
+        "icon": "🛋️",
+        "prompt": "Mid-century modern furniture: walnut tapered legs, Eames lounge chair, Saarinen tulip table, Nelson bubble lamp, mustard and teal accents, 1950s curated elegance.",
+        "tags": [
+          "furniture",
+          "mcm"
+        ],
+        "default": false
+      },
+      {
+        "id": "japandi",
+        "category": "Objects",
+        "label": "Japandi",
+        "labelEn": "Japandi",
+        "icon": "🍵",
+        "prompt": "Japandi interior: low oak platform sofa, paper-shade lanterns, ceramic stoneware, monochrome neutrals, ikebana branches, calm hybrid of Japanese and Scandinavian restraint.",
+        "tags": [
+          "furniture",
+          "japandi"
+        ],
+        "default": false
+      },
+      {
+        "id": "industrial_loft",
+        "category": "Objects",
+        "label": "Industrial Loft",
+        "labelEn": "Industrial Loft",
+        "icon": "🏭",
+        "prompt": "Industrial loft furnishings: distressed leather Chesterfield, raw steel shelving, Edison filament bulbs, reclaimed timber tables, exposed pipes, Brooklyn warehouse vibe.",
+        "tags": [
+          "furniture",
+          "industrial"
+        ],
+        "default": false
+      },
+      {
+        "id": "luxury_contemporary",
+        "category": "Objects",
+        "label": "Luxury Contemporary",
+        "labelEn": "Luxury Contemporary",
+        "icon": "💎",
+        "prompt": "Luxury contemporary: B&B Italia and Minotti seating, polished marble coffee table, brass detailing, silk and cashmere textures, statement art, 5-star penthouse refinement.",
+        "tags": [
+          "furniture",
+          "luxury"
+        ],
+        "default": true
+      },
+      {
+        "id": "boho",
+        "category": "Objects",
+        "label": "Boho",
+        "labelEn": "Boho",
+        "icon": "🌺",
+        "prompt": "Bohemian furnishings: layered Persian rugs, macrame wall hangings, rattan peacock chair, abundant trailing plants, eclectic vintage finds, warm earthy palette.",
+        "tags": [
+          "furniture",
+          "boho"
+        ],
+        "default": false
+      },
+      {
+        "id": "biophilic",
+        "category": "Objects",
+        "label": "Biophilic",
+        "labelEn": "Biophilic",
+        "icon": "🌱",
+        "prompt": "Biophilic design: living moss walls, hanging fiddle-leaf figs, natural stone planters, raw timber surfaces, integrated water feature, nature-immersive interior.",
+        "tags": [
+          "furniture",
+          "biophilic"
+        ],
+        "default": false
+      },
+      {
+        "id": "art_deco",
+        "category": "Objects",
+        "label": "Art Deco",
+        "labelEn": "Art Deco",
+        "icon": "🎩",
+        "prompt": "Art Deco furniture: velvet emerald sofa, gold geometric mirrors, lacquered burl wood cabinet, fluted glass, fan motifs, 1920s Gatsby glamour.",
+        "tags": [
+          "furniture",
+          "deco"
+        ],
+        "default": false
+      },
+      {
+        "id": "wabi_sabi",
+        "category": "Objects",
+        "label": "Wabi-Sabi",
+        "labelEn": "Wabi-Sabi",
+        "icon": "🪨",
+        "prompt": "Wabi-sabi furnishings: hand-thrown ceramics, raw linen, weathered timber, irregular kintsugi-mended forms, neutral earthen palette, meditative imperfection.",
+        "tags": [
+          "furniture",
+          "wabisabi"
+        ],
+        "default": false
+      },
+      {
+        "id": "brutalist_interior",
+        "category": "Objects",
+        "label": "Brutalist Interior",
+        "labelEn": "Brutalist Interior",
+        "icon": "🧱",
+        "prompt": "Brutalist interior: raw concrete furniture, monolithic stone slabs, blackened steel, oversized leather slabs, monochromatic grey palette, sculptural heaviness.",
+        "tags": [
+          "furniture",
+          "brutalist"
+        ],
+        "default": false
+      },
+      {
+        "id": "asian_contemporary",
+        "category": "Objects",
+        "label": "Asian Contemporary",
+        "labelEn": "Asian Contemporary",
+        "icon": "🏯",
+        "prompt": "Asian contemporary furnishings: lacquered dark wood, low seating, celadon ceramics, ink-wash art, paper-screen room dividers, refined modern oriental palette.",
+        "tags": [
+          "furniture",
+          "asian"
+        ],
+        "default": false
+      },
+      {
+        "id": "vietnamese_tropical",
+        "category": "Objects",
+        "label": "Vietnamese Tropical",
+        "labelEn": "Vietnamese Tropical Modern",
+        "icon": "🌾",
+        "prompt": "Vietnamese tropical modern interior: rattan and bamboo furniture, indigo textile accents, lotus motifs, dark teak wood, louvered shutters, open tropical veranda feel.",
+        "tags": [
+          "furniture",
+          "vietnam",
+          "tropical"
+        ],
+        "default": false
+      },
+      {
+        "id": "kids_friendly",
+        "category": "Objects",
+        "label": "Kids-Friendly",
+        "labelEn": "Kids-Friendly Family",
+        "icon": "🧸",
+        "prompt": "Kids-friendly family furnishings: rounded-corner furniture, bright primary accents, soft rugs, open toy storage, durable washable fabrics.",
+        "tags": [
+          "furniture",
+          "kids"
+        ],
+        "default": false
+      },
+      {
+        "id": "home_office",
+        "category": "Objects",
+        "label": "Home Office Setup",
+        "labelEn": "Home Office Setup",
+        "icon": "🖥️",
+        "prompt": "Home office setup: ergonomic chair, height-adjustable desk, dual monitors, good task lighting, cable management, books and small plants.",
+        "tags": [
+          "furniture",
+          "workspace"
+        ],
+        "default": false
+      }
+    ],
+    "Architecture": [
+      {
+        "id": "parametric_zaha",
+        "category": "Architecture",
+        "label": "Parametric (Zaha)",
+        "labelEn": "Parametric Modern (Zaha Hadid)",
+        "icon": "🌀",
+        "prompt": "Parametric modern architecture in Zaha Hadid style: fluid curvilinear forms, continuous flowing surfaces, fiber-reinforced concrete and aluminum panels, dynamic non-Euclidean geometry.",
+        "tags": [
+          "arch",
+          "parametric"
+        ],
+        "default": false
+      },
+      {
+        "id": "brutalist_ando",
+        "category": "Architecture",
+        "label": "Brutalist (Ando)",
+        "labelEn": "Brutalist (Tadao Ando)",
+        "icon": "🪨",
+        "prompt": "Tadao Ando style: board-formed exposed concrete, precise cubist volumes, single shaft of natural light, contemplative monastic spaces, water reflecting pool.",
+        "tags": [
+          "arch",
+          "brutalist"
+        ],
+        "default": false
+      },
+      {
+        "id": "min_japanese_sanaa",
+        "category": "Architecture",
+        "label": "Japanese Minimalist (SANAA)",
+        "labelEn": "Minimalist Japanese (SANAA)",
+        "icon": "⚪",
+        "prompt": "SANAA minimalist Japanese architecture: paper-thin white volumes, full-height glazing, ethereal lightness, blurred indoor-outdoor boundary, ghostly translucency.",
+        "tags": [
+          "arch",
+          "japanese"
+        ],
+        "default": false
+      },
+      {
+        "id": "scandi_big",
+        "category": "Architecture",
+        "label": "Scandinavian (BIG)",
+        "labelEn": "Scandinavian Modern (BIG)",
+        "icon": "🟦",
+        "prompt": "BIG Scandinavian modern: bold pragmatic geometries, stepped terraces, sustainable cross-laminated timber, playful but rational forms, hedonistic sustainability.",
+        "tags": [
+          "arch",
+          "scandi"
+        ],
+        "default": false
+      },
+      {
+        "id": "med_vernacular",
+        "category": "Architecture",
+        "label": "Mediterranean",
+        "labelEn": "Mediterranean Vernacular",
+        "icon": "🏛️",
+        "prompt": "Mediterranean vernacular: lime-washed stone walls, terracotta barrel-tile roofs, blue timber shutters, vine-covered pergolas, sun-bleached palette.",
+        "tags": [
+          "arch",
+          "mediterranean"
+        ],
+        "default": false
+      },
+      {
+        "id": "tropical_woha",
+        "category": "Architecture",
+        "label": "Tropical (WOHA)",
+        "labelEn": "Tropical Modernist (WOHA)",
+        "icon": "🌴",
+        "prompt": "WOHA tropical modernism: deep cantilevered shading, lush vertical greenery, perforated screens for cross-ventilation, sky terraces, biophilic high-rise.",
+        "tags": [
+          "arch",
+          "tropical",
+          "biophilic"
+        ],
+        "default": true
+      },
+      {
+        "id": "deconstructivist_gehry",
+        "category": "Architecture",
+        "label": "Deconstructivist (Gehry)",
+        "labelEn": "Deconstructivist (Gehry)",
+        "icon": "🎵",
+        "prompt": "Gehry deconstructivist: titanium scale-clad sculptural forms, fragmented colliding volumes, sweeping metallic curves, Bilbao monumentality.",
+        "tags": [
+          "arch",
+          "decon"
+        ],
+        "default": false
+      },
+      {
+        "id": "midcentury_desert",
+        "category": "Architecture",
+        "label": "Mid-Century Desert",
+        "labelEn": "Mid-Century Desert",
+        "icon": "🏜️",
+        "prompt": "Mid-century desert modernism in Palm Springs style: butterfly roofs, breeze block screens, post-and-beam glass walls, integrated pool, Neutra-Lautner desert glamour.",
+        "tags": [
+          "arch",
+          "desert",
+          "mcm"
+        ],
+        "default": false
+      },
+      {
+        "id": "vietnamese_traditional",
+        "category": "Architecture",
+        "label": "Traditional Vietnamese",
+        "labelEn": "Traditional Vietnamese",
+        "icon": "🏯",
+        "prompt": "Traditional Vietnamese architecture: nha ruong timber post-and-beam structure, glazed yin-yang clay tile roofs with curved eaves, lacquered red columns, courtyard with lotus pond.",
+        "tags": [
+          "arch",
+          "vietnam"
+        ],
+        "default": false
+      },
+      {
+        "id": "high_tech_rogers",
+        "category": "Architecture",
+        "label": "High-Tech (Rogers)",
+        "labelEn": "High-Tech (Rogers/Piano)",
+        "icon": "⚙️",
+        "prompt": "High-tech architecture in Richard Rogers style: exposed structural steel, colorful service ducts, glass curtain walls, machine-aesthetic expressiveness.",
+        "tags": [
+          "arch",
+          "hightech"
+        ],
+        "default": false
+      },
+      {
+        "id": "postmodern_venturi",
+        "category": "Architecture",
+        "label": "Postmodern (Venturi)",
+        "labelEn": "Postmodern (Venturi)",
+        "icon": "🎨",
+        "prompt": "Postmodern architecture: playful historical references, bold colors, decorative ornament, pediments and columns reinterpreted ironically, Memphis-adjacent wit.",
+        "tags": [
+          "arch",
+          "postmodern"
+        ],
+        "default": false
+      },
+      {
+        "id": "neofuturist_calatrava",
+        "category": "Architecture",
+        "label": "Neo-Futurist (Calatrava)",
+        "labelEn": "Neo-Futurist (Calatrava)",
+        "icon": "🦴",
+        "prompt": "Santiago Calatrava neo-futurist: white skeletal ribs, biological curves, cast-in-place concrete, kinetic-inspired geometry, museum-scale civic monumentality.",
+        "tags": [
+          "arch",
+          "futurist"
+        ],
+        "default": false
+      },
+      {
+        "id": "tropical_vernacular_vn",
+        "category": "Architecture",
+        "label": "Vietnamese Tropical Modern",
+        "labelEn": "Vietnamese Tropical Modern",
+        "icon": "🌿",
+        "prompt": "Vietnamese tropical modern (VTN Architects / Vo Trong Nghia influence): bamboo structural elements, green roofs, natural cross-ventilation, lush integrated planting, hot-humid climate response.",
+        "tags": [
+          "arch",
+          "vietnam",
+          "tropical"
+        ],
+        "default": false
+      },
+      {
+        "id": "passive_house",
+        "category": "Architecture",
+        "label": "Passive House",
+        "labelEn": "Passive House",
+        "icon": "🌡️",
+        "prompt": "Passive house sustainable architecture: super-insulated envelope, triple-glazed windows, heat-recovery ventilation, solar orientation, net-zero energy aesthetics.",
+        "tags": [
+          "arch",
+          "sustainable"
+        ],
+        "default": false
+      }
+    ],
+    "Environment": [
+      {
+        "id": "urban_dense",
+        "category": "Environment",
+        "label": "Urban Dense",
+        "labelEn": "Urban Dense",
+        "icon": "🏙️",
+        "prompt": "Dense urban context: surrounding glass and concrete towers, layered skyline, busy adjacent streets, vibrant metropolitan setting.",
+        "tags": [
+          "env",
+          "urban"
+        ],
+        "default": false
+      },
+      {
+        "id": "suburban_quiet",
+        "category": "Environment",
+        "label": "Suburban Quiet",
+        "labelEn": "Suburban Quiet",
+        "icon": "🏘️",
+        "prompt": "Quiet suburban context: tree-lined residential streets, manicured lawns, low-rise neighbors, calm domestic neighborhood.",
+        "tags": [
+          "env",
+          "suburban"
+        ],
+        "default": false
+      },
+      {
+        "id": "rural_countryside",
+        "category": "Environment",
+        "label": "Rural Countryside",
+        "labelEn": "Rural Countryside",
+        "icon": "🌾",
+        "prompt": "Rural countryside setting: rolling agricultural fields, scattered farmhouses, distant mountains, pastoral tranquility.",
+        "tags": [
+          "env",
+          "rural"
+        ],
+        "default": false
+      },
+      {
+        "id": "coastal",
+        "category": "Environment",
+        "label": "Coastal",
+        "labelEn": "Coastal",
+        "icon": "🌊",
+        "prompt": "Coastal setting: sandy beach foreground, ocean horizon, gentle surf, salty atmospheric haze, sea grass dunes.",
+        "tags": [
+          "env",
+          "coastal"
+        ],
+        "default": false
+      },
+      {
+        "id": "mountain_alpine",
+        "category": "Environment",
+        "label": "Mountain Alpine",
+        "labelEn": "Mountain Alpine",
+        "icon": "⛰️",
+        "prompt": "Alpine mountain setting: snow-capped peaks, dense conifer forests, dramatic valley, crisp thin air.",
+        "tags": [
+          "env",
+          "mountain"
+        ],
+        "default": false
+      },
+      {
+        "id": "desert",
+        "category": "Environment",
+        "label": "Desert",
+        "labelEn": "Desert",
+        "icon": "🏜️",
+        "prompt": "Desert setting: rolling sand dunes, sparse cacti, ochre palette, vast empty horizon, dry heat shimmer.",
+        "tags": [
+          "env",
+          "desert"
+        ],
+        "default": false
+      },
+      {
+        "id": "tropical_jungle",
+        "category": "Environment",
+        "label": "Tropical Jungle",
+        "labelEn": "Tropical Jungle",
+        "icon": "🌴",
+        "prompt": "Tropical jungle context: dense lush foliage, towering palms, hanging lianas, dappled humid light, exotic biodiversity.",
+        "tags": [
+          "env",
+          "jungle"
+        ],
+        "default": false
+      },
+      {
+        "id": "historic_district",
+        "category": "Environment",
+        "label": "Historic District",
+        "labelEn": "Historic District",
+        "icon": "🏛️",
+        "prompt": "Historic district context: heritage stone buildings, cobblestone streets, ornate cornices, preserved old-world character.",
+        "tags": [
+          "env",
+          "historic"
+        ],
+        "default": false
+      },
+      {
+        "id": "wet_pavement",
+        "category": "Environment",
+        "label": "Wet Pavement",
+        "labelEn": "Wet Pavement",
+        "icon": "💧",
+        "prompt": "Wet pavement foreground: glossy reflective sidewalks, mirror-like puddles doubling the architecture, fresh post-rain freshness.",
+        "tags": [
+          "env",
+          "wet"
+        ],
+        "default": false
+      },
+      {
+        "id": "snow_cover",
+        "category": "Environment",
+        "label": "Snow Cover",
+        "labelEn": "Snow Cover",
+        "icon": "❄️",
+        "prompt": "Snow-covered ground plane: pristine white blanket, footprints, snow caps on every horizontal surface, soft blue shadows.",
+        "tags": [
+          "env",
+          "snow"
+        ],
+        "default": false
+      },
+      {
+        "id": "autumn_leaves",
+        "category": "Environment",
+        "label": "Autumn Leaves",
+        "labelEn": "Autumn Leaves",
+        "icon": "🍂",
+        "prompt": "Autumn foliage: trees in fiery red, orange, gold, drifting fallen leaves, crisp October light, seasonal warmth.",
+        "tags": [
+          "env",
+          "autumn"
+        ],
+        "default": false
+      },
+      {
+        "id": "cherry_blossom",
+        "category": "Environment",
+        "label": "Cherry Blossom",
+        "labelEn": "Cherry Blossom",
+        "icon": "🌸",
+        "prompt": "Cherry blossom sakura context: trees in full pink bloom, drifting petals in air, soft spring sunlight, hanami festival mood.",
+        "tags": [
+          "env",
+          "spring"
+        ],
+        "default": false
+      },
+      {
+        "id": "vn_urban",
+        "category": "Environment",
+        "label": "Vietnamese Urban",
+        "labelEn": "Vietnamese Urban Street",
+        "icon": "🛵",
+        "prompt": "Vietnamese urban street context: scooter traffic, mixed shophouses, overhead cables, street vendors, vibrant Saigon/Hanoi city life.",
+        "tags": [
+          "env",
+          "vietnam",
+          "urban"
+        ],
+        "default": true
+      },
+      {
+        "id": "waterfront_river",
+        "category": "Environment",
+        "label": "Waterfront River",
+        "labelEn": "Waterfront River",
+        "icon": "🚤",
+        "prompt": "Waterfront river setting: calm river surface reflecting architecture, wooden docks, distant boats, humid waterfront atmosphere.",
+        "tags": [
+          "env",
+          "water"
+        ],
+        "default": false
+      }
+    ],
+    "Lighting": [
+      {
+        "id": "lit_soft_daylight",
+        "category": "Lighting",
+        "label": "Soft Daylight",
+        "labelEn": "Soft Daylight",
+        "icon": "🌤️",
+        "prompt": "Soft diffuse daylight through thin overcast: even skin tones, true colors, no harsh shadows, ideal for material accuracy.",
+        "tags": [
+          "light",
+          "soft"
+        ],
+        "default": false
+      },
+      {
+        "id": "lit_hard_sun",
+        "category": "Lighting",
+        "label": "Hard Direct Sun",
+        "labelEn": "Hard Direct Sun",
+        "icon": "☀️",
+        "prompt": "Hard direct sunlight: crisp shadow edges, high-contrast highlights, saturated colors, tropical midday feel.",
+        "tags": [
+          "light",
+          "hard"
+        ],
+        "default": false
+      },
+      {
+        "id": "lit_window_sidelight",
+        "category": "Lighting",
+        "label": "Window Sidelight",
+        "labelEn": "Window Side-Lit Interior",
+        "icon": "🪟",
+        "prompt": "Interior side-lit by large window: soft gradient from bright window wall to shadowed opposite side, Vermeer painterly quality.",
+        "tags": [
+          "light",
+          "window",
+          "interior"
+        ],
+        "default": true
+      },
+      {
+        "id": "lit_backlit_rim",
+        "category": "Lighting",
+        "label": "Backlit Rim",
+        "labelEn": "Backlit Rim Light",
+        "icon": "🌅",
+        "prompt": "Backlit rim lighting: subject silhouetted against bright sky, rim glow on edges, atmospheric haze picking up the beam.",
+        "tags": [
+          "light",
+          "rim",
+          "backlit"
+        ],
+        "default": false
+      },
+      {
+        "id": "lit_warm_interior",
+        "category": "Lighting",
+        "label": "Warm Interior Glow",
+        "labelEn": "Warm Interior Glow",
+        "icon": "🕯️",
+        "prompt": "Warm 2700K interior glow: incandescent-tone lamps, cozy amber ambiance, reading-nook intimacy.",
+        "tags": [
+          "light",
+          "warm",
+          "interior"
+        ],
+        "default": false
+      },
+      {
+        "id": "lit_neon_night",
+        "category": "Lighting",
+        "label": "Neon Night",
+        "labelEn": "Neon Night",
+        "icon": "🌃",
+        "prompt": "Neon-lit night scene: magenta and cyan neon signs casting colored spill, wet street reflections, Blade Runner energy.",
+        "tags": [
+          "light",
+          "neon",
+          "night"
+        ],
+        "default": false
+      },
+      {
+        "id": "lit_candlelight",
+        "category": "Lighting",
+        "label": "Candlelight",
+        "labelEn": "Candlelight",
+        "icon": "🕯",
+        "prompt": "Pure candlelight scene: 1800K flicker warmth, soft highlights only on facets close to flame, deep shadows elsewhere.",
+        "tags": [
+          "light",
+          "candle",
+          "warm"
+        ],
+        "default": false
+      },
+      {
+        "id": "lit_studio_softbox",
+        "category": "Lighting",
+        "label": "Studio Softbox",
+        "labelEn": "Studio Softbox",
+        "icon": "💡",
+        "prompt": "Studio softbox lighting: large broad soft source, minimal shadow density, magazine product-shot clarity.",
+        "tags": [
+          "light",
+          "studio"
+        ],
+        "default": false
+      },
+      {
+        "id": "lit_god_rays",
+        "category": "Lighting",
+        "label": "God Rays",
+        "labelEn": "God Rays",
+        "icon": "✨",
+        "prompt": "Visible god rays / volumetric shafts of light cutting through dust and haze, cathedral light columns, spiritual drama.",
+        "tags": [
+          "light",
+          "volumetric"
+        ],
+        "default": false
+      },
+      {
+        "id": "lit_moonlight",
+        "category": "Lighting",
+        "label": "Moonlight",
+        "labelEn": "Moonlight",
+        "icon": "🌙",
+        "prompt": "Cool moonlight: 4100K silver-blue cast, long soft shadows, low ambient, night architectural silver wash.",
+        "tags": [
+          "light",
+          "moon",
+          "night"
+        ],
+        "default": false
+      },
+      {
+        "id": "lit_mixed_warm_cool",
+        "category": "Lighting",
+        "label": "Mixed Warm+Cool",
+        "labelEn": "Mixed Warm & Cool",
+        "icon": "🎨",
+        "prompt": "Mixed color temperature: warm 2700K interior against cool 6500K exterior dusk, classic magic-hour real-estate contrast.",
+        "tags": [
+          "light",
+          "mixed",
+          "hero"
+        ],
+        "default": false
+      },
+      {
+        "id": "lit_up_facade",
+        "category": "Lighting",
+        "label": "Uplit Facade",
+        "labelEn": "Uplit Facade",
+        "icon": "🔦",
+        "prompt": "Uplit facade architectural lighting: ground-mounted uplights grazing textured walls, LED accent lines, nighttime curb appeal.",
+        "tags": [
+          "light",
+          "facade",
+          "night"
+        ],
+        "default": false
+      }
+    ],
+    "Materials": [
+      {
+        "id": "mat_travertine",
+        "category": "Materials",
+        "label": "Travertine",
+        "labelEn": "Travertine Stone",
+        "icon": "🪨",
+        "prompt": "Travertine stone surfaces: warm cream tones, characteristic pitted texture, honed matte finish, luxurious spa-like weight.",
+        "tags": [
+          "material",
+          "stone"
+        ],
+        "default": false
+      },
+      {
+        "id": "mat_oak_timber",
+        "category": "Materials",
+        "label": "Oak Timber",
+        "labelEn": "Oak Timber",
+        "icon": "🪵",
+        "prompt": "European oak timber: visible grain, warm honey tone, natural oil finish, tactile wood warmth.",
+        "tags": [
+          "material",
+          "wood"
+        ],
+        "default": true
+      },
+      {
+        "id": "mat_brushed_brass",
+        "category": "Materials",
+        "label": "Brushed Brass",
+        "labelEn": "Brushed Brass",
+        "icon": "🟡",
+        "prompt": "Brushed brass metalwork: satin warm-gold finish, subtle directional grain, luxurious accent hardware.",
+        "tags": [
+          "material",
+          "metal"
+        ],
+        "default": false
+      },
+      {
+        "id": "mat_black_steel",
+        "category": "Materials",
+        "label": "Blackened Steel",
+        "labelEn": "Blackened Steel",
+        "icon": "⬛",
+        "prompt": "Blackened hot-rolled steel: matte carbon-black finish, subtle patina variation, industrial refined detail.",
+        "tags": [
+          "material",
+          "metal"
+        ],
+        "default": false
+      },
+      {
+        "id": "mat_concrete_board",
+        "category": "Materials",
+        "label": "Board-Formed Concrete",
+        "labelEn": "Board-Formed Concrete",
+        "icon": "🧱",
+        "prompt": "Board-formed exposed concrete: visible timber plank imprint, cold grey tone, tie-hole pattern, Ando-style craft.",
+        "tags": [
+          "material",
+          "concrete"
+        ],
+        "default": false
+      },
+      {
+        "id": "mat_marble_carrara",
+        "category": "Materials",
+        "label": "Carrara Marble",
+        "labelEn": "Carrara Marble",
+        "icon": "⚪",
+        "prompt": "Carrara white marble with grey veining: polished mirror finish, elegant cool luxury.",
+        "tags": [
+          "material",
+          "stone",
+          "luxury"
+        ],
+        "default": false
+      },
+      {
+        "id": "mat_terrazzo",
+        "category": "Materials",
+        "label": "Terrazzo",
+        "labelEn": "Terrazzo",
+        "icon": "🟢",
+        "prompt": "Terrazzo flooring: cement base with colored stone chips, polished surface, playful scattered composition.",
+        "tags": [
+          "material",
+          "floor"
+        ],
+        "default": false
+      },
+      {
+        "id": "mat_rammed_earth",
+        "category": "Materials",
+        "label": "Rammed Earth",
+        "labelEn": "Rammed Earth",
+        "icon": "🟫",
+        "prompt": "Rammed earth walls: horizontal layered tonal bands, natural ochre and terracotta hues, sustainable tactile honesty.",
+        "tags": [
+          "material",
+          "earth",
+          "sustainable"
+        ],
+        "default": false
+      },
+      {
+        "id": "mat_glass_curtain",
+        "category": "Materials",
+        "label": "Glass Curtain Wall",
+        "labelEn": "Glass Curtain Wall",
+        "icon": "🏢",
+        "prompt": "Structural glass curtain wall: minimally framed, sky reflections, crystalline transparency, high-performance low-e coating.",
+        "tags": [
+          "material",
+          "glass"
+        ],
+        "default": false
+      },
+      {
+        "id": "mat_bamboo",
+        "category": "Materials",
+        "label": "Bamboo",
+        "labelEn": "Bamboo",
+        "icon": "🎋",
+        "prompt": "Bamboo structural elements: natural blonde tone, segmented nodes, woven screens, tropical sustainable warmth.",
+        "tags": [
+          "material",
+          "tropical",
+          "sustainable"
+        ],
+        "default": false
+      },
+      {
+        "id": "mat_linen_textile",
+        "category": "Materials",
+        "label": "Linen Textile",
+        "labelEn": "Linen Textile",
+        "icon": "🧵",
+        "prompt": "Natural linen textile upholstery: slubby undyed weave, soft drape, earthy oatmeal tone.",
+        "tags": [
+          "material",
+          "textile"
+        ],
+        "default": false
+      },
+      {
+        "id": "mat_cortenstell",
+        "category": "Materials",
+        "label": "Corten Steel",
+        "labelEn": "Corten Steel",
+        "icon": "🟤",
+        "prompt": "Corten weathering steel: protective orange-brown oxidized patina, sculptural facade cladding, landscape weathered charm.",
+        "tags": [
+          "material",
+          "metal"
+        ],
+        "default": false
+      }
+    ],
+    "Photographer": [
+      {
+        "id": "photo_iwan_baan",
+        "category": "Photographer",
+        "label": "Iwan Baan",
+        "labelEn": "Iwan Baan",
+        "icon": "📸",
+        "prompt": "In the style of Iwan Baan architectural photography: contextual wide shots with people living the building, genuine narrative, warm natural light.",
+        "tags": [
+          "photographer",
+          "contextual"
+        ],
+        "default": false
+      },
+      {
+        "id": "photo_helene_binet",
+        "category": "Photographer",
+        "label": "Hélène Binet",
+        "labelEn": "Hélène Binet",
+        "icon": "◼️",
+        "prompt": "In the style of Hélène Binet: poetic black-and-white, luminous geometry, shadow as subject, analog silver gelatin feel.",
+        "tags": [
+          "photographer",
+          "bw",
+          "fineart"
+        ],
+        "default": false
+      },
+      {
+        "id": "photo_candida_hofer",
+        "category": "Photographer",
+        "label": "Candida Höfer",
+        "labelEn": "Candida Höfer",
+        "icon": "🏛",
+        "prompt": "In the style of Candida Höfer: perfectly symmetrical grand interiors, empty public spaces, flawless exposure, large-format precision.",
+        "tags": [
+          "photographer",
+          "symmetry",
+          "interior"
+        ],
+        "default": false
+      },
+      {
+        "id": "photo_julius_shulman",
+        "category": "Photographer",
+        "label": "Julius Shulman",
+        "labelEn": "Julius Shulman",
+        "icon": "🏊",
+        "prompt": "In the style of Julius Shulman mid-century archviz: glamorous dusk poolside, glowing modernist homes, perfect Case Study composition.",
+        "tags": [
+          "photographer",
+          "mcm",
+          "twilight"
+        ],
+        "default": false
+      },
+      {
+        "id": "photo_hiroshi_sugimoto",
+        "category": "Photographer",
+        "label": "Hiroshi Sugimoto",
+        "labelEn": "Hiroshi Sugimoto",
+        "icon": "🌫",
+        "prompt": "In the style of Hiroshi Sugimoto: deliberately out-of-focus long-exposure architecture, ghostly minimal form, meditative timelessness.",
+        "tags": [
+          "photographer",
+          "minimal",
+          "fineart"
+        ],
+        "default": false
+      },
+      {
+        "id": "photo_andreas_gursky",
+        "category": "Photographer",
+        "label": "Andreas Gursky",
+        "labelEn": "Andreas Gursky",
+        "icon": "🏙",
+        "prompt": "In the style of Andreas Gursky: monumental large-format tableau, repeated pattern hypnosis, hyperreal detail, elevated viewpoint.",
+        "tags": [
+          "photographer",
+          "large",
+          "pattern"
+        ],
+        "default": false
+      },
+      {
+        "id": "photo_fernando_guerra",
+        "category": "Photographer",
+        "label": "Fernando Guerra",
+        "labelEn": "Fernando Guerra",
+        "icon": "🌴",
+        "prompt": "In the style of Fernando Guerra: lived-in candid archviz, people naturally inhabiting space, warm lifestyle storytelling.",
+        "tags": [
+          "photographer",
+          "lifestyle"
+        ],
+        "default": true
+      },
+      {
+        "id": "photo_hiroyuki_oki",
+        "category": "Photographer",
+        "label": "Hiroyuki Oki",
+        "labelEn": "Hiroyuki Oki",
+        "icon": "🏯",
+        "prompt": "In the style of Hiroyuki Oki (Vietnam archviz photographer): lush tropical context, bamboo-filtered light, intimate domestic scale, VTN/a21 lineage.",
+        "tags": [
+          "photographer",
+          "vietnam",
+          "tropical"
+        ],
+        "default": false
+      },
+      {
+        "id": "photo_simon_menges",
+        "category": "Photographer",
+        "label": "Simon Menges",
+        "labelEn": "Simon Menges",
+        "icon": "🌆",
+        "prompt": "In the style of Simon Menges: clean contextual documentation, balanced exposures, European rational archviz.",
+        "tags": [
+          "photographer",
+          "documentary"
+        ],
+        "default": false
+      },
+      {
+        "id": "photo_tim_griffith",
+        "category": "Photographer",
+        "label": "Tim Griffith",
+        "labelEn": "Tim Griffith",
+        "icon": "✨",
+        "prompt": "In the style of Tim Griffith: luminous polished commercial archviz, crisp materials, studio-grade lighting control.",
+        "tags": [
+          "photographer",
+          "commercial"
+        ],
+        "default": false
+      }
+    ],
+    "RealEstate": [
+      {
+        "id": "re_luxury_penthouse",
+        "category": "RealEstate",
+        "label": "Luxury Penthouse",
+        "labelEn": "Luxury Penthouse Listing",
+        "icon": "🏙️",
+        "prompt": "Luxury penthouse real-estate listing hero: floor-to-ceiling city view, curated statement furniture, twilight skyline, aspirational $10M+ marketing shot.",
+        "tags": [
+          "realestate",
+          "luxury"
+        ],
+        "default": false
+      },
+      {
+        "id": "re_family_villa",
+        "category": "RealEstate",
+        "label": "Family Villa",
+        "labelEn": "Family Villa Listing",
+        "icon": "🏡",
+        "prompt": "Family villa listing shot: welcoming facade, lush landscaped garden, lifestyle-staged interior, warm inviting tone.",
+        "tags": [
+          "realestate",
+          "family"
+        ],
+        "default": true
+      },
+      {
+        "id": "re_condo_apartment",
+        "category": "RealEstate",
+        "label": "Condo Apartment",
+        "labelEn": "Condo Apartment Listing",
+        "icon": "🏢",
+        "prompt": "Modern condo apartment listing: clean neutral staging, maximized apparent space (wide 16mm interior), natural daylight, approachable price point.",
+        "tags": [
+          "realestate",
+          "condo"
+        ],
+        "default": false
+      },
+      {
+        "id": "re_shophouse_vn",
+        "category": "RealEstate",
+        "label": "Vietnamese Shophouse",
+        "labelEn": "Vietnamese Shophouse",
+        "icon": "🏪",
+        "prompt": "Vietnamese nha-pho shophouse listing: narrow vertical facade, retail-level commerce with upstairs residence, typical Saigon streetscape context.",
+        "tags": [
+          "realestate",
+          "vietnam"
+        ],
+        "default": false
+      },
+      {
+        "id": "re_townhouse",
+        "category": "RealEstate",
+        "label": "Urban Townhouse",
+        "labelEn": "Urban Townhouse",
+        "icon": "🏘️",
+        "prompt": "Urban townhouse listing: attached row-house facade, bright updated interior, compact efficient layout, young-family appeal.",
+        "tags": [
+          "realestate",
+          "townhouse"
+        ],
+        "default": false
+      },
+      {
+        "id": "re_beachfront",
+        "category": "RealEstate",
+        "label": "Beachfront Villa",
+        "labelEn": "Beachfront Villa",
+        "icon": "🏖️",
+        "prompt": "Beachfront luxury villa: infinity pool merging into ocean, indoor-outdoor living, palm-fringed sunset, resort-grade staging.",
+        "tags": [
+          "realestate",
+          "beach",
+          "luxury"
+        ],
+        "default": false
+      },
+      {
+        "id": "re_mountain_cabin",
+        "category": "RealEstate",
+        "label": "Mountain Cabin",
+        "labelEn": "Mountain Cabin",
+        "icon": "🏕️",
+        "prompt": "Mountain cabin retreat: rustic timber and stone exterior, cozy interior with fireplace, snow-capped backdrop, Airbnb-getaway appeal.",
+        "tags": [
+          "realestate",
+          "mountain"
+        ],
+        "default": false
+      },
+      {
+        "id": "re_office_highrise",
+        "category": "RealEstate",
+        "label": "Office High-Rise",
+        "labelEn": "Office High-Rise",
+        "icon": "🏙",
+        "prompt": "Class-A office high-rise: glass tower with landscaped plaza, corporate tenant marketing, confident commercial presence.",
+        "tags": [
+          "realestate",
+          "office",
+          "commercial"
+        ],
+        "default": false
+      },
+      {
+        "id": "re_retail_mall",
+        "category": "RealEstate",
+        "label": "Retail Mall",
+        "labelEn": "Retail Mall",
+        "icon": "🛒",
+        "prompt": "Modern retail mall exterior/interior: shopper flow, branded anchor tenants, bright LED-lit atrium, leasing-brochure aesthetic.",
+        "tags": [
+          "realestate",
+          "retail",
+          "commercial"
+        ],
+        "default": false
+      },
+      {
+        "id": "re_hotel_lobby",
+        "category": "RealEstate",
+        "label": "Hotel Lobby",
+        "labelEn": "Boutique Hotel Lobby",
+        "icon": "🛎️",
+        "prompt": "Boutique hotel lobby marketing shot: statement pendant chandelier, curated seating clusters, warm wood and brass, welcoming check-in moment.",
+        "tags": [
+          "realestate",
+          "hospitality"
+        ],
+        "default": false
+      }
+    ]
+  }
+}

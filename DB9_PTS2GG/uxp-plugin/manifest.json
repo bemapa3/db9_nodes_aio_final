@@ -1,0 +1,114 @@
+{
+  "id": "com.i8studio.db9.gemini",
+  "name": "DB9 Multi-Provider Auto",
+  "version": "0.4.7.1",
+  "main": "index.html",
+  "manifestVersion": 5,
+  "host": [
+    {
+      "app": "PS",
+      "minVersion": "24.0.0"
+    }
+  ],
+  "entrypoints": [
+    {
+      "type": "panel",
+      "id": "main",
+      "label": {
+        "default": "DB9 Multi-Provider"
+      },
+      "minimumSize": {
+        "width": 280,
+        "height": 360
+      },
+      "maximumSize": {
+        "width": 1600,
+        "height": 1400
+      },
+      "preferredDockedSize": {
+        "width": 420,
+        "height": 680
+      },
+      "preferredFloatingSize": {
+        "width": 960,
+        "height": 720
+      },
+      "icons": [
+        {
+          "width": 23,
+          "height": 23,
+          "path": "icons/dark.png",
+          "scale": [
+            1,
+            2
+          ],
+          "theme": [
+            "darkest",
+            "dark"
+          ],
+          "species": [
+            "chrome"
+          ]
+        },
+        {
+          "width": 23,
+          "height": 23,
+          "path": "icons/light.png",
+          "scale": [
+            1,
+            2
+          ],
+          "theme": [
+            "lightest",
+            "light"
+          ],
+          "species": [
+            "chrome"
+          ]
+        }
+      ]
+    }
+  ],
+  "icons": [
+    {
+      "width": 48,
+      "height": 48,
+      "path": "icons/plugin.png",
+      "scale": [
+        1,
+        2
+      ],
+      "theme": [
+        "darkest",
+        "dark",
+        "lightest",
+        "light"
+      ],
+      "species": [
+        "pluginList"
+      ]
+    }
+  ],
+  "requiredPermissions": {
+    "network": {
+      "domains": [
+        "http://127.0.0.1:8765",
+        "ws://127.0.0.1:8765",
+        "http://localhost:8765",
+        "ws://localhost:8765",
+        "http://127.0.0.1:*",
+        "ws://127.0.0.1:*",
+        "http://localhost:*",
+        "ws://localhost:*"
+      ]
+    },
+    "clipboard": "read",
+    "localFileSystem": "request",
+    "launchProcess": {
+      "schemes": [
+        "http",
+        "https"
+      ]
+    }
+  }
+}

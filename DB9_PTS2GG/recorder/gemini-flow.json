@@ -1,0 +1,1186 @@
+{
+    "title": "Recording 24/4/2026 at 01:40:32",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 742,
+            "height": 1243,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "https://gemini.google.com/app/08b52a11b0a86a2f",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "https://gemini.google.com/app/08b52a11b0a86a2f",
+                    "title": "Image Generation Unavailable Due to High Demand - Google Gemini"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "#eff13714aa97dd2f"
+                ],
+                [
+                    "xpath///*[@id=\"eff13714aa97dd2f\"]"
+                ],
+                [
+                    "pierce/#eff13714aa97dd2f"
+                ]
+            ],
+            "offsetY": 556,
+            "offsetX": 360
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "mat-icon:nth-of-type(2)"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/toolbox-drawer/div/div/button[2]/mat-icon[2]"
+                ],
+                [
+                    "pierce/mat-icon:nth-of-type(2)"
+                ]
+            ],
+            "offsetY": 6,
+            "offsetX": 6.046875
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Tools",
+                    "aria/[role=\"image\"]"
+                ],
+                [
+                    "toolbox-drawer mat-icon"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/toolbox-drawer/div/div/button/mat-icon"
+                ],
+                [
+                    "pierce/toolbox-drawer mat-icon"
+                ]
+            ],
+            "offsetY": 6,
+            "offsetX": 18
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "toolbox-drawer-item:nth-of-type(1) div > div > div"
+                ],
+                [
+                    "xpath///*[@id=\"toolbox-drawer-menu\"]/toolbox-drawer-item[1]/button/span/span/div/div/div"
+                ],
+                [
+                    "pierce/toolbox-drawer-item:nth-of-type(1) div > div > div"
+                ],
+                [
+                    "text/Create image"
+                ]
+            ],
+            "offsetY": 16,
+            "offsetX": 57
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Open upload file menu",
+                    "aria/[role=\"image\"]"
+                ],
+                [
+                    "div.leading-actions-wrapper > div mat-icon"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/uploader/div/div/button/mat-icon"
+                ],
+                [
+                    "pierce/div.leading-actions-wrapper > div mat-icon"
+                ]
+            ],
+            "offsetY": 11,
+            "offsetX": 11
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "[data-test-id='uploader-images-files-button-advanced'] span > div div"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"local-images-files-uploader-button\"]/span/span/div/span/div"
+                ],
+                [
+                    "pierce/[data-test-id='uploader-images-files-button-advanced'] span > div div"
+                ],
+                [
+                    "text/Upload files"
+                ]
+            ],
+            "offsetY": 15,
+            "offsetX": 37
+        },
+        {
+            "type": "change",
+            "value": "C:\\fakepath\\Gemini_Generated_Image_y7aun3y7aun3y7au.jpg",
+            "selectors": [
+                [
+                    "input"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"uploader-images-files-button-advanced\"]/div/input"
+                ],
+                [
+                    "pierce/input"
+                ],
+                [
+                    "text/C:\\fakepath\\Gemini_Generated_Image_y7aun3y7aun3y7au.jpg"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini",
+                    "aria/[role=\"paragraph\"]"
+                ],
+                [
+                    "fieldset p"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]/p"
+                ],
+                [
+                    "pierce/fieldset p"
+                ]
+            ],
+            "offsetY": 19,
+            "offsetX": 86
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "DD",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "d",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "D",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Backspace"
+        },
+        {
+            "type": "keyUp",
+            "key": "Backspace",
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Control"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyUp",
+            "key": "Control",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "D",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "ArrowLeft"
+        },
+        {
+            "type": "keyUp",
+            "key": "ArrowLeft",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đ",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "d",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đo",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "ArrowLeft"
+        },
+        {
+            "type": "keyUp",
+            "key": "ArrowLeft",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Backspace"
+        },
+        {
+            "type": "keyUp",
+            "key": "Backspace",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đô",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "o",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đôi",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "ArrowLeft"
+        },
+        {
+            "type": "keyUp",
+            "key": "ArrowLeft",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Backspace"
+        },
+        {
+            "type": "keyUp",
+            "key": "Backspace",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổ",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "r",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi mu",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "ArrowLeft"
+        },
+        {
+            "type": "keyUp",
+            "key": "ArrowLeft",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Backspace"
+        },
+        {
+            "type": "keyUp",
+            "key": "Backspace",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi mũ",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "x",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi mũ con meo",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "ArrowLeft"
+        },
+        {
+            "type": "keyUp",
+            "key": "ArrowLeft",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Backspace"
+        },
+        {
+            "type": "keyUp",
+            "key": "Backspace",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi mũ con mè",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi mũ con mèo",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "f",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi mũ con mèo thanh",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "ArrowLeft"
+        },
+        {
+            "type": "keyUp",
+            "key": "ArrowLeft",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Backspace"
+        },
+        {
+            "type": "keyUp",
+            "key": "Backspace",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi mũ con mèo thà",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi mũ con mèo thàn",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi mũ con mèo thành",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "f",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi mũ con mèo thành mau",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "ArrowLeft"
+        },
+        {
+            "type": "keyUp",
+            "key": "ArrowLeft",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Backspace"
+        },
+        {
+            "type": "keyUp",
+            "key": "Backspace",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi mũ con mèo thành mà",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi mũ con mèo thành màu",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "f",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi mũ con mèo thành màu vang",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "ArrowLeft"
+        },
+        {
+            "type": "keyUp",
+            "key": "ArrowLeft",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Backspace"
+        },
+        {
+            "type": "keyUp",
+            "key": "Backspace",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi mũ con mèo thành màu và",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi mũ con mèo thành màu vàn",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "Đổi mũ con mèo thành màu vàng",
+            "selectors": [
+                [
+                    "aria/Enter a prompt for Gemini"
+                ],
+                [
+                    "div.ql-editor"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[2]/div/div/rich-textarea/div[1]"
+                ],
+                [
+                    "pierce/div.ql-editor"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "f",
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Send message",
+                    "aria/[role=\"image\"]"
+                ],
+                [
+                    "div.trailing-actions-wrapper div.mat-mdc-tooltip-trigger mat-icon"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"bard-sidenav-container\"]/bard-sidenav-content/div[2]/div/div/chat-window/div/input-container/fieldset/input-area-v2/div/div/div[4]/div[2]/div[2]/button/mat-icon"
+                ],
+                [
+                    "pierce/div.trailing-actions-wrapper div.mat-mdc-tooltip-trigger mat-icon"
+                ]
+            ],
+            "offsetY": 13,
+            "offsetX": 15
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Open mode picker",
+                    "aria/[role=\"image\"]"
+                ],
+                [
+                    "div.model-picker-container mat-icon"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"logo-pill-label-container\"]/mat-icon"
+                ],
+                [
+                    "pierce/div.model-picker-container mat-icon"
+                ]
+            ],
+            "offsetY": 6,
+            "offsetX": 9
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Open mode picker",
+                    "aria/[role=\"image\"]"
+                ],
+                [
+                    "div.model-picker-container mat-icon"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"logo-pill-label-container\"]/mat-icon"
+                ],
+                [
+                    "pierce/div.model-picker-container mat-icon"
+                ]
+            ],
+            "offsetY": 6,
+            "offsetX": 9
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "#fd4fad52b3601f9a download-generated-image-button mat-icon"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"download-generated-image-button\"]/span[2]/div/mat-icon"
+                ],
+                [
+                    "pierce/#fd4fad52b3601f9a download-generated-image-button mat-icon"
+                ]
+            ],
+            "offsetY": 8.8125,
+            "offsetX": 15
+        }
+    ]
+}

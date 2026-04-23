@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id               String       @id @default(cuid())
+  companyName      String
+  legalName        String?
+  companyType      String       @default("company")
+  countryCode      String       @default("VN")
+  defaultCurrency  String       @default("VND")
+  paymentTermsDays Int          @default(30)
+  projects         Project[]
+  engagements      Engagement[]
+  createdAt        DateTime     @default(now())
+}
+
+model Project {
+  id            String   @id @default(cuid())
+  companyId     String
+  name          String
+  priority      String   @default("medium")
+  status        String   @default("active")
+  startDate     DateTime
+  endDate       DateTime?
+  contractValue Float    @default(0)
+  billingMode   String?  @default("extra_project")
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+}
+
+model Engagement {
+  id              String   @id @default(cuid())
+  companyId       String
+  engagementName  String
+  status          String   @default("active")
+  fixedAmount     Float    @default(0)
+  workloadPercent Float    @default(0)
+  paymentCycle    String   @default("monthly")
+  startDate       DateTime
+  endDate         DateTime?
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  sourceType    String
+  sourceId      String
+  gross         Float    @default(0)
+  withheldTax   Float    @default(0)
+  userTax       Float    @default(0)
+  companyTax    Float    @default(0)
+  net           Float    @default(0)
+  date          DateTime
+  createdAt     DateTime @default(now())
+}
+
+model ScheduleSuggestion {
+  id                 String   @id @default(cuid())
+  projectId          String
+  reason             String
+  currentStartDate   DateTime
+  currentEndDate     DateTime
+  suggestedStartDate DateTime
+  suggestedEndDate   DateTime
+  confidenceScore    Float    @default(80)
+  impactScore        Float    @default(70)
+  status             String   @default("proposed")
+  createdAt          DateTime @default(now())
+}
+
+model BackupTarget {
+  id          String   @id @default(cuid())
+  targetName  String
+  targetType  String
+  rootPath    String
+  isDefault   Boolean  @default(false)
+  isEnabled   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  policies    BackupPolicy[]
+  runs        BackupRun[]
+}
+
+model BackupPolicy {
+  id                    String   @id @default(cuid())
+  backupTargetId        String
+  policyName            String
+  frequency             String
+  keepLastN             Int      @default(12)
+  includeDocuments      Boolean  @default(true)
+  includeFeedbackImages Boolean  @default(true)
+  isEnabled             Boolean  @default(true)
+  backupTarget          BackupTarget @relation(fields: [backupTargetId], references: [id], onDelete: Cascade)
+  createdAt             DateTime @default(now())
+}
+
+model BackupRun {
+  id             String   @id @default(cuid())
+  backupTargetId String
+  runType        String
+  status         String
+  backupLabel    String?
+  archivePath    String?
+  errorMessage   String?
+  backupTarget   BackupTarget @relation(fields: [backupTargetId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+}

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>DB9 Multi-Provider</title>
+  <style>
+    :root {
+      --db9-bg: #0f141a;
+      --db9-bg-2: #151d26;
+      --db9-panel: #1b2530;
+      --db9-panel-2: #22303d;
+      --db9-surface: #121922;
+      --db9-border: #314150;
+      --db9-border-strong: #43607a;
+      --db9-text: #edf3fb;
+      --db9-muted: #93a7bc;
+      --db9-accent: #4da3ff;
+      --db9-accent-2: #79d7ff;
+      --db9-ok: #37c38f;
+      --db9-danger: #ff6b6b;
+      --db9-shadow: 0 14px 32px rgba(0, 0, 0, 0.24);
+      --db9-radius: 10px;
+      --db9-radius-sm: 6px;
+    }
+    /* ===== DB9 v0.4.7 dark layout ===== */
+    html, body {
+      height: 100%;
+      margin: 0;
+      min-width: 280px;
+      box-sizing: border-box;
+    }
+    *, *::before, *::after { box-sizing: inherit; }
+    body {
+      padding: 12px;
+      padding-bottom: 48px;
+      font-family: "Segoe UI", "Adobe Clean", system-ui, sans-serif;
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--db9-text);
+      background:
+        radial-gradient(circle at top left, rgba(77, 163, 255, 0.14), transparent 34%),
+        linear-gradient(180deg, var(--db9-bg-2), var(--db9-bg));
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    button {
+      font-family: inherit;
+      font-size: 11px;
+      color: var(--db9-text);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      border: 1px solid var(--db9-border);
+      border-radius: var(--db9-radius-sm);
+      padding: 7px 11px;
+      cursor: pointer;
+      min-height: 32px;
+      transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+    }
+    button:hover:not(:disabled) {
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+      border-color: var(--db9-border-strong);
+      transform: translateY(-1px);
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    textarea {
+      width: 100%;
+      min-height: 60px;
+      resize: vertical;
+      background: rgba(12, 18, 25, 0.9);
+      color: var(--db9-text);
+      border: 1px solid var(--db9-border);
+      border-radius: var(--db9-radius-sm);
+      padding: 8px 9px;
+      font-family: inherit;
+      font-size: 12px;
+    }
+    textarea:focus { outline: none; border-color: var(--db9-accent); box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.16); }
+    input[type="radio"] { accent-color: var(--db9-accent); vertical-align: middle; }
+    label { font-size: 11px; color: #d7e2ef; cursor: pointer; padding: 2px 6px; }
+    .db9-radio-row { display: flex; flex-wrap: wrap; gap: 4px; }
+    details summary::-webkit-details-marker { color: var(--db9-muted); }
+    /* Header */
+    .db9-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      border: 1px solid var(--db9-border);
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(34, 48, 61, 0.96), rgba(20, 29, 37, 0.96));
+      box-shadow: var(--db9-shadow);
+    }
+    #db9-title { font-size: 0; font-weight: 700; letter-spacing: 0.3px; }
+    #db9-title::before {
+      content: "DB9 Multi-Provider";
+      font-size: 14px;
+      color: var(--db9-text);
+    }
+    .db9-header-status { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+    .db9-dot {
+      display: inline-block;
+      width: 10px; height: 10px; border-radius: 50%;
+      margin: 0 4px;
+      vertical-align: middle;
+      background: #5f7388;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.06);
+    }
+    .db9-dot-off { background: #5f7388; }
+    .db9-dot-on  { background: var(--db9-ok); }
+    .db9-dot-busy{ background: var(--db9-accent); }
+    .db9-dot-err { background: var(--db9-danger); }
+    .db9-dot-label { font-size: 10px; color: var(--db9-muted); margin-right: 4px; }
+    #btn-settings {
+      background: transparent;
+      border: 1px solid var(--db9-border);
+      color: var(--db9-text);
+      border-radius: 999px;
+      padding: 4px 10px;
+      cursor: pointer;
+    }
+
+    /* Section card */
+    .db9-section {
+      background: linear-gradient(180deg, rgba(29, 40, 51, 0.96), rgba(22, 31, 40, 0.98));
+      border: 1px solid var(--db9-border);
+      border-radius: var(--db9-radius);
+      padding: 12px;
+      margin: 0 0 10px;
+      box-shadow: var(--db9-shadow);
+    }
+    .db9-section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--db9-text);
+      letter-spacing: 0.6px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    /* Inputs */
+    input[type="text"], textarea, select {
+      background: rgba(12, 18, 25, 0.9);
+      border: 1px solid var(--db9-border);
+      color: var(--db9-text);
+      padding: 8px 9px;
+      border-radius: var(--db9-radius-sm);
+      width: 100%;
+      box-sizing: border-box;
+      font-family: inherit;
+      font-size: 12px;
+    }
+    textarea { min-height: 56px; resize: vertical; }
+    input[type="text"]:focus, textarea:focus {
+      outline: none; border-color: var(--db9-accent); box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.16);
+    }
+
+    /* Buttons */
+    button {
+      background: #383838;
+      border: 1px solid #4d4d4d;
+      color: #e6e6e6;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    button:hover { background: #454545; }
+    button[disabled] { opacity: 0.5; cursor: not-allowed; }
+    .db9-btn-primary {
+      background: linear-gradient(135deg, var(--db9-accent), var(--db9-accent-2));
+      color: white;
+      border: 0;
+      height: 46px;
+      width: 100%;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.4px;
+      box-shadow: 0 12px 24px rgba(77, 163, 255, 0.28);
+    }
+    .db9-btn-primary:hover { filter: brightness(1.08); }
+
+    /* Radios */
+    .db9-radio-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .db9-radio-row label { font-size: 12px; color: #d0d0d0; cursor: pointer; }
+    .db9-radio-row input { vertical-align: middle; margin-right: 3px; }
+
+    /* Group dropdowns (for presets/negatives) */
+    .db9-group {
+      border: 1px solid #3d3d3d;
+      border-radius: 3px;
+      margin-bottom: 4px;
+      background: #1a1a1a;
+    }
+    .db9-group-header {
+      padding: 5px 8px;
+      cursor: pointer;
+      font-size: 11px;
+      display: flex; justify-content: space-between; align-items: center;
+      user-select: none;
+      color: #c8c8c8;
+    }
+    .db9-group-header:hover { background: #232323; }
+    .db9-group-body {
+      display: none;
+      padding: 4px 8px 6px;
+      border-top: 1px solid #3d3d3d;
+    }
+    .db9-group.open .db9-group-body { display: block; }
+    .db9-chk-row {
+      display: flex; align-items: center; gap: 6px;
+      padding: 3px 0; font-size: 11px;
+      cursor: pointer;
+    }
+    .db9-chk-row input { margin: 0; }
+    .db9-chk-row .lbl { flex: 1; color: #d6d6d6; }
+    .db9-chk-row .lbl-en { color: #888; font-size: 10px; }
+    .db9-chk-row.def .lbl::after { content: " ⭐"; color: #f59e0b; }
+
+    /* Custom chips */
+    #customList { display: flex; flex-wrap: wrap; gap: 4px; min-height: 22px; }
+    .db9-chip {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--db9-border);
+      padding: 4px 9px;
+      border-radius: 12px;
+      font-size: 11px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .db9-chip:hover { background: rgba(77, 163, 255, 0.15); border-color: var(--db9-accent); }
+
+    /* Selection info */
+    #selectionInfo { font-size: 11px; color: #d4deea; }
+    #promptHint, #presetCount { font-size: 10px; color: var(--db9-muted); margin-top: 6px; }
+
+    /* Progress */
+    #progressSteps { display: flex; flex-direction: column; gap: 2px; font-size: 11px; }
+    .db9-step { color: #8e8e8e; padding: 2px 0; }
+    .db9-step.active { color: #2680eb; font-weight: 600; }
+    .db9-step.done { color: #33ab84; }
+    .db9-step.error { color: #d7373f; }
+    #progressLog {
+      font-size: 10px;
+      color: #b4c3d2;
+      margin-top: 8px;
+      max-height: 110px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      background: rgba(10, 15, 20, 0.5);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--db9-radius-sm);
+      padding: 8px;
+    }
+
+    /* History */
+    #historyGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+    .db9-history-cell {
+      background: rgba(10, 15, 20, 0.7);
+      border: 1px solid var(--db9-border);
+      border-radius: var(--db9-radius-sm);
+      aspect-ratio: 1;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .db9-history-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .db9-history-empty { grid-column: 1/-1; color: #707070; text-align: center; padding: 16px 0; font-size: 11px; }
+
+    /* Modal (dual) */
+    .db9-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .db9-modal-content {
+      background: linear-gradient(180deg, rgba(28, 39, 50, 0.98), rgba(18, 26, 34, 0.98));
+      width: 660px;
+      max-width: 95%;
+      padding: 20px;
+      border-radius: 14px;
+      border: 1px solid var(--db9-border);
+      box-shadow: 0 28px 60px rgba(0,0,0,0.42);
+    }
+    .db9-modal-header { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #e6e6e6; }
+    .db9-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .db9-modal-cell { background: #1a1a1a; border: 1px solid #3d3d3d; border-radius: 4px; padding: 8px; text-align: center; }
+    .db9-modal-cell h4 { font-size: 11px; margin: 0 0 6px; color: #b0b0b0; text-transform: uppercase; letter-spacing: 0.5px; }
+    .db9-modal-cell img { max-width: 100%; max-height: 280px; object-fit: contain; border-radius: 3px; background: #000; display: block; margin: 0 auto 6px; }
+    .db9-modal-cell button { width: 100%; }
+    .db9-modal-cell .db9-status { font-size: 10px; color: #8e8e8e; margin: 4px 0; }
+    .db9-modal-actions { margin-top: 12px; text-align: right; }
+
+    /* Provider helper buttons */
+    .provider-extra { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .provider-extra button { font-size: 10px; padding: 3px 6px; }
+
+    /* Sub-row utilities */
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+    .small { font-size: 10px; color: #8e8e8e; }
+
+    /* TAB NAV v0.4.7 */
+    .db9-tabs {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin: 0 0 10px;
+      background: rgba(18, 25, 34, 0.92);
+      border: 1px solid var(--db9-border);
+      border-radius: 12px;
+      padding: 4px;
+      box-shadow: var(--db9-shadow);
+    }
+    .db9-tab {
+      flex: 1 1 88px;
+      padding: 8px 6px;
+      font-size: 0;
+      background: transparent;
+      color: var(--db9-muted);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .db9-tab::before {
+      display: inline-flex;
+      width: 19px;
+      height: 19px;
+      border-radius: 999px;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      background: rgba(255,255,255,0.09);
+      border: 1px solid rgba(255,255,255,0.08);
+      margin-right: 7px;
+      vertical-align: middle;
+      content: "•";
+    }
+    .db9-tab::after {
+      font-size: 10px;
+      vertical-align: middle;
+      content: attr(data-tab);
+    }
+    .db9-tab[data-tab="pane-main"]::before { content: "M"; }
+    .db9-tab[data-tab="pane-main"]::after { content: "Main"; }
+    .db9-tab[data-tab="pane-prompt"]::before { content: "P"; }
+    .db9-tab[data-tab="pane-prompt"]::after { content: "Prompt"; }
+    .db9-tab[data-tab="pane-presets"]::before { content: "S"; }
+    .db9-tab[data-tab="pane-presets"]::after { content: "Style"; }
+    .db9-tab[data-tab="pane-negative"]::before { content: "N"; }
+    .db9-tab[data-tab="pane-negative"]::after { content: "Negative"; }
+    .db9-tab[data-tab="pane-reference"]::before { content: "R"; }
+    .db9-tab[data-tab="pane-reference"]::after { content: "Reference"; }
+    .db9-tab[data-tab="pane-saved"]::before { content: "C"; }
+    .db9-tab[data-tab="pane-saved"]::after { content: "Combos"; }
+    .db9-tab[data-tab="pane-log"]::before { content: "L"; }
+    .db9-tab[data-tab="pane-log"]::after { content: "Logs"; }
+    .db9-tab:hover { color: var(--db9-text); background: rgba(255,255,255,0.04); }
+    .db9-tab.active {
+      background: linear-gradient(135deg, rgba(77,163,255,0.95), rgba(121,215,255,0.9));
+      color: #08131d;
+      font-weight: 700;
+    }
+    .db9-pane { display: none; }
+    .db9-pane.active { display: block; }
+
+    /* v0.4.7 polish */
+    .db9-tab.active { box-shadow: 0 10px 20px rgba(77,163,255,0.22); }
+
+    /* Reference section */
+    #refImagePreview {
+      width: 100%;
+      max-height: 200px;
+      object-fit: contain;
+      background: #1a1a1a;
+      border: 1px dashed #3d3d3d;
+      border-radius: 4px;
+      display: none;
+      margin-top: 6px;
+    }
+    #refImagePreview.has-image { display: block; }
+    #refDescBox {
+      margin-top: 6px;
+      padding: 8px;
+      background: #1a1a1a;
+      border: 1px solid #3d3d3d;
+      border-radius: 4px;
+      font-size: 10px;
+      color: #b0b0b0;
+      max-height: 100px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      display: none;
+    }
+    #refDescBox.has-desc { display: block; color: #d0d0d0; }
+
+    /* HORIZONTAL LAYOUT (when panel ≥ 600px wide) */
+    @media (max-width: 520px) {
+      .row-2,
+      .row-3 {
+        grid-template-columns: 1fr;
+      }
+      .db9-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    @media (min-width: 760px) {
+      body.h-layout {
+        display: grid;
+        grid-template-columns: minmax(380px, 1.25fr) minmax(280px, 0.9fr);
+        gap: 12px;
+        align-content: start;
+      }
+      body.h-layout .db9-header,
+      body.h-layout .db9-tabs,
+      body.h-layout .db9-pane.active {
+        grid-column: 1 / -1;
+      }
+      body.h-layout #pane-main.active { grid-column: 1; }
+      body.h-layout #pane-main-bottom.active { grid-column: 2; }
+      body.h-layout #pane-main-history.active { grid-column: 1 / -1; }
+      body.h-layout .db9-tabs {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        backdrop-filter: blur(10px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 1. HEADER -->
+  <header class="db9-header">
+    <div id="db9-title">🍌 DB9 Multi-Provider <span style="font-size:10px;color:#8e8e8e;font-weight:400;">v0.4.7.1</span></div>
+    <div class="db9-header-status">
+      <span class="db9-dot-label">Bridge</span><span class="db9-dot db9-dot-off" id="dot-bridge" title="bridge"></span>
+      <span class="db9-dot-label">Gemini</span><span class="db9-dot db9-dot-off" id="dot-gemini" title="gemini tab"></span>
+      <span class="db9-dot-label">ChatGPT</span><span class="db9-dot db9-dot-off" id="dot-chatgpt" title="chatgpt tab"></span>
+      <span style="background:#d7373f;color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;font-weight:700;">v0.4.7.1 NEW</span>
+      <button id="btn-reconnect" title="Reconnect to bridge">🔄</button>
+      <button id="btn-settings" title="Settings">⚙</button>
+    </div>
+  </header>
+
+  <!-- TAB NAV -->
+  <div class="db9-tabs">
+    <button class="db9-tab active" data-tab="pane-main">🚀 Main</button>
+    <button class="db9-tab" data-tab="pane-prompt">💭 Prompt</button>
+    <button class="db9-tab" data-tab="pane-presets">🎨 Presets</button>
+    <button class="db9-tab" data-tab="pane-negative">🚫 Neg</button>
+    <button class="db9-tab" data-tab="pane-reference">🖼 Ref</button>
+    <button class="db9-tab" data-tab="pane-saved">💾 Saved</button>
+    <button class="db9-tab" data-tab="pane-log">📜 Log</button>
+  </div>
+
+  <!-- PANE: MAIN (selection + mode + provider + generate + progress + history) -->
+  <div class="db9-pane active" id="pane-main">
+
+  <!-- 2. SELECTION -->
+  <section class="db9-section" id="sec-selection">
+    <div class="db9-section-title">📷 Selection</div>
+    <div id="selectionInfo">Make a marquee or lasso selection in Photoshop, then click Generate.</div>
+  </section>
+
+  </div><!-- /pane-main split -->
+
+  <!-- PANE: PROMPT -->
+  <div class="db9-pane" id="pane-prompt">
+  <!-- 3. PROMPT -->
+  <section class="db9-section" id="sec-prompt">
+    <div class="db9-section-title">💭 Prompt</div>
+    <textarea id="promptInput" placeholder="Mô tả ý tưởng... (có thể dùng tiếng Việt — sẽ tự động dịch sang English)"></textarea>
+    <div id="promptHint">Auto-translate VN → EN: <b>on</b> · Structured prompt: <b>on</b></div>
+  </section>
+
+  </div><!-- /pane-prompt -->
+
+  <!-- PANE: NEGATIVE -->
+  <div class="db9-pane" id="pane-negative">
+  <!-- 4. NEGATIVE -->
+  <section class="db9-section" id="sec-negative">
+    <div class="db9-section-title">🚫 Negative</div>
+    <textarea id="negativePrompt" placeholder="Tokens to avoid (comma-separated). Will be merged with checked categories below."></textarea>
+    <input id="negativeSearch" type="text" placeholder="🔍 filter negative..." style="width:100%;margin-top:4px;padding:4px 6px;background:#1a1a1a;color:#e6e6e6;border:1px solid #3d3d3d;border-radius:3px;font-size:10px;">
+    <div id="negativeGroups" style="margin-top:6px;"></div>
+  </section>
+
+  </div><!-- /pane-negative -->
+
+  <!-- PANE: PRESETS -->
+  <div class="db9-pane" id="pane-presets">
+  <!-- 5. PRESETS -->
+  <section class="db9-section" id="sec-presets">
+    <div class="db9-section-title">🎨 Presets</div>
+    <div style="display:flex;gap:4px;align-items:center;">
+      <div id="presetCount" style="flex:1;">0 presets selected</div>
+      <input id="presetSearch" type="text" placeholder="🔍 search..." style="width:120px;padding:4px 6px;background:#1a1a1a;color:#e6e6e6;border:1px solid #3d3d3d;border-radius:3px;font-size:10px;">
+    </div>
+    <div id="presetGroups" style="margin-top:6px;"></div>
+    <div class="row-2" style="margin-top:6px;">
+      <button id="btn-clear">🧹 Clear all</button>
+      <button id="btn-save-custom">💾 Save combo as…</button>
+    </div>
+  </section>
+
+  </div><!-- /pane-presets -->
+
+  <!-- PANE: SAVED -->
+  <div class="db9-pane" id="pane-saved">
+  <!-- 6. CUSTOM SAVED -->
+  <section class="db9-section" id="sec-custom">
+    <div class="db9-section-title">💾 My Saved Combos</div>
+    <div id="customList"><span class="small">No combos saved yet — pick presets/negatives then click "Save combo as…"</span></div>
+    <div class="row-2" style="margin-top:6px;">
+      <button id="btn-export">⬆ Export JSON</button>
+      <button id="btn-import">⬇ Import JSON</button>
+    </div>
+  </section>
+
+  </div><!-- /pane-saved -->
+
+  <!-- PANE: REFERENCE -->
+  <div class="db9-pane" id="pane-reference">
+    <section class="db9-section">
+      <div class="db9-section-title">🖼 Reference image</div>
+      <div class="small">Upload ảnh ref → AI mô tả → tự chèn vào prompt khi Generate.</div>
+      <div class="row-2" style="margin-top:8px;">
+        <button id="btn-ref-upload">📂 Upload reference</button>
+        <button id="btn-ref-describe" disabled>🤖 Describe via Gemini</button>
+      </div>
+      <img id="refImagePreview" alt="reference preview">
+      <div id="refDescBox"></div>
+      <div class="row-2" style="margin-top:8px;">
+        <button id="btn-ref-clear">🗑 Clear</button>
+        <button id="btn-ref-save-preset">💾 Save as preset</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- PANE: MAIN continued -->
+  <div class="db9-pane active" id="pane-main-bottom">
+  <!-- 7. MODE -->
+  <section class="db9-section" id="sec-mode">
+    <div class="db9-section-title">⚙ Mode</div>
+    <div class="db9-radio-row">
+      <label><input type="radio" name="mode" value="new" checked> 🆕 New</label>
+      <label><input type="radio" name="mode" value="regen"> 🔄 Regen</label>
+      <label><input type="radio" name="mode" value="refine"> ✏ Refine</label>
+    </div>
+  </section>
+
+  <!-- 8. PROVIDER -->
+  <section class="db9-section" id="sec-provider">
+    <div class="db9-section-title">🔌 Provider</div>
+    <div class="db9-radio-row">
+      <label><input type="radio" name="provider" value="gemini" checked> 🟦 Gemini</label>
+      <label><input type="radio" name="provider" value="chatgpt"> 🟢 ChatGPT</label>
+      <label><input type="radio" name="provider" value="both"> ⚔ Both (compare)</label>
+    </div>
+    <div class="provider-extra">
+      <button id="btn-open-gemini" title="Open gemini.google.com in browser">🔗 Open Gemini</button>
+      <button id="btn-open-chatgpt" title="Open chatgpt.com in browser">🔗 Open ChatGPT</button>
+    </div>
+  </section>
+
+  <!-- 9. ACTION -->
+  <section class="db9-section" id="sec-action">
+    <button id="btn-generate" class="db9-btn-primary">🚀 GENERATE</button>
+  </section>
+
+  </div><!-- /pane-main-bottom -->
+
+  <!-- PANE: LOG -->
+  <div class="db9-pane" id="pane-log">
+  <!-- 10. PROGRESS -->
+  <section class="db9-section" id="sec-progress">
+    <div class="db9-section-title">⏳ Progress</div>
+    <div id="progressSteps"></div>
+    <div id="progressLog"></div>
+  </section>
+
+  </div><!-- /pane-log -->
+
+  <!-- PANE: MAIN continued 2 -->
+  <div class="db9-pane active" id="pane-main-history">
+  <!-- 11. HISTORY -->
+  <section class="db9-section" id="sec-history">
+    <div class="db9-section-title">🖼 History</div>
+    <div id="historyGrid"><div class="db9-history-empty">No generations yet</div></div>
+  </section>
+
+  </div><!-- /pane-main-history -->
+
+  <!-- 12. DUAL MODAL -->
+  <div id="dualModal" class="db9-modal" style="display:none;">
+    <div class="db9-modal-content">
+      <div class="db9-modal-header">⚔ Compare results — pick one to apply</div>
+      <div class="db9-modal-grid">
+        <div class="db9-modal-cell">
+          <h4>🟦 Gemini</h4>
+          <img id="dual-img-gemini" alt="gemini result">
+          <div id="dual-status-gemini" class="db9-status">waiting…</div>
+          <button id="dual-use-gemini" class="db9-btn-primary" style="height:34px;font-size:12px;" disabled>USE THIS</button>
+        </div>
+        <div class="db9-modal-cell">
+          <h4>🟢 ChatGPT</h4>
+          <img id="dual-img-chatgpt" alt="chatgpt result">
+          <div id="dual-status-chatgpt" class="db9-status">waiting…</div>
+          <button id="dual-use-chatgpt" class="db9-btn-primary" style="height:34px;font-size:12px;" disabled>USE THIS</button>
+        </div>
+      </div>
+      <div class="db9-modal-actions">
+        <button id="dual-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="index.js"></script>
+</body>
+</html>

@@ -1,0 +1,985 @@
+{
+    "title": "GPT record",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 1748,
+            "height": 1271,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "https://chatgpt.com/?utm_source=google&utm_medium=paid_search&utm_campaign=GOOG_C_SEM_GBR_Core_CHT_BAU_ACQ_PER_MIX_ALL_APAC_VN_EN_032525&c_id=22370486775&c_agid=178488388073&c_crid=741727687600&c_kwid=kwd-1927227100722&c_ims=&c_pms=9047170&c_nw=g&c_dvc=c&gad_source=1&gad_campaignid=22370486775&gbraid=0AAAAA-I0E5cCZlM4FzT7MkBQXN_CfcH18&gclid=CjwKCAjwhqfPBhBWEiwAZo196s5GYakUNuH5oAtgAHi_Q600iYgTwW8UV3My3THl9cy1hRDR-pU9qxoCiqMQAvD_BwE",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "https://chatgpt.com/?utm_source=google&utm_medium=paid_search&utm_campaign=GOOG_C_SEM_GBR_Core_CHT_BAU_ACQ_PER_MIX_ALL_APAC_VN_EN_032525&c_id=22370486775&c_agid=178488388073&c_crid=741727687600&c_kwid=kwd-1927227100722&c_ims=&c_pms=9047170&c_nw=g&c_dvc=c&gad_source=1&gad_campaignid=22370486775&gbraid=0AAAAA-I0E5cCZlM4FzT7MkBQXN_CfcH18&gclid=CjwKCAjwhqfPBhBWEiwAZo196s5GYakUNuH5oAtgAHi_Q600iYgTwW8UV3My3THl9cy1hRDR-pU9qxoCiqMQAvD_BwE",
+                    "title": "ChatGPT"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "span.header-wordmark"
+                ],
+                [
+                    "xpath///*[@data-testid=\"model-switcher-dropdown-button\"]/div/span[1]"
+                ],
+                [
+                    "pierce/span.header-wordmark"
+                ]
+            ],
+            "offsetY": 12.5,
+            "offsetX": 63
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Thêm tệp và nhiều tính năng khác"
+                ],
+                [
+                    "[data-testid='composer-plus-btn']"
+                ],
+                [
+                    "xpath///*[@data-testid=\"composer-plus-btn\"]"
+                ],
+                [
+                    "pierce/[data-testid='composer-plus-btn']"
+                ]
+            ],
+            "offsetY": 18.1875,
+            "offsetX": 23
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.ms-\\[-20px\\] > div"
+                ],
+                [
+                    "xpath///*[@id=\"thread-bottom-container\"]/div[3]/div/div/div/div/div[2]/div[1]/div"
+                ],
+                [
+                    "pierce/div.ms-\\[-20px\\] > div"
+                ]
+            ],
+            "offsetY": 1.1875,
+            "offsetX": 80
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.ms-\\[-20px\\] > div"
+                ],
+                [
+                    "xpath///*[@id=\"thread-bottom-container\"]/div[3]/div/div/div/div/div[2]/div[1]/div"
+                ],
+                [
+                    "pierce/div.ms-\\[-20px\\] > div"
+                ]
+            ],
+            "offsetY": 1.1875,
+            "offsetX": 122
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Nghiên cứu sâu, nhấp để xóa"
+                ],
+                [
+                    "[data-testid='composer-footer-actions'] > div > div button"
+                ],
+                [
+                    "xpath///*[@data-testid=\"composer-footer-actions\"]/div/div/div/button"
+                ],
+                [
+                    "pierce/[data-testid='composer-footer-actions'] > div > div button"
+                ]
+            ],
+            "offsetY": 23.1875,
+            "offsetX": 23
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Thêm tệp và nhiều tính năng khác"
+                ],
+                [
+                    "[data-testid='composer-plus-btn']"
+                ],
+                [
+                    "xpath///*[@data-testid=\"composer-plus-btn\"]"
+                ],
+                [
+                    "pierce/[data-testid='composer-plus-btn']"
+                ]
+            ],
+            "offsetY": 20.1875,
+            "offsetX": 19
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div:nth-of-type(1) > div:nth-of-type(2) > div.flex > div.min-w-0 > div"
+                ],
+                [
+                    "xpath///*[@id=\"radix-_R_26msojkpaha5fb66cc63kqicmH1_\"]/div[2]/div[1]/div[2]/div[1]/div[2]/div"
+                ],
+                [
+                    "pierce/div:nth-of-type(1) > div:nth-of-type(2) > div.flex > div.min-w-0 > div"
+                ],
+                [
+                    "text/Tạo hình ảnh"
+                ]
+            ],
+            "offsetY": 6,
+            "offsetX": 26
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div:nth-of-type(3) div.max-w-full"
+                ],
+                [
+                    "xpath///*[@id=\"thread-bottom-container\"]/div[3]/div/div/div[2]"
+                ],
+                [
+                    "pierce/div:nth-of-type(3) div.max-w-full"
+                ]
+            ],
+            "offsetY": 66.1875,
+            "offsetX": 59
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Thêm tệp và nhiều tính năng khác"
+                ],
+                [
+                    "[data-testid='composer-plus-btn']"
+                ],
+                [
+                    "xpath///*[@data-testid=\"composer-plus-btn\"]"
+                ],
+                [
+                    "pierce/[data-testid='composer-plus-btn']"
+                ]
+            ],
+            "offsetY": 20.1875,
+            "offsetX": 22
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.content-sheet\\:content-sheet-inset-section div.flex > div.min-w-0 > div"
+                ],
+                [
+                    "xpath///*[@id=\"radix-_R_26msojkpaha5fb66cc63kqicmH1_\"]/div[1]/div[1]/div[1]/div[2]/div"
+                ],
+                [
+                    "pierce/div.content-sheet\\:content-sheet-inset-section div.flex > div.min-w-0 > div"
+                ],
+                [
+                    "text/Tải lên ảnh &"
+                ]
+            ],
+            "offsetY": 0,
+            "offsetX": 66
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Choose image aspect ratio"
+                ],
+                [
+                    "#radix-_r_7q_"
+                ],
+                [
+                    "xpath///*[@id=\"radix-_r_7q_\"]"
+                ],
+                [
+                    "pierce/#radix-_r_7q_"
+                ]
+            ],
+            "offsetY": 21.1875,
+            "offsetX": 45.109375
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Thêm tệp và nhiều tính năng khác"
+                ],
+                [
+                    "[data-testid='composer-plus-btn']"
+                ],
+                [
+                    "xpath///*[@data-testid=\"composer-plus-btn\"]"
+                ],
+                [
+                    "pierce/[data-testid='composer-plus-btn']"
+                ]
+            ],
+            "offsetY": 18.1875,
+            "offsetX": 21
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.content-sheet\\:content-sheet-inset-section div.flex > div.min-w-0 > div"
+                ],
+                [
+                    "xpath///*[@id=\"radix-_R_26msojkpaha5fb66cc63kqicmH1_\"]/div[1]/div[1]/div[1]/div[2]/div"
+                ],
+                [
+                    "pierce/div.content-sheet\\:content-sheet-inset-section div.flex > div.min-w-0 > div"
+                ],
+                [
+                    "text/Tải lên ảnh &"
+                ]
+            ],
+            "offsetY": 15,
+            "offsetX": 15
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Thêm tệp và nhiều tính năng khác"
+                ],
+                [
+                    "[data-testid='composer-plus-btn']"
+                ],
+                [
+                    "xpath///*[@data-testid=\"composer-plus-btn\"]"
+                ],
+                [
+                    "pierce/[data-testid='composer-plus-btn']"
+                ]
+            ],
+            "offsetY": 25.1875,
+            "offsetX": 15
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.content-sheet\\:content-sheet-inset-section div.flex > div.min-w-0 > div"
+                ],
+                [
+                    "xpath///*[@id=\"radix-_R_26msojkpaha5fb66cc63kqicmH1_\"]/div[1]/div[1]/div[1]/div[2]/div"
+                ],
+                [
+                    "pierce/div.content-sheet\\:content-sheet-inset-section div.flex > div.min-w-0 > div"
+                ],
+                [
+                    "text/Tải lên ảnh &"
+                ]
+            ],
+            "offsetY": 8,
+            "offsetX": 7
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Control"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "u"
+        },
+        {
+            "type": "keyUp",
+            "key": "u",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Control",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "C:\\fakepath\\Gemini_Generated_Image_v83f9wv83f9wv83f.jpg",
+            "selectors": [
+                [
+                    "#upload-files"
+                ],
+                [
+                    "xpath///*[@id=\"upload-files\"]"
+                ],
+                [
+                    "pierce/#upload-files"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT",
+                    "aria/[role=\"paragraph\"]"
+                ],
+                [
+                    "p"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]/p"
+                ],
+                [
+                    "pierce/p"
+                ]
+            ],
+            "offsetY": 15.6875,
+            "offsetX": 159
+        },
+        {
+            "type": "change",
+            "value": "d",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT"
+                ],
+                [
+                    "#prompt-textarea"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]"
+                ],
+                [
+                    "pierce/#prompt-textarea"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "ArrowLeft"
+        },
+        {
+            "type": "keyUp",
+            "key": "ArrowLeft",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "đ",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT"
+                ],
+                [
+                    "#prompt-textarea"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]"
+                ],
+                [
+                    "pierce/#prompt-textarea"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "d",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "đo",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT"
+                ],
+                [
+                    "#prompt-textarea"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]"
+                ],
+                [
+                    "pierce/#prompt-textarea"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "ArrowLeft"
+        },
+        {
+            "type": "keyUp",
+            "key": "ArrowLeft",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "đô",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT"
+                ],
+                [
+                    "#prompt-textarea"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]"
+                ],
+                [
+                    "pierce/#prompt-textarea"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "o",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "đôi",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT"
+                ],
+                [
+                    "#prompt-textarea"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]"
+                ],
+                [
+                    "pierce/#prompt-textarea"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "ArrowLeft"
+        },
+        {
+            "type": "keyUp",
+            "key": "ArrowLeft",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "đổ",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT"
+                ],
+                [
+                    "#prompt-textarea"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]"
+                ],
+                [
+                    "pierce/#prompt-textarea"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "đổi",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT"
+                ],
+                [
+                    "#prompt-textarea"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]"
+                ],
+                [
+                    "pierce/#prompt-textarea"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "r",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "đổi con meo",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT"
+                ],
+                [
+                    "#prompt-textarea"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]"
+                ],
+                [
+                    "pierce/#prompt-textarea"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "ArrowLeft"
+        },
+        {
+            "type": "keyUp",
+            "key": "ArrowLeft",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "đổi con mè",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT"
+                ],
+                [
+                    "#prompt-textarea"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]"
+                ],
+                [
+                    "pierce/#prompt-textarea"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "đổi con mèo",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT"
+                ],
+                [
+                    "#prompt-textarea"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]"
+                ],
+                [
+                    "pierce/#prompt-textarea"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "f",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "đổi con mèo thanh",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT"
+                ],
+                [
+                    "#prompt-textarea"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]"
+                ],
+                [
+                    "pierce/#prompt-textarea"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "ArrowLeft"
+        },
+        {
+            "type": "keyUp",
+            "key": "ArrowLeft",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "đổi con mèo thà",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT"
+                ],
+                [
+                    "#prompt-textarea"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]"
+                ],
+                [
+                    "pierce/#prompt-textarea"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "đổi con mèo thàn",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT"
+                ],
+                [
+                    "#prompt-textarea"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]"
+                ],
+                [
+                    "pierce/#prompt-textarea"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "đổi con mèo thành",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT"
+                ],
+                [
+                    "#prompt-textarea"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]"
+                ],
+                [
+                    "pierce/#prompt-textarea"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "f",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "đổi con mèo thành con cho",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT"
+                ],
+                [
+                    "#prompt-textarea"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]"
+                ],
+                [
+                    "pierce/#prompt-textarea"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "Shift"
+        },
+        {
+            "type": "keyDown",
+            "target": "main",
+            "key": "ArrowLeft"
+        },
+        {
+            "type": "keyUp",
+            "key": "ArrowLeft",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Shift",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "đổi con mèo thành con chó",
+            "selectors": [
+                [
+                    "aria/Trò chuyện với ChatGPT"
+                ],
+                [
+                    "#prompt-textarea"
+                ],
+                [
+                    "xpath///*[@id=\"prompt-textarea\"]"
+                ],
+                [
+                    "pierce/#prompt-textarea"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "Unidentified",
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "s",
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.gap-2 > div > div:nth-of-type(2) svg"
+                ],
+                [
+                    "xpath///*[@data-testid=\"send-button\"]/svg"
+                ],
+                [
+                    "pierce/div.gap-2 > div > div:nth-of-type(2) svg"
+                ]
+            ],
+            "offsetY": 1.1875,
+            "offsetX": 13
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.-mb-\\(--composer-overlap-px\\) div.max-w-full svg"
+                ],
+                [
+                    "xpath///*[@data-testid=\"image-gen-overlay-right-actions\"]/button/span/svg"
+                ],
+                [
+                    "pierce/div.-mb-\\(--composer-overlap-px\\) div.max-w-full svg"
+                ]
+            ],
+            "offsetY": 12.140625,
+            "offsetX": 9
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "button:nth-of-type(2) > div.composer-submit-button-color"
+                ],
+                [
+                    "xpath///*[@id=\"radix-_r_a8_\"]/div[4]/div[2]/button[2]/div[1]"
+                ],
+                [
+                    "pierce/button:nth-of-type(2) > div.composer-submit-button-color"
+                ]
+            ],
+            "offsetY": 35.359375,
+            "offsetX": 31.890625
+        }
+    ]
+}
