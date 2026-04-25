@@ -10,6 +10,8 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 
+CORE_WORK_TILE_SCHEMA = "core_work_local_padding_v1"
+
 CONFLICT_FILES = [
     "db9_auto_tiling_full.py",
     "db9_auto_tiling_bundle.py",
@@ -128,19 +130,21 @@ def _make_tile_seed(base_seed, row, col, idx, seed_mode, attempt=0):
     return int((seed + attempt * 7919) % (2**31))
 
 def _score_candidate(width, height, tile_size, overlap, prefer_larger_tiles):
-    stride = tile_size - overlap
-    cols = math.ceil((width - overlap) / stride)
-    rows = math.ceil((height - overlap) / stride)
-    padded_w = overlap + cols * stride
-    padded_h = overlap + rows * stride
-    extra_pad_pixels = max(0, padded_w - width) * height + max(0, padded_h - height) * width
+    stride = tile_size
+    cols = math.ceil(width / tile_size)
+    rows = math.ceil(height / tile_size)
+    last_w = width - (cols - 1) * tile_size
+    last_h = height - (rows - 1) * tile_size
+    edge_imbalance = (tile_size - last_w) + (tile_size - last_h)
     total_tiles = cols * rows
-    score = total_tiles * 1000 + extra_pad_pixels * 0.01 + abs(cols - rows) * 10
+    score = total_tiles * 1000 + edge_imbalance * 0.01 + abs(cols - rows) * 10
     if prefer_larger_tiles:
         score -= tile_size * 0.1
     return {"score": score, "tile_size": tile_size, "overlap": overlap, "stride": stride, "cols": cols, "rows": rows, "total_tiles": total_tiles}
 
 def _pad_image_bhwc(image_bhwc, pad_left, pad_right, pad_top, pad_bottom, pad_mode):
+    if pad_left == pad_right == pad_top == pad_bottom == 0:
+        return image_bhwc
     x = image_bhwc.permute(0, 3, 1, 2)  # BHWC -> BCHW
     _, _, h, w = x.shape
     if pad_mode == "reflect":
@@ -156,6 +160,92 @@ def _pad_image_bhwc(image_bhwc, pad_left, pad_right, pad_top, pad_bottom, pad_mo
         x = F.pad(x, (pad_left, pad_right, pad_top, pad_bottom), mode="constant", value=0.0)
 
     return x.permute(0, 2, 3, 1)  # BCHW -> BHWC
+
+def _build_core_work_tile_meta(W, H, tile_size, overlap, row, col, idx, base_seed, seed_mode, core_box=None):
+    if core_box is None:
+        core_x0 = col * tile_size
+        core_y0 = row * tile_size
+        core_x1 = min(core_x0 + tile_size, W)
+        core_y1 = min(core_y0 + tile_size, H)
+    else:
+        core_x0, core_y0, core_x1, core_y1 = core_box
+    work_x0 = core_x0 - overlap
+    work_y0 = core_y0 - overlap
+    work_x1 = core_x1 + overlap
+    work_y1 = core_y1 + overlap
+    src_x0 = max(work_x0, 0)
+    src_y0 = max(work_y0, 0)
+    src_x1 = min(work_x1, W)
+    src_y1 = min(work_y1, H)
+    pad_left = max(0, -work_x0)
+    pad_top = max(0, -work_y0)
+    pad_right = max(0, work_x1 - W)
+    pad_bottom = max(0, work_y1 - H)
+    core_w = core_x1 - core_x0
+    core_h = core_y1 - core_y0
+    work_w = work_x1 - work_x0
+    work_h = work_y1 - work_y0
+    batch_work_w = tile_size + overlap * 2
+    batch_work_h = tile_size + overlap * 2
+    return {
+        "index": idx,
+        "row": row,
+        "col": col,
+        "core_x0": core_x0,
+        "core_y0": core_y0,
+        "core_x1": core_x1,
+        "core_y1": core_y1,
+        "work_x0": work_x0,
+        "work_y0": work_y0,
+        "work_x1": work_x1,
+        "work_y1": work_y1,
+        "src_x0": src_x0,
+        "src_y0": src_y0,
+        "src_x1": src_x1,
+        "src_y1": src_y1,
+        "pad_left": pad_left,
+        "pad_top": pad_top,
+        "pad_right": pad_right,
+        "pad_bottom": pad_bottom,
+        "core_in_tile_x0": core_x0 - work_x0,
+        "core_in_tile_y0": core_y0 - work_y0,
+        "core_in_tile_x1": core_x0 - work_x0 + core_w,
+        "core_in_tile_y1": core_y0 - work_y0 + core_h,
+        "core_w": core_w,
+        "core_h": core_h,
+        "work_w": work_w,
+        "work_h": work_h,
+        "batch_work_w": batch_work_w,
+        "batch_work_h": batch_work_h,
+        "seed": _make_tile_seed(base_seed, row, col, idx, seed_mode),
+        "attempt": 0,
+        # Legacy aliases keep older QA/debug consumers readable without driving composite.
+        "x0": core_x0,
+        "y0": core_y0,
+        "x1": core_x1,
+        "y1": core_y1,
+        "tile_w": core_w,
+        "tile_h": core_h,
+    }
+
+def _extract_core_work_tile(image, tile, tile_size, pad_mode):
+    cropped = image[:, tile["src_y0"]:tile["src_y1"], tile["src_x0"]:tile["src_x1"], :]
+    padded = _pad_image_bhwc(
+        cropped,
+        tile["pad_left"],
+        tile["pad_right"],
+        tile["pad_top"],
+        tile["pad_bottom"],
+        pad_mode,
+    )
+    _, ph, pw, _ = padded.shape
+    target_h = int(tile.get("batch_work_h", tile_size + int(tile.get("pad_top", 0)) + int(tile.get("pad_bottom", 0))))
+    target_w = int(tile.get("batch_work_w", tile_size + int(tile.get("pad_left", 0)) + int(tile.get("pad_right", 0))))
+    if ph > target_h or pw > target_w:
+        raise ValueError(f"DB9 tile {tile.get('index', '?')} exceeded batch work size: got {pw}x{ph}, target {target_w}x{target_h}")
+    if ph < target_h or pw < target_w:
+        padded = _pad_image_bhwc(padded, 0, target_w - pw, 0, target_h - ph, pad_mode)
+    return padded
 
 def _extract_tile_with_padding(image, tile, tile_size, pad_mode):
     _, H, W, _ = image.shape
@@ -267,6 +357,43 @@ def _accumulate_tile(canvas, weights, tile_img, tile_meta, mask):
     canvas[y0:y0 + tile_h, x0:x0 + tile_w, :] += valid_tile * valid_mask
     weights[y0:y0 + tile_h, x0:x0 + tile_w, :] += valid_mask
 
+def _validate_core_meta(tile_meta, tile_img):
+    core_w = int(tile_meta["core_x1"]) - int(tile_meta["core_x0"])
+    core_h = int(tile_meta["core_y1"]) - int(tile_meta["core_y0"])
+    tile_core_w = int(tile_meta["core_in_tile_x1"]) - int(tile_meta["core_in_tile_x0"])
+    tile_core_h = int(tile_meta["core_in_tile_y1"]) - int(tile_meta["core_in_tile_y0"])
+    if core_w != tile_core_w or core_h != tile_core_h:
+        raise ValueError(f"DB9 tile {tile_meta.get('index', '?')} core size mismatch: canvas={core_w}x{core_h}, tile={tile_core_w}x{tile_core_h}")
+    if int(tile_meta["core_in_tile_x1"]) > tile_img.shape[1] or int(tile_meta["core_in_tile_y1"]) > tile_img.shape[0]:
+        raise ValueError(f"DB9 tile {tile_meta.get('index', '?')} core_in_tile exceeds processed tile bounds.")
+
+def _accumulate_core_tile(canvas, weights, tile_img, tile_meta, mask=None):
+    _validate_core_meta(tile_meta, tile_img)
+    cx0 = int(tile_meta["core_in_tile_x0"])
+    cy0 = int(tile_meta["core_in_tile_y0"])
+    cx1 = int(tile_meta["core_in_tile_x1"])
+    cy1 = int(tile_meta["core_in_tile_y1"])
+    x0 = int(tile_meta["core_x0"])
+    y0 = int(tile_meta["core_y0"])
+    x1 = int(tile_meta["core_x1"])
+    y1 = int(tile_meta["core_y1"])
+    core = tile_img[cy0:cy1, cx0:cx1, :]
+    if mask is None:
+        canvas[y0:y1, x0:x1, :] = core
+        weights[y0:y1, x0:x1, :] = 1.0
+        return
+    core_mask = mask[cy0:cy1, cx0:cx1, :]
+    canvas[y0:y1, x0:x1, :] += core * core_mask
+    weights[y0:y1, x0:x1, :] += core_mask
+
+def _core_region_from_tile(tile_img, tile_meta):
+    _validate_core_meta(tile_meta, tile_img)
+    return tile_img[
+        int(tile_meta["core_in_tile_y0"]):int(tile_meta["core_in_tile_y1"]),
+        int(tile_meta["core_in_tile_x0"]):int(tile_meta["core_in_tile_x1"]),
+        :,
+    ]
+
 def _safe_normalize(canvas, weights, eps=1e-8):
     return canvas / torch.clamp(weights, min=eps)
 
@@ -305,14 +432,16 @@ class DB9TilePlanV2:
             if best is None or info["score"] < best["score"]: best = info
         tile_size = best["tile_size"]; ov = best["overlap"]; stride = best["stride"]; cols = best["cols"]; rows = best["rows"]
         tiles = []; idx = 0
+        xs = [round(i * W / cols) for i in range(cols + 1)]
+        ys = [round(i * H / rows) for i in range(rows + 1)]
         for row in range(rows):
             for col in range(cols):
-                x0 = col * stride; y0 = row * stride; x1 = x0 + tile_size; y1 = y0 + tile_size
-                tile_w = min(tile_size, max(0, W - x0)); tile_h = min(tile_size, max(0, H - y0))
-                tiles.append({"index": idx, "row": row, "col": col, "x0": x0, "y0": y0, "x1": x1, "y1": y1, "tile_w": tile_w, "tile_h": tile_h, "seed": _make_tile_seed(base_seed, row, col, idx, seed_mode), "attempt": 0})
+                core_box = (xs[col], ys[row], xs[col + 1], ys[row + 1])
+                tiles.append(_build_core_work_tile_meta(W, H, tile_size, ov, row, col, idx, base_seed, seed_mode, core_box=core_box))
                 idx += 1
-        plan = {"image_width": W, "image_height": H, "tile_size": tile_size, "overlap": ov, "stride": stride, "cols": cols, "rows": rows, "total_tiles": len(tiles), "pad_mode": pad_mode, "seed_mode": seed_mode, "base_seed": int(base_seed), "tiles": tiles}
-        return (plan, len(tiles), tile_size, cols, rows, f"TilePlanV2: {tile_size}px, overlap={ov}, grid={cols}x{rows}, total={len(tiles)}")
+        plan = {"version": CORE_WORK_TILE_SCHEMA, "orig_w": W, "orig_h": H, "image_width": W, "image_height": H, "tile_size": tile_size, "work_tile_size": tile_size + ov * 2, "overlap": ov, "stride": stride, "cols": cols, "rows": rows, "total_tiles": len(tiles), "pad_mode": pad_mode, "padding_mode": pad_mode, "seed_mode": seed_mode, "base_seed": int(base_seed), "tiles": tiles}
+        dbg = f"DB9 CoreWorkTilePlan: orig={W}x{H}, tile_size={tile_size}, work_tile_size={tile_size + ov * 2}, overlap={ov}, grid={cols}x{rows}, total={len(tiles)}, padding_mode={pad_mode}, schema={CORE_WORK_TILE_SCHEMA}"
+        return (plan, len(tiles), tile_size, cols, rows, dbg)
 
 class DB9TileBatchEmitterV2:
     RETURN_TYPES = ("IMAGE", "DB9_TILE_META_STACK", "STRING")
@@ -324,7 +453,11 @@ class DB9TileBatchEmitterV2:
     def emit_tiles(self, image, tile_plan):
         image = _ensure_bhwc(image); tile_size = tile_plan["tile_size"]; pad_mode = tile_plan["pad_mode"]; images = []; meta = []
         for tile in tile_plan["tiles"]:
-            tile_img = _extract_tile_with_padding(image, tile, tile_size, pad_mode); images.append(tile_img[0]); meta.append(dict(tile))
+            if tile_plan.get("version") == CORE_WORK_TILE_SCHEMA:
+                tile_img = _extract_core_work_tile(image, tile, tile_size, pad_mode)
+            else:
+                tile_img = _extract_tile_with_padding(image, tile, tile_size, pad_mode)
+            images.append(tile_img[0]); meta.append(dict(tile))
         return (torch.stack(images, dim=0), meta, f"Emitted {len(images)} tiles.")
 
 class DB9TileResultCollectorV2:
@@ -354,18 +487,32 @@ class DB9HighlightPreserveCompositeCanny:
     def INPUT_TYPES(cls):
         return {"required": {"base_tiles": ("DB9_TILE_IMAGE_STACK",), "highlight_tiles": ("DB9_TILE_IMAGE_STACK",), "tile_plan": ("DB9_TILE_PLAN",), "highlight_blend_mode": (["add", "screen"], {"default": "add"}), "center_priority_strength": ("FLOAT", {"default": 0.95, "min": 0.0, "max": 2.0, "step": 0.01}), "canny_low_thresh": ("FLOAT", {"default": 0.08, "min": 0.0, "max": 5.0, "step": 0.01}), "canny_high_thresh": ("FLOAT", {"default": 0.18, "min": 0.0, "max": 5.0, "step": 0.01}), "border_edge_penalty": ("FLOAT", {"default": 0.85, "min": 0.0, "max": 1.0, "step": 0.01}), "border_start": ("FLOAT", {"default": 0.12, "min": 0.0, "max": 0.95, "step": 0.01}), "highlight_amount": ("FLOAT", {"default": 0.22, "min": 0.0, "max": 2.0, "step": 0.01})}}
     def composite(self, base_tiles, highlight_tiles, tile_plan, highlight_blend_mode, center_priority_strength, canny_low_thresh, canny_high_thresh, border_edge_penalty, border_start, highlight_amount):
-        H = tile_plan["image_height"]; W = tile_plan["image_width"]
-        base_canvas = torch.zeros((H, W, 3), dtype=torch.float32); base_weights = torch.zeros((H, W, 3), dtype=torch.float32)
-        hi_canvas = torch.zeros((H, W, 3), dtype=torch.float32); hi_weights = torch.zeros((H, W, 3), dtype=torch.float32)
+        H = int(tile_plan.get("orig_h", tile_plan["image_height"])); W = int(tile_plan.get("orig_w", tile_plan["image_width"]))
+        expected = int(tile_plan.get("total_tiles", len(tile_plan["tiles"])))
+        actual = int(base_tiles["images"].shape[0])
+        if actual != expected or int(highlight_tiles["images"].shape[0]) != expected:
+            raise ValueError(f"DB9 composite tile count mismatch: got base={actual}, highlight={highlight_tiles['images'].shape[0]}, expected={expected}. Do not pass rerun subset into full Seam Finish. Merge subset first.")
+        device = base_tiles["images"].device
+        dtype = base_tiles["images"].dtype
+        base_canvas = torch.zeros((H, W, 3), dtype=dtype, device=device); base_weights = torch.zeros((H, W, 3), dtype=dtype, device=device)
+        hi_canvas = torch.zeros((H, W, 3), dtype=dtype, device=device); hi_weights = torch.zeros((H, W, 3), dtype=dtype, device=device)
+        use_core_schema = tile_plan.get("version") == CORE_WORK_TILE_SCHEMA
         for i, tile_meta in enumerate(tile_plan["tiles"]):
             base_tile = base_tiles["images"][i].float(); hi_tile = highlight_tiles["images"][i].float()
-            base_mask = _canny_border_suppressed_mask(base_tile, center_strength=center_priority_strength, low_thresh=canny_low_thresh, high_thresh=canny_high_thresh, border_edge_penalty=border_edge_penalty, border_start=border_start)
-            hi_mask = _canny_border_suppressed_mask(hi_tile, center_strength=center_priority_strength + 0.15, low_thresh=max(0.0, canny_low_thresh * 0.9), high_thresh=max(0.0, canny_high_thresh * 0.9), border_edge_penalty=min(1.0, border_edge_penalty + 0.05), border_start=border_start)
-            _accumulate_tile(base_canvas, base_weights, base_tile, tile_meta, base_mask); _accumulate_tile(hi_canvas, hi_weights, hi_tile, tile_meta, hi_mask)
+            if use_core_schema:
+                _accumulate_core_tile(base_canvas, base_weights, base_tile, tile_meta)
+                _accumulate_core_tile(hi_canvas, hi_weights, hi_tile, tile_meta)
+            else:
+                base_mask = _canny_border_suppressed_mask(base_tile, center_strength=center_priority_strength, low_thresh=canny_low_thresh, high_thresh=canny_high_thresh, border_edge_penalty=border_edge_penalty, border_start=border_start)
+                hi_mask = _canny_border_suppressed_mask(hi_tile, center_strength=center_priority_strength + 0.15, low_thresh=max(0.0, canny_low_thresh * 0.9), high_thresh=max(0.0, canny_high_thresh * 0.9), border_edge_penalty=min(1.0, border_edge_penalty + 0.05), border_start=border_start)
+                _accumulate_tile(base_canvas, base_weights, base_tile, tile_meta, base_mask); _accumulate_tile(hi_canvas, hi_weights, hi_tile, tile_meta, hi_mask)
         base_comp = _safe_normalize(base_canvas, base_weights); hi_comp = _safe_normalize(hi_canvas, hi_weights)
         final = 1.0 - (1.0 - base_comp) * (1.0 - hi_comp * highlight_amount) if highlight_blend_mode == "screen" else base_comp + hi_comp * highlight_amount
         final = torch.clamp(final, 0.0, 1.0)
-        return (base_comp.unsqueeze(0), hi_comp.unsqueeze(0), final.unsqueeze(0), "Composite Canny done.")
+        if final.shape[0] != H or final.shape[1] != W:
+            raise ValueError(f"DB9 composite final size mismatch: got {final.shape[1]}x{final.shape[0]}, expected {W}x{H}")
+        mode = "core_only" if use_core_schema else "legacy_weighted"
+        return (base_comp.unsqueeze(0), hi_comp.unsqueeze(0), final.unsqueeze(0), f"Composite: processed_tiles={actual}, expected_tiles={expected}, final={W}x{H}, paste_mode={mode}")
 
 class DB9TileQAPriority:
     RETURN_TYPES = ("DB9_QA_REPORT", "STRING", "BOOLEAN")
@@ -377,13 +524,18 @@ class DB9TileQAPriority:
         return {"required": {"final_image": ("IMAGE",), "tile_plan": ("DB9_TILE_PLAN",), "base_tiles": ("DB9_TILE_IMAGE_STACK",), "ssim_threshold": ("FLOAT", {"default": 0.72, "min": 0.0, "max": 1.0, "step": 0.01}), "l2_threshold": ("FLOAT", {"default": 0.12, "min": 0.0, "max": 10.0, "step": 0.01}), "ghost_threshold": ("FLOAT", {"default": 0.18, "min": 0.0, "max": 10.0, "step": 0.01}), "severity_weight_ssim": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.01}), "severity_weight_l2": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.01}), "severity_weight_ghost": ("FLOAT", {"default": 1.25, "min": 0.0, "max": 10.0, "step": 0.01})}}
     def evaluate(self, final_image, tile_plan, base_tiles, ssim_threshold, l2_threshold, ghost_threshold, severity_weight_ssim, severity_weight_l2, severity_weight_ghost):
         images = base_tiles["images"]; overlap = int(tile_plan["overlap"]); cols = int(tile_plan["cols"]); rows = int(tile_plan["rows"])
+        use_core_schema = tile_plan.get("version") == CORE_WORK_TILE_SCHEMA
+        metas = tile_plan["tiles"]
         pair_scores = []; failing = set()
         def index_of(row, col): return row * cols + col
         for row in range(rows):
             for col in range(cols):
                 idx = index_of(row, col)
                 if col + 1 < cols:
-                    j = index_of(row, col + 1); a, b = images[idx], images[j]; ov = min(overlap, a.shape[1], b.shape[1])
+                    j = index_of(row, col + 1)
+                    a = _core_region_from_tile(images[idx], metas[idx]) if use_core_schema else images[idx]
+                    b = _core_region_from_tile(images[j], metas[j]) if use_core_schema else images[j]
+                    ov = min(overlap, a.shape[1], b.shape[1])
                     if ov > 0:
                         a_overlap = a[:, -ov:, :]; b_overlap = b[:, :ov, :]
                         ssim_v = _simple_ssim_proxy(a_overlap, b_overlap); l2_v = _simple_l2(a_overlap, b_overlap); ghost_v = _gradient_mismatch_score(a_overlap, b_overlap)
@@ -391,7 +543,10 @@ class DB9TileQAPriority:
                         pair_scores.append({"tile_a": idx, "tile_b": j, "dir": "h", "ssim": ssim_v, "l2": l2_v, "ghost": ghost_v, "severity": severity})
                         if severity > 0: failing.update([idx, j])
                 if row + 1 < rows:
-                    j = index_of(row + 1, col); a, b = images[idx], images[j]; ov = min(overlap, a.shape[0], b.shape[0])
+                    j = index_of(row + 1, col)
+                    a = _core_region_from_tile(images[idx], metas[idx]) if use_core_schema else images[idx]
+                    b = _core_region_from_tile(images[j], metas[j]) if use_core_schema else images[j]
+                    ov = min(overlap, a.shape[0], b.shape[0])
                     if ov > 0:
                         a_overlap = a[-ov:, :, :]; b_overlap = b[:ov, :, :]
                         ssim_v = _simple_ssim_proxy(a_overlap, b_overlap); l2_v = _simple_l2(a_overlap, b_overlap); ghost_v = _gradient_mismatch_score(a_overlap, b_overlap)
@@ -450,9 +605,14 @@ class DB9TileBatchEmitterSubsetV2:
         image = _ensure_bhwc(image); tile_size = tile_plan["tile_size"]; pad_mode = tile_plan["pad_mode"]; images = []; meta = []
         for tile in tile_plan["tiles"]:
             if not tile.get("rerun", False): continue
-            tile_img = _extract_tile_with_padding(image, tile, tile_size, pad_mode); images.append(tile_img[0]); meta.append(dict(tile))
+            if tile_plan.get("version") == CORE_WORK_TILE_SCHEMA:
+                tile_img = _extract_core_work_tile(image, tile, tile_size, pad_mode)
+            else:
+                tile_img = _extract_tile_with_padding(image, tile, tile_size, pad_mode)
+            images.append(tile_img[0]); meta.append(dict(tile))
         if not images:
-            empty = torch.zeros((0, tile_size, tile_size, 3), dtype=image.dtype, device=image.device)
+            empty_size = int(tile_plan.get("work_tile_size", tile_size))
+            empty = torch.zeros((0, empty_size, empty_size, 3), dtype=image.dtype, device=image.device)
             return (empty, meta, "Subset emitter: 0 tiles.")
         return (torch.stack(images, dim=0), meta, f"Subset emitter: {len(images)} tiles.")
 
