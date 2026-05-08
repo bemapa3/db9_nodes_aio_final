@@ -41,7 +41,7 @@ priority reruns, tone matching, compare/export, and a live tone editor UI.
 1. Copy this folder into `ComfyUI/custom_nodes/`
 2. Restart ComfyUI
 
-ComfyUI should auto-load the frontend extension from `web/extensions/db9_live_editor.js`.
+ComfyUI should auto-load the frontend extension from `web/extensions/db9_live_editor_pro_ux.js`.
 
 ## Dependencies
 

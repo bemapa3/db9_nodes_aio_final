@@ -38,7 +38,9 @@ KEEP_FILES = {
     "requirements.txt",
     "README.md",
     "db9_tiling_aio.py",
-    "db9_nodes.py",
+    "db9_macro_nodes.py",
+    "db9_tone_and_compare.py",
+    "db9_live_editor.py",
 }
 
 def db9_backup_and_remove_conflicts(repo_dir: str, dry_run: bool = True) -> dict:
@@ -309,6 +311,84 @@ def _center_priority_mask(tile_h, tile_w, strength=0.9):
     gamma = max(0.1, 1.0 + strength * 2.0)
     return (mask ** gamma).unsqueeze(-1)
 
+
+_LORA_RATIOS = {
+    "none": 1.0, "1:1": 1.0, "4:3": 4/3, "3:2": 3/2,
+    "16:9": 16/9, "2:1": 2.0, "9:16": 9/16, "2:3": 2/3, "3:4": 3/4,
+}
+
+def _adjust_tile_for_lora_ratio(tile, ratio, W, H):
+    """Expand work region so the KSampler sees a window matching the LoRA training ratio."""
+    if abs(ratio - 1.0) < 0.01:
+        return tile
+    t = dict(tile)
+    sq = int(t["batch_work_w"])
+    if ratio > 1.0:
+        new_w = max(sq, (round(sq * ratio) // 8) * 8)
+        new_h = sq
+    else:
+        new_w = sq
+        new_h = max(sq, (round(sq / ratio) // 8) * 8)
+    extra_x = new_w - sq;  extra_y = new_h - sq
+    add_l = extra_x // 2;  add_r = extra_x - add_l
+    add_t = extra_y // 2;  add_b = extra_y - add_t
+    nwx0 = t["work_x0"] - add_l;  nwx1 = t["work_x1"] + add_r
+    nwy0 = t["work_y0"] - add_t;  nwy1 = t["work_y1"] + add_b
+    t["src_x0"] = max(0, nwx0);  t["src_y0"] = max(0, nwy0)
+    t["src_x1"] = min(W, nwx1);  t["src_y1"] = min(H, nwy1)
+    t["pad_left"]   = max(0, -nwx0);  t["pad_top"]    = max(0, -nwy0)
+    t["pad_right"]  = max(0, nwx1 - W); t["pad_bottom"] = max(0, nwy1 - H)
+    t["work_x0"] = nwx0; t["work_x1"] = nwx1
+    t["work_y0"] = nwy0; t["work_y1"] = nwy1
+    t["work_w"]  = nwx1 - nwx0; t["work_h"] = nwy1 - nwy0
+    t["batch_work_w"] = new_w;   t["batch_work_h"] = new_h
+    t["core_in_tile_x0"] = t["core_x0"] - nwx0
+    t["core_in_tile_y0"] = t["core_y0"] - nwy0
+    t["core_in_tile_x1"] = t["core_x1"] - nwx0
+    t["core_in_tile_y1"] = t["core_y1"] - nwy0
+    return t
+
+def _build_cosine_feather_mask(h, w, feather_px, has_l, has_r, has_t, has_b, device, dtype):
+    mask = torch.ones((h, w, 1), dtype=dtype, device=device)
+    f = min(feather_px, w // 2, h // 2)
+    if f <= 0:
+        return mask
+    idx = torch.arange(f, dtype=dtype, device=device)
+    ramp = 0.5 * (1.0 - torch.cos(math.pi * idx / max(f, 1)))  # shape [f]
+    if has_l:  mask[:, :f,  :] *= ramp.view(1, f, 1)
+    if has_r:  mask[:, -f:, :] *= ramp.flip(0).view(1, f, 1)
+    if has_t:  mask[:f,  :, :] *= ramp.view(f, 1, 1)
+    if has_b:  mask[-f:, :, :] *= ramp.flip(0).view(f, 1, 1)
+    return mask
+
+def _accumulate_core_tile_feathered(canvas, weights, tile_img, tile_meta, feather_px, cols, rows):
+    _validate_core_meta(tile_meta, tile_img)
+    r, c   = int(tile_meta["row"]), int(tile_meta["col"])
+    has_l  = c > 0;  has_r = c < cols - 1
+    has_t  = r > 0;  has_b = r < rows - 1
+    tcx0, tcy0 = int(tile_meta["core_in_tile_x0"]), int(tile_meta["core_in_tile_y0"])
+    tcx1, tcy1 = int(tile_meta["core_in_tile_x1"]), int(tile_meta["core_in_tile_y1"])
+    cx0, cy0   = int(tile_meta["core_x0"]), int(tile_meta["core_y0"])
+    cx1, cy1   = int(tile_meta["core_x1"]), int(tile_meta["core_y1"])
+    th, tw = tile_img.shape[0], tile_img.shape[1]
+    f = min(feather_px, tcx0, tcy0, tw - tcx1, th - tcy1,
+            max(1, (cx1 - cx0) // 2), max(1, (cy1 - cy0) // 2))
+    f = max(0, f)
+    ex0 = tcx0 - (f if has_l else 0);  ex1 = tcx1 + (f if has_r else 0)
+    ey0 = tcy0 - (f if has_t else 0);  ey1 = tcy1 + (f if has_b else 0)
+    dx0 = max(0, cx0 - (f if has_l else 0));  dy0 = max(0, cy0 - (f if has_t else 0))
+    dx1 = min(canvas.shape[1], cx1 + (f if has_r else 0))
+    dy1 = min(canvas.shape[0], cy1 + (f if has_b else 0))
+    region = tile_img[ey0:ey1, ex0:ex1, :]
+    rh, rw = region.shape[0], region.shape[1]
+    if rh == 0 or rw == 0:
+        return
+    mask = _build_cosine_feather_mask(rh, rw, f, has_l, has_r, has_t, has_b,
+                                       tile_img.device, tile_img.dtype)
+    ah = min(dy1 - dy0, rh); aw = min(dx1 - dx0, rw)
+    canvas[dy0:dy0+ah, dx0:dx0+aw, :] += region[:ah, :aw, :] * mask[:ah, :aw, :]
+    weights[dy0:dy0+ah, dx0:dx0+aw, :] += mask[:ah, :aw, :]
+
 def _sobel_edges_from_luma(luma_hw):
     x = luma_hw.unsqueeze(0).unsqueeze(0)
     kx = torch.tensor([[-1., 0., 1.], [-2., 0., 2.], [-1., 0., 1.]], device=x.device, dtype=x.dtype).view(1, 1, 3, 3)
@@ -420,8 +500,9 @@ class DB9TilePlanV2:
     CATEGORY = "DB9/AIO"
     @classmethod
     def INPUT_TYPES(cls):
-        return {"required": {"image": ("IMAGE",), "min_tile_size": ("INT", {"default": 1536, "min": 512, "max": 4096, "step": 64}), "max_tile_size": ("INT", {"default": 2048, "min": 512, "max": 4096, "step": 64}), "overlap_mode": (["auto", "manual"], {"default": "auto"}), "overlap": ("INT", {"default": 224, "min": 0, "max": 1024, "step": 8}), "prefer_larger_tiles": ("BOOLEAN", {"default": True}), "pad_mode": (["reflect", "replicate", "constant"], {"default": "reflect"}), "base_seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}), "seed_mode": (["fixed", "fixed_with_grid_offset", "row", "col", "golden_jitter"], {"default": "fixed_with_grid_offset"})}, "optional": {"tile_sizes_csv": ("STRING", {"default": "2048,1920,1792,1664,1536"})}}
-    def plan_tiles(self, image, min_tile_size, max_tile_size, overlap_mode, overlap, prefer_larger_tiles, pad_mode, base_seed, seed_mode, tile_sizes_csv="2048,1920,1792,1664,1536"):
+        return {"required": {"image": ("IMAGE",), "min_tile_size": ("INT", {"default": 1536, "min": 512, "max": 4096, "step": 64}), "max_tile_size": ("INT", {"default": 2048, "min": 512, "max": 4096, "step": 64}), "overlap_mode": (["auto", "manual"], {"default": "auto"}), "overlap": ("INT", {"default": 224, "min": 0, "max": 1024, "step": 8}), "prefer_larger_tiles": ("BOOLEAN", {"default": True}), "pad_mode": (["reflect", "replicate", "constant"], {"default": "replicate"}), "base_seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}), "seed_mode": (["fixed", "fixed_with_grid_offset", "row", "col", "golden_jitter"], {"default": "fixed_with_grid_offset"}),
+             "lora_aspect_ratio": (["none", "1:1", "4:3", "3:2", "16:9", "2:1", "9:16", "2:3", "3:4"], {"default": "none"})}, "optional": {"tile_sizes_csv": ("STRING", {"default": "2048,1920,1792,1664,1536"})}}
+    def plan_tiles(self, image, min_tile_size, max_tile_size, overlap_mode, overlap, prefer_larger_tiles, pad_mode, base_seed, seed_mode, tile_sizes_csv="2048,1920,1792,1664,1536", lora_aspect_ratio="none"):
         image = _ensure_bhwc(image); batch, H, W, _ = image.shape
         if batch != 1: raise ValueError("DB9TilePlanV2 expects a single image batch.")
         candidates = _parse_tile_sizes(tile_sizes_csv, min_tile_size, max_tile_size); best = None
@@ -439,7 +520,10 @@ class DB9TilePlanV2:
                 core_box = (xs[col], ys[row], xs[col + 1], ys[row + 1])
                 tiles.append(_build_core_work_tile_meta(W, H, tile_size, ov, row, col, idx, base_seed, seed_mode, core_box=core_box))
                 idx += 1
-        plan = {"version": CORE_WORK_TILE_SCHEMA, "orig_w": W, "orig_h": H, "image_width": W, "image_height": H, "tile_size": tile_size, "work_tile_size": tile_size + ov * 2, "overlap": ov, "stride": stride, "cols": cols, "rows": rows, "total_tiles": len(tiles), "pad_mode": pad_mode, "padding_mode": pad_mode, "seed_mode": seed_mode, "base_seed": int(base_seed), "tiles": tiles}
+        _lora_ratio = _LORA_RATIOS.get(lora_aspect_ratio, 1.0)
+        if abs(_lora_ratio - 1.0) > 0.01:
+            tiles = [_adjust_tile_for_lora_ratio(tile, _lora_ratio, W, H) for tile in tiles]
+        plan = {"version": CORE_WORK_TILE_SCHEMA, "orig_w": W, "orig_h": H, "image_width": W, "image_height": H, "tile_size": tile_size, "work_tile_size": tile_size + ov * 2, "overlap": ov, "stride": stride, "cols": cols, "rows": rows, "total_tiles": len(tiles), "pad_mode": pad_mode, "padding_mode": pad_mode, "seed_mode": seed_mode, "base_seed": int(base_seed), "lora_aspect_ratio": lora_aspect_ratio, "tiles": tiles}
         dbg = f"DB9 CoreWorkTilePlan: orig={W}x{H}, tile_size={tile_size}, work_tile_size={tile_size + ov * 2}, overlap={ov}, grid={cols}x{rows}, total={len(tiles)}, padding_mode={pad_mode}, schema={CORE_WORK_TILE_SCHEMA}"
         return (plan, len(tiles), tile_size, cols, rows, dbg)
 
@@ -485,8 +569,9 @@ class DB9HighlightPreserveCompositeCanny:
     CATEGORY = "DB9/AIO"
     @classmethod
     def INPUT_TYPES(cls):
-        return {"required": {"base_tiles": ("DB9_TILE_IMAGE_STACK",), "highlight_tiles": ("DB9_TILE_IMAGE_STACK",), "tile_plan": ("DB9_TILE_PLAN",), "highlight_blend_mode": (["add", "screen"], {"default": "add"}), "center_priority_strength": ("FLOAT", {"default": 0.95, "min": 0.0, "max": 2.0, "step": 0.01}), "canny_low_thresh": ("FLOAT", {"default": 0.08, "min": 0.0, "max": 5.0, "step": 0.01}), "canny_high_thresh": ("FLOAT", {"default": 0.18, "min": 0.0, "max": 5.0, "step": 0.01}), "border_edge_penalty": ("FLOAT", {"default": 0.85, "min": 0.0, "max": 1.0, "step": 0.01}), "border_start": ("FLOAT", {"default": 0.12, "min": 0.0, "max": 0.95, "step": 0.01}), "highlight_amount": ("FLOAT", {"default": 0.22, "min": 0.0, "max": 2.0, "step": 0.01})}}
-    def composite(self, base_tiles, highlight_tiles, tile_plan, highlight_blend_mode, center_priority_strength, canny_low_thresh, canny_high_thresh, border_edge_penalty, border_start, highlight_amount):
+        return {"required": {"base_tiles": ("DB9_TILE_IMAGE_STACK",), "highlight_tiles": ("DB9_TILE_IMAGE_STACK",), "tile_plan": ("DB9_TILE_PLAN",), "highlight_blend_mode": (["add", "screen"], {"default": "screen"}), "center_priority_strength": ("FLOAT", {"default": 0.95, "min": 0.0, "max": 2.0, "step": 0.01}), "canny_low_thresh": ("FLOAT", {"default": 0.08, "min": 0.0, "max": 5.0, "step": 0.01}), "canny_high_thresh": ("FLOAT", {"default": 0.18, "min": 0.0, "max": 5.0, "step": 0.01}), "border_edge_penalty": ("FLOAT", {"default": 0.85, "min": 0.0, "max": 1.0, "step": 0.01}), "border_start": ("FLOAT", {"default": 0.12, "min": 0.0, "max": 0.95, "step": 0.01}), "highlight_amount": ("FLOAT", {"default": 0.22, "min": 0.0, "max": 2.0, "step": 0.01}),
+            "seam_feather_px": ("INT", {"default": 64, "min": 0, "max": 256, "step": 8})}}
+    def composite(self, base_tiles, highlight_tiles, tile_plan, highlight_blend_mode, center_priority_strength, canny_low_thresh, canny_high_thresh, border_edge_penalty, border_start, highlight_amount, seam_feather_px=64):
         H = int(tile_plan.get("orig_h", tile_plan["image_height"])); W = int(tile_plan.get("orig_w", tile_plan["image_width"]))
         expected = int(tile_plan.get("total_tiles", len(tile_plan["tiles"])))
         actual = int(base_tiles["images"].shape[0])
@@ -497,11 +582,16 @@ class DB9HighlightPreserveCompositeCanny:
         base_canvas = torch.zeros((H, W, 3), dtype=dtype, device=device); base_weights = torch.zeros((H, W, 3), dtype=dtype, device=device)
         hi_canvas = torch.zeros((H, W, 3), dtype=dtype, device=device); hi_weights = torch.zeros((H, W, 3), dtype=dtype, device=device)
         use_core_schema = tile_plan.get("version") == CORE_WORK_TILE_SCHEMA
+        _cols = int(tile_plan.get("cols", 1)); _rows = int(tile_plan.get("rows", 1))
         for i, tile_meta in enumerate(tile_plan["tiles"]):
             base_tile = base_tiles["images"][i].float(); hi_tile = highlight_tiles["images"][i].float()
             if use_core_schema:
-                _accumulate_core_tile(base_canvas, base_weights, base_tile, tile_meta)
-                _accumulate_core_tile(hi_canvas, hi_weights, hi_tile, tile_meta)
+                if seam_feather_px > 0:
+                    _accumulate_core_tile_feathered(base_canvas, base_weights, base_tile, tile_meta, seam_feather_px, _cols, _rows)
+                    _accumulate_core_tile_feathered(hi_canvas, hi_weights, hi_tile, tile_meta, seam_feather_px, _cols, _rows)
+                else:
+                    _accumulate_core_tile(base_canvas, base_weights, base_tile, tile_meta)
+                    _accumulate_core_tile(hi_canvas, hi_weights, hi_tile, tile_meta)
             else:
                 base_mask = _canny_border_suppressed_mask(base_tile, center_strength=center_priority_strength, low_thresh=canny_low_thresh, high_thresh=canny_high_thresh, border_edge_penalty=border_edge_penalty, border_start=border_start)
                 hi_mask = _canny_border_suppressed_mask(hi_tile, center_strength=center_priority_strength + 0.15, low_thresh=max(0.0, canny_low_thresh * 0.9), high_thresh=max(0.0, canny_high_thresh * 0.9), border_edge_penalty=min(1.0, border_edge_penalty + 0.05), border_start=border_start)
@@ -524,6 +614,7 @@ class DB9TileQAPriority:
         return {"required": {"final_image": ("IMAGE",), "tile_plan": ("DB9_TILE_PLAN",), "base_tiles": ("DB9_TILE_IMAGE_STACK",), "ssim_threshold": ("FLOAT", {"default": 0.72, "min": 0.0, "max": 1.0, "step": 0.01}), "l2_threshold": ("FLOAT", {"default": 0.12, "min": 0.0, "max": 10.0, "step": 0.01}), "ghost_threshold": ("FLOAT", {"default": 0.18, "min": 0.0, "max": 10.0, "step": 0.01}), "severity_weight_ssim": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.01}), "severity_weight_l2": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.01}), "severity_weight_ghost": ("FLOAT", {"default": 1.25, "min": 0.0, "max": 10.0, "step": 0.01})}}
     def evaluate(self, final_image, tile_plan, base_tiles, ssim_threshold, l2_threshold, ghost_threshold, severity_weight_ssim, severity_weight_l2, severity_weight_ghost):
         images = base_tiles["images"]; overlap = int(tile_plan["overlap"]); cols = int(tile_plan["cols"]); rows = int(tile_plan["rows"])
+        seam_px = max(8, min(64, overlap // 3))  # boundary-focused comparison zone
         use_core_schema = tile_plan.get("version") == CORE_WORK_TILE_SCHEMA
         metas = tile_plan["tiles"]
         pair_scores = []; failing = set()
@@ -535,7 +626,7 @@ class DB9TileQAPriority:
                     j = index_of(row, col + 1)
                     a = _core_region_from_tile(images[idx], metas[idx]) if use_core_schema else images[idx]
                     b = _core_region_from_tile(images[j], metas[j]) if use_core_schema else images[j]
-                    ov = min(overlap, a.shape[1], b.shape[1])
+                    ov = min(seam_px, a.shape[1], b.shape[1])
                     if ov > 0:
                         a_overlap = a[:, -ov:, :]; b_overlap = b[:, :ov, :]
                         ssim_v = _simple_ssim_proxy(a_overlap, b_overlap); l2_v = _simple_l2(a_overlap, b_overlap); ghost_v = _gradient_mismatch_score(a_overlap, b_overlap)
@@ -546,7 +637,7 @@ class DB9TileQAPriority:
                     j = index_of(row + 1, col)
                     a = _core_region_from_tile(images[idx], metas[idx]) if use_core_schema else images[idx]
                     b = _core_region_from_tile(images[j], metas[j]) if use_core_schema else images[j]
-                    ov = min(overlap, a.shape[0], b.shape[0])
+                    ov = min(seam_px, a.shape[0], b.shape[0])
                     if ov > 0:
                         a_overlap = a[-ov:, :, :]; b_overlap = b[:ov, :, :]
                         ssim_v = _simple_ssim_proxy(a_overlap, b_overlap); l2_v = _simple_l2(a_overlap, b_overlap); ghost_v = _gradient_mismatch_score(a_overlap, b_overlap)
@@ -694,8 +785,10 @@ class DB9TileColorNormalize:
             means.append(mean)
             stds.append(std)
 
-        target_mean = torch.stack(means, dim=0).mean(dim=0)
-        target_std = torch.stack(stds, dim=0).mean(dim=0)
+        stacked_means = torch.stack(means, dim=0)
+        stacked_stds  = torch.stack(stds,  dim=0)
+        target_mean = stacked_means.median(dim=0).values
+        target_std  = stacked_stds.median(dim=0).values
 
         out_imgs = []
         for i in range(imgs.shape[0]):

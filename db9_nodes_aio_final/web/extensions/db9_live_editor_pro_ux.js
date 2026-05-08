@@ -708,12 +708,7 @@ app.registerExtension({
       const actions = row(
         maxBtn,
         btn("💾 Save Now", saveNow, "background:#2a4a2a;border-color:#3a7a3a;"),
-        btn("— Minimize", () => {
-          const body = document.getElementById("db9-panel-body");
-          state.isMinimized = !state.isMinimized;
-          if (body) body.style.display = state.isMinimized ? "none" : "";
-          if (!state.isMinimized) refreshCanvasSize();
-        }),
+        minBtn,
         btn("↩ Reset", resetEditor),
         btn("✕ Close", closeEditor, "background:#4a2020;border-color:#7a3a3a;margin-left:auto;")
       );
