@@ -92,14 +92,10 @@
   "requiredPermissions": {
     "network": {
       "domains": [
-        "http://127.0.0.1:8765",
-        "ws://127.0.0.1:8765",
-        "http://localhost:8765",
-        "ws://localhost:8765",
-        "http://127.0.0.1:*",
-        "ws://127.0.0.1:*",
-        "http://localhost:*",
-        "ws://localhost:*"
+        "127.0.0.1:8765",
+        "localhost:8765",
+        "127.0.0.1",
+        "localhost"
       ]
     },
     "clipboard": "read",
