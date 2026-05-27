@@ -1,7 +1,7 @@
 {
   "id": "com.i8studio.db9.gemini",
   "name": "DB9 Multi-Provider Auto",
-  "version": "0.4.7.1",
+  "version": "0.4.7.2",
   "main": "index.html",
   "manifestVersion": 5,
   "host": [

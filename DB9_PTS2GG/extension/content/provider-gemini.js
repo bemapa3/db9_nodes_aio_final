@@ -1,8 +1,8 @@
-// DB9 Multi-Provider — Gemini provider module
+// DB9 Multi-Provider XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Gemini provider module
 // Loaded first on https://gemini.google.com/*, BEFORE content-script.js.
 // Exposes window.__DB9_PROVIDER = { name, selectors, submitPrompt, uploadImage,
 // waitForOutput, downloadHD, toggleCreateImage, startNewChat, promptInput,
-// installNetworkMonitor, getUploadMonitorOk } — the shared orchestrator in
+// installNetworkMonitor, getUploadMonitorOk } XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX the shared orchestrator in
 // content-script.js calls into this object so the same run-loop works for
 // every provider.
 //
@@ -12,6 +12,7 @@
 (() => {
   if (window.__DB9_PROVIDER && window.__DB9_PROVIDER.name === 'gemini') return;
 
+  try {
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
   const rand = (min, max) => min + Math.random() * (max - min);
   const visible = (e) => e && e.offsetParent !== null;
@@ -104,13 +105,20 @@
   }
 
   function sendButton() {
-    return document.querySelector(
+    return qDeep(
       'button[aria-label*="Send message" i], ' +
       'button[aria-label*="Submit" i], ' +
-      'button[aria-label="Send"]'
-    );
+      'button[aria-label="Send" i], ' +
+      'button[aria-label*="Run" i], ' +
+      'button[aria-label*="Gửi tin nhắn" i], ' +
+      'button[data-test-id*="send" i], ' +
+      'button[data-test-id*="submit" i], ' +
+      'button:has(mat-icon[data-mat-icon-name="arrow_upward"]), ' +
+      '[data-mat-icon-name="arrow_upward"]'
+    ) || qAllDeep('button,[role="button"]').find((el) =>
+      textMatches(el, ['Send', 'Gui', 'Submit', 'Run', 'Gửi']) && !el.disabled
+    ) || null;
   }
-
   function newChatButton() {
     return [...document.querySelectorAll('button,a')].find(b =>
       /new chat/i.test(b.getAttribute('aria-label') || b.textContent || '')
@@ -121,10 +129,42 @@
     return qAll('button[aria-label*="Download full size image" i]').filter(visible);
   }
 
+
+  function generatedVideos() {
+    return qAllDeep('video').filter((video) => {
+      if (!visible(video)) return false;
+      const src = video.currentSrc || video.src || '';
+      const rect = video.getBoundingClientRect();
+      const hasSize = rect.width >= 160 && rect.height >= 120;
+      return hasSize && !!src && !src.startsWith('data:');
+    });
+  }
+
+  function outputKey(el) {
+    return [el.tagName || '', el.currentSrc || el.src || '', el.getAttribute('aria-label') || '', el.getAttribute('alt') || '', el.textContent || ''].join('|');
+  }
+
   function generatedImages() {
-    return qAll('img').filter(i =>
-      visible(i) && /AI generated/i.test(i.alt || '') && i.naturalWidth > 200
-    );
+    return qAllDeep('img').filter((img) => {
+      if (!visible(img)) return false;
+      const width = img.naturalWidth || img.width || 0;
+      const height = img.naturalHeight || img.height || 0;
+      if (width < 200 || height < 200) return false;
+      const src = img.currentSrc || img.src || '';
+      const alt = img.alt || '';
+      if (src.startsWith('data:')) return false;
+      if (/avatar|profile|logo|icon/i.test(alt + ' ' + src)) return false;
+      const looksGenerated = /AI generated|generated image|image generated|do AI tao|do AI to/i.test(alt);
+      const isLargeBlob = src.startsWith('blob:') && width >= 512 && height >= 512;
+      return looksGenerated
+        || isLargeBlob
+        || /googleusercontent\.com|gemini|usercontent|lh3\.google/i.test(src)
+        || width * height >= 160000;
+    });
+  }
+  let baselineImageKeys = new Set();
+  function imageKey(img) {
+    return [img.currentSrc || img.src || '', img.alt || '', img.naturalWidth || img.width || 0, img.naturalHeight || img.height || 0].join('|');
   }
 
   function uploadMenuButton() {
@@ -139,31 +179,27 @@
 
   function toolsButton() {
     return qDeep('button[aria-label="Tools"]')
-        || qDeep('button[aria-label*="Tools" i]')
-        || qAllDeep('button,[role="button"]').find((el) =>
-          textMatches(el, ['Tools'])
-        );
+        || qDeep('button[aria-label="Open tools" i]')
+        || qAllDeep('button.mat-mdc-tooltip-trigger, button.mdc-icon-button').find(b => textMatches(b, ['+']));
   }
 
   function uploadPreviewImages() {
-    return qAll('img').filter((img) =>
-      visible(img) &&
-      img.src.startsWith('blob:') &&
-      img.naturalWidth > 50 &&
-      !/AI generated/i.test(img.alt || '')
-    );
+    return [
+      ...qAll('uploader-file-preview, .file-preview-chip, .uploader-file-preview-container, [data-test-id="uploaded-img"]'),
+      ...qAll('img').filter((img) => img.src.startsWith('blob:') && img.naturalWidth > 50 && !/AI generated/i.test(img.alt || ''))
+    ].filter(visible);
   }
 
   async function dedupeUploadPreviews(maxAllowed = 1) {
     const previews = uploadPreviewImages();
     if (previews.length > maxAllowed) {
-      log(`⚠ upload preview duplicated (${previews.length}), continuing with newest preview`);
+      log('cleaned garbled log');
     }
     return previews.slice(-maxAllowed);
   }
 
   // ===== Page-world fetch/XHR monitor (Gemini-specific: content-push.googleapis.com) =====
-  // v0.3.1 — CSP-safe: load monitor as external file via web_accessible_resources.
+  // v0.3.1 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX CSP-safe: load monitor as external file via web_accessible_resources.
   function installNetworkMonitor() {
     try {
       if (window.__db9MonitorInjected) return;
@@ -179,20 +215,25 @@
   }
 
   // CSP-safe probe: dispatch a request event; page-world listener replies.
-  async function getUploadMonitorOk() {
+  async function getUploadMonitorState() {
     return new Promise((resolve) => {
       try {
         const id = 'db9-probe-' + Math.random().toString(36).slice(2);
         const handler = (ev) => {
           if (!ev.detail || ev.detail.id !== id) return;
           window.removeEventListener('db9-probe-result', handler);
-          resolve(!!ev.detail.ok);
+          resolve({ ok: !!ev.detail.ok, hasFileInput: !!ev.detail.hasFileInput });
         };
         window.addEventListener('db9-probe-result', handler);
         window.dispatchEvent(new CustomEvent('db9-probe-request', { detail: { id } }));
-        setTimeout(() => { try { window.removeEventListener('db9-probe-result', handler); } catch (e) {} resolve(false); }, 250);
-      } catch (e) { resolve(false); }
+        setTimeout(() => { try { window.removeEventListener('db9-probe-result', handler); } catch (e) {} resolve({ ok: false, hasFileInput: false }); }, 250);
+      } catch (e) { resolve({ ok: false, hasFileInput: false }); }
     });
+  }
+
+  async function getUploadMonitorOk() {
+    const s = await getUploadMonitorState();
+    return s.ok;
   }
 
   // ===== Native file input setter (Angular-safe) =====
@@ -229,17 +270,16 @@
     if (btn) {
       btn.click();
       await sleep(800);
-      log('▶️ started new chat');
+      log('cleaned garbled log');
     } else {
-      log('⚠ new chat button not found, trying URL navigation');
-      location.href = 'https://gemini.google.com/app';
-      await sleep(2500);
+      log('cleaned garbled log');
+      await sleep(500);
     }
   }
 
   async function toggleCreateImage() {
     const active = isCreateImageActive();
-    if (active) { log('✓ Create image mode already on'); return; }
+    if (active) { log('cleaned garbled log'); return; }
     let btn = createImageToggle();
     if (!btn) {
       const tools = toolsButton();
@@ -252,9 +292,9 @@
     if (btn) {
       realClick(btn);
       await sleep(500);
-      log('✓ enabled Create image mode');
+      log('cleaned garbled log');
     } else {
-      log('⚠ Create image toggle not found (may be auto-detect on image input)');
+      log('cleaned garbled log');
     }
   }
 
@@ -291,7 +331,7 @@
 
     // Filter: prefer inputs whose `accept` allows images (or has no accept at all).
     // Gemini typically visually hides the input (display:none / offsetParent null)
-    // but the native setter still works — so offsetParent is NOT a disqualifier.
+    // but the native setter still works XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX so offsetParent is NOT a disqualifier.
     const scored = found.map(el => {
       const accept = (el.getAttribute('accept') || '').toLowerCase();
       let score = 0;
@@ -305,65 +345,121 @@
     return scored[0].el;
   }
 
-  // Upload primary method: open menu → click Upload files → native setter on hidden input
-  async function uploadViaMenu(file) {
-    // v0.4.7.1: recorder path + REAL MouseEvent clicks + longer poll + multiple file-input re-scan
-    log('📎 menu path: Tools → Open upload file menu → Upload images & files');
+  // Upload primary method: open menu -> click Upload files -> native setter on hidden input
+  async function uploadViaMenu(file, base64) {
+    // v0.4.7.2: robust tools selection + popover menu item search with retry polling + local safety checks
+    log('menu path: Tools -> Open upload file menu -> Upload images & files -> native setter on hidden input');
 
-    // 1. Tools button — may already be expanded; try anyway
-    const toolsBtn = toolsButton();
-    if (toolsBtn) { realClick(toolsBtn); await sleep(400); }
+    const input = promptInput();
+    let inputArea = input ? (input.closest('chat-input') || input.closest('uploader') || input.closest('rich-textarea')) : null;
+    if (!inputArea && input) {
+      let p = input;
+      for (let i = 0; i < 6 && p.parentElement; i++) p = p.parentElement;
+      inputArea = p;
+    }
+    
+    // Strict safety check: do not search entire page if prompt input itself is not found/active
+    if (!inputArea) {
+      log('inputArea not found, aborting upload menu path to prevent dangerous clicks');
+      return false;
+    }
 
-    // 2. Open upload file menu
-    const openUpload = qDeep('[aria-label="Open upload file menu" i]')
-      || qDeep('button[aria-label*="upload" i][aria-label*="menu" i]')
-      || qDeep('uploader button');
-    if (openUpload) { realClick(openUpload); await sleep(500); }
-    else { log('⚠ "Open upload file menu" not found'); }
+    // 1. Tools / Plus button - look for any plus, upload, or attach buttons specifically within inputArea
+    const toolsBtn = qDeep('button[aria-label*="upload" i]', inputArea)
+      || qDeep('button[aria-label*="tải" i]', inputArea)
+      || qDeep('button[aria-label*="tệp" i]', inputArea)
+      || qDeep('button[aria-label*="file" i]', inputArea)
+      || qDeep('button[aria-label*="Add" i]', inputArea)
+      || qDeep('button[aria-label*="Thêm" i]', inputArea)
+      || qDeep('button[aria-label*="công cụ" i]', inputArea)
+      || qDeep('button[aria-label*="Tools" i]', inputArea)
+      || qAllDeep('button', inputArea).find(b => textMatches(b, ['+', 'add', 'attach', 'thêm', 'tải']))
+      || toolsButton(); // fallback
 
-    // 3. Click "Upload images & files"
-    const uploadItem = qDeep('[data-test-id="uploader-images-files-button-advanced"]')
-      || qDeep('[data-test-id="local-images-files-uploader-button"]')
-      || qDeep('[data-test-id*="uploader-images"]')
-      || qDeep('[data-test-id*="local-images"]')
-      || qAllDeep('button,[role="menuitem"],toolbox-drawer-item button').find((el) =>
-        textMatches(el, ['Upload files', 'Upload images', 'Tai len tep', 'Tai len anh'])
-      );
+    if (toolsBtn) {
+      log('Clicking tools/plus button to open menu...');
+      realClick(toolsBtn);
+      await sleep(400);
+    } else {
+      log('Tools button not found, checking if upload menu is already open...');
+    }
+
+    // 2. Scan for "Upload images & files" (Tải tệp lên) item inside the entire document (since overlay menus are attached to body)
+    // We poll for up to 1.5s in case of anims
+    let uploadItem = null;
+    const menuStart = Date.now();
+    while (Date.now() - menuStart < 1500) {
+      uploadItem = qDeep('[data-test-id="uploader-images-files-button-advanced"]')
+        || qDeep('[data-test-id="local-images-files-uploader-button"]')
+        || qDeep('[data-test-id*="uploader-images"]')
+        || qDeep('[data-test-id*="local-images"]')
+        || qAllDeep('span.menu-text.gem-menu-item-label, div.label.gem-menu-item-label, button, [role="menuitem"], toolbox-drawer-item button, [role="menuitem"] span, .mdc-list-item__primary-text').find((el) =>
+          textMatches(el, ['Upload', 'Tai len', 'Tải tệp lên', 'Tải lên'])
+        );
+      if (uploadItem) break;
+      await sleep(100);
+    }
+
     if (uploadItem) {
-      const directInput = qDeep('input[type="file"]', uploadItem) || qDeep('input', uploadItem);
+      log('Found upload menu item, checking for direct input or clicking...');
+      
+      // Upgrade: ascend to the actual clickable button/menuitem container to ensure event handler hits
+      let clickable = uploadItem;
+      const parentBtn = uploadItem.closest('button, [role="menuitem"], [role="button"], toolbox-drawer-item');
+      if (parentBtn) {
+        clickable = parentBtn;
+      }
+
+      const directInput = qDeep('input[type="file"]', clickable) || qDeep('input', clickable);
       if (directInput) {
         const dt = new DataTransfer();
         dt.items.add(file);
         setNativeFiles(directInput, dt.files);
-        log('📎 direct file input found inside upload item');
+        log('direct file input found inside upload item');
         return true;
       }
-      realClick(uploadItem);
+      realClick(clickable);
       await sleep(500);
+    } else {
+      log('Upload menu item ("Tải tệp lên") not found after waiting 1.5s');
     }
 
-    // 4. Poll for file input up to 5s — Angular injects into cdk-overlay/shadow late
-    let fileInput = null;
+    // 3. Poll for page-world file input up to 5s
+    let captured = false;
     const deadline = Date.now() + 5000;
     while (Date.now() < deadline) {
-      fileInput = findFileInput();
-      if (fileInput) break;
+      const state = await getUploadMonitorState();
+      if (state.hasFileInput) {
+        captured = true;
+        break;
+      }
       await sleep(120);
     }
+    
+    if (captured) {
+      window.dispatchEvent(new CustomEvent('db9-inject-file-base64', {
+        detail: { base64: base64, mime: file.type, filename: file.name }
+      }));
+      log('file injected via page-world base64 event');
+      return true;
+    }
+
+    // 4. Fallback to DOM search if page-world didn't catch it
+    let fileInput = findFileInput();
     if (!fileInput) {
-      log('⚠ no <input type="file"> found after 5s polling (including shadow roots)');
+      log('no <input type="file"> found after 5s polling');
       return false;
     }
 
     const dt = new DataTransfer();
     dt.items.add(file);
     setNativeFiles(fileInput, dt.files);
-    log('📎 file injected via native setter on ' + (fileInput.id || fileInput.name || '<unnamed input>'));
+    log('file injected via native setter on ' + (fileInput.id || fileInput.name || '<unnamed input>'));
     return true;
   }
 
   async function uploadImage(base64, mime) {
-    // v0.4.7.1: SEQUENTIAL — try one method, wait, only fallback if upload NOT confirmed.
+    // v0.4.7.1: SEQUENTIAL XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX try one method, wait, only fallback if upload NOT confirmed.
     // Avoids "7 candidates" duplicate uploads.
     const input = promptInput();
     if (!input) throw new Error('prompt input not found');
@@ -371,44 +467,52 @@
     await sleep(150);
 
     try { window.dispatchEvent(new CustomEvent('db9-reset-upload')); } catch (e) {}
+    try { window.dispatchEvent(new CustomEvent('db9-automation-start')); } catch (e) {}
+    
     const file = base64ToFile(base64, mime);
 
-    // METHOD 3 first (recorder-validated path) — clean & deterministic
     try {
-      const ok = await uploadViaMenu(file);
-      if (ok) {
-        // wait long enough to let the upload network round-trip
-        for (let i = 0; i < 16; i++) {
+      // METHOD 3 first (recorder-validated path) XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX clean & deterministic
+      try {
+        const ok = await uploadViaMenu(file, base64);
+        if (ok) {
+          // wait long enough to let the upload network round-trip
+          for (let i = 0; i < 16; i++) {
+            await sleep(300);
+            if (await quickPreviewCheck()) {
+              await dedupeUploadPreviews(1);
+              log('cleaned garbled log');
+              return;
+            }
+          }
+        }
+      } catch (e) { log('method 3 threw: ' + e.message); }
+
+      // FALLBACK: paste (only if method 3 failed to confirm)
+      log('cleaned garbled log');
+      try {
+        const dt1 = new DataTransfer();
+        dt1.items.add(file);
+        const evt = new ClipboardEvent('paste', { bubbles: true, cancelable: true, composed: true });
+        Object.defineProperty(evt, 'clipboardData', { value: dt1 });
+        input.dispatchEvent(evt);
+        log('cleaned garbled log');
+        for (let i = 0; i < 12; i++) {
           await sleep(300);
           if (await quickPreviewCheck()) {
             await dedupeUploadPreviews(1);
-            log('✓ upload confirmed via menu+native');
+            log('cleaned garbled log');
             return;
           }
         }
-      }
-    } catch (e) { log('method 3 threw: ' + e.message); }
+      } catch (e) { log('paste threw: ' + e.message); }
 
-    // FALLBACK: paste (only if method 3 failed to confirm)
-    log('⚠ method 3 not confirmed — trying paste fallback');
-    try {
-      const dt1 = new DataTransfer();
-      dt1.items.add(file);
-      const evt = new ClipboardEvent('paste', { bubbles: true, cancelable: true, composed: true });
-      Object.defineProperty(evt, 'clipboardData', { value: dt1 });
-      input.dispatchEvent(evt);
-      log('📎 paste dispatched');
-      for (let i = 0; i < 12; i++) {
-        await sleep(300);
-        if (await quickPreviewCheck()) {
-          await dedupeUploadPreviews(1);
-          log('✓ upload confirmed via paste fallback');
-          return;
-        }
-      }
-    } catch (e) { log('paste threw: ' + e.message); }
-
-    log('⚠ all upload methods exhausted, will wait for monitor');
+      log('cleaned garbled log');
+      // IF nothing worked, we still do a final wait, which will throw if missing
+      await waitForUploadPreview(30000);
+    } finally {
+      try { window.dispatchEvent(new CustomEvent('db9-automation-end')); } catch (e) {}
+    }
   }
 
   async function quickPreviewCheck() {
@@ -421,16 +525,17 @@
     const start = Date.now();
     while (Date.now() - start < timeoutMs) {
       if (await getUploadMonitorOk()) {
-        log('✓ upload confirmed by page-world fetch/XHR monitor');
+        log('cleaned garbled log');
         return true;
       }
       const candidates = [
+        ...qAll('uploader-file-preview, .file-preview-chip, .uploader-file-preview-container, [data-test-id="uploaded-img"]').filter(visible),
         ...qAll('img').filter(i => visible(i) && /uploaded image preview|upload/i.test(i.alt || '')),
         ...qAll('[data-test-id*="upload"], [aria-label*="uploaded" i], [class*="upload-preview"]').filter(visible),
         ...qAll('img').filter(i => visible(i) && i.src.startsWith('blob:') && i.naturalWidth > 50 && !/AI generated/i.test(i.alt || ''))
       ];
       if (candidates.length > 0) {
-        log(`✓ upload preview detected (${candidates.length} candidates)`);
+        log('cleaned garbled log');
         return true;
       }
       await sleep(500);
@@ -446,128 +551,142 @@
 
     const btn = sendButton();
     if (btn && !btn.disabled) {
-      btn.click();
-      log('▶️ submit clicked');
+      realClick(btn);
+      log('submit clicked');
       return;
     }
     input.focus();
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    log('▶️ submit via Enter key');
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true, cancelable: true }));
+    input.dispatchEvent(new KeyboardEvent('keypress', { key: 'Enter', code: 'Enter', bubbles: true, cancelable: true }));
+    input.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', bubbles: true, cancelable: true }));
+    log('submit via Enter key');
   }
-
-  async function waitForOutput(baselineCount, timeoutMs = 180000) {
-    // v0.4.7.1: wait for HD — poll until image res stabilizes (no growth for 3 consecutive checks)
+  async function waitForOutput(baselineCount, timeoutMs = 420000) {
     const start = Date.now();
-    let firstSeenAt = 0;
+    const baselineOutputs = new Set([...generatedImages(), ...generatedVideos()].map(outputKey));
+    let firstImageSeenAt = 0;
     let lastArea = 0;
     let stableCount = 0;
+    let lastWaitLog = 0;
     while (Date.now() - start < timeoutMs) {
+      const videos = generatedVideos().filter((video) => !baselineOutputs.has(outputKey(video)));
+      if (videos.length) {
+        const bestVideo = videos[videos.length - 1];
+        log('got generated video output');
+        return bestVideo;
+      }
+
       const imgs = generatedImages();
-      if (imgs.length > baselineCount) {
-        if (!firstSeenAt) {
-          firstSeenAt = Date.now();
-          log('▶️ first image appeared, waiting for HD to load...');
+      if (Date.now() - lastWaitLog > 10000) {
+        lastWaitLog = Date.now();
+        log('waiting for generated output: images=' + imgs.length + ', videos=' + generatedVideos().length + ', baseline images=' + baselineCount);
+      }
+      const newImgs = imgs.filter((img) => !baselineImageKeys.has(imageKey(img)) && !baselineOutputs.has(outputKey(img)));
+      if (newImgs.length > 0 || imgs.length > baselineCount) {
+        if (!firstImageSeenAt) {
+          firstImageSeenAt = Date.now();
+          log('first image appeared, waiting for full media to load');
         }
-        const newOnes = imgs.slice(baselineCount);
+        const newOnes = newImgs.length > 0 ? newImgs : imgs.slice(baselineCount);
         const best = newOnes.sort((a, b) => (b.naturalWidth * b.naturalHeight) - (a.naturalWidth * a.naturalHeight))[0];
         const area = best.naturalWidth * best.naturalHeight;
         if (area > lastArea) {
           lastArea = area;
           stableCount = 0;
-          log(`  ⏳ loading ${best.naturalWidth}x${best.naturalHeight}...`);
+          log(`image loading ${best.naturalWidth}x${best.naturalHeight}`);
         } else if (area === lastArea && area > 0) {
           stableCount++;
         }
-        // Accept when: stable for 3 polls OR waited 8s since first-seen OR already at >= 1024x1024
         const hdEnough = (best.naturalWidth >= 1024 && best.naturalHeight >= 1024);
         const stableWaited = stableCount >= 3;
-        const longWaited = firstSeenAt && (Date.now() - firstSeenAt > 8000);
+        const longWaited = firstImageSeenAt && (Date.now() - firstImageSeenAt > 8000);
         if (stableWaited || longWaited || hdEnough) {
-          log(`✅ got generated image ${best.naturalWidth}x${best.naturalHeight}`);
+          log(`got generated image ${best.naturalWidth}x${best.naturalHeight}`);
           return best;
         }
       }
       await sleep(1000);
     }
-    throw new Error('no generated image within ' + (timeoutMs / 1000) + 's');
+    throw new Error('no generated image/video within ' + (timeoutMs / 1000) + 's');
   }
 
-  async function downloadHD(imgEl) {
-    // v0.4.7.1: use REAL "Download generated image" button from recorder
-    // data-test-id="download-generated-image-button" triggers native download of full-res image
-    let targetSrc = imgEl.src;
-
-    // Try: find the download button associated with this image, click it, intercept blob
-    try {
-      // Find any visible download-generated-image-button
-      const dlBtn = document.querySelector('[data-test-id="download-generated-image-button"]')
-        || document.querySelector('button[aria-label*="Download" i][aria-label*="image" i]');
-      if (dlBtn) {
-        // Intercept: monkey-patch <a>.click() to capture the object URL before download triggers
-        let capturedUrl = null;
-        const origCreate = URL.createObjectURL;
-        URL.createObjectURL = function(obj) {
-          const url = origCreate.apply(this, arguments);
-          try { if (obj instanceof Blob) capturedUrl = url; } catch (e) {}
-          return url;
-        };
-        try { dlBtn.click(); } catch (e) {}
-        await sleep(600);
-        URL.createObjectURL = origCreate;
-        if (capturedUrl) {
-          log('  ✓ captured download blob URL');
-          const resp = await fetch(capturedUrl);
-          const blob = await resp.blob();
-          return await blobToBase64(blob);
-        }
+  async function downloadHD(mediaEl) {
+    if ((mediaEl.tagName || '').toLowerCase() === 'video') {
+      let targetSrc = mediaEl.currentSrc || mediaEl.src;
+      if (!targetSrc) {
+        const source = mediaEl.querySelector('source[src]');
+        targetSrc = source && source.src;
       }
-    } catch (e) { log('  ⚠ download-button path: ' + e.message); }
+      if (!targetSrc) throw new Error('generated video has no downloadable src');
+      const resp = await fetch(targetSrc);
+      if (!resp.ok) throw new Error('video download HTTP ' + resp.status);
+      const blob = await resp.blob();
+      return await blobToBase64(blob, blob.type || 'video/mp4');
+    }
 
-    // Fallback: open lightbox, grab biggest <img>
-    try {
-      imgEl.scrollIntoView({ block: 'center' });
-      imgEl.click();
-      await sleep(700);
-      const lbImgs = Array.from(document.querySelectorAll('[role="dialog"] img, .lightbox img, .image-viewer img'))
-        .filter(i => i.naturalWidth > 512);
-      if (lbImgs.length) {
-        const big = lbImgs.sort((a,b) => (b.naturalWidth*b.naturalHeight) - (a.naturalWidth*a.naturalHeight))[0];
-        if (big.naturalWidth > imgEl.naturalWidth) {
-          targetSrc = big.src;
-          log('  ✓ lightbox HD: ' + big.naturalWidth + 'x' + big.naturalHeight);
-        }
-      }
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-      await sleep(200);
-    } catch (e) {}
-
-    // Strip size suffix
+    let targetSrc = mediaEl.currentSrc || mediaEl.src;
     if (/googleusercontent\.com\//.test(targetSrc) && /=[swh]\d+/.test(targetSrc)) {
       targetSrc = targetSrc.replace(/=[swh]\d+[^?&]*/g, '=s0');
-      log('  ✓ stripped size suffix');
+      log('stripped size suffix');
     }
 
     const resp = await fetch(targetSrc);
+    if (!resp.ok) throw new Error('image download HTTP ' + resp.status);
     const blob = await resp.blob();
-    return await blobToBase64(blob);
+    return await blobToBase64(blob, blob.type || 'image/png');
   }
 
-  async function blobToBase64(blob) {
+  async function blobToTransparentPngBase64(blob) {
+    return await blobToBase64(blob, blob.type || 'image/png');
+  }
+
+  async function blobToBase64(blob, forcedMime) {
     return await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const dataUrl = reader.result;
-        const base64 = dataUrl.split(',')[1];
-        resolve({ base64, mime: blob.type || 'image/png' });
+        const dataUrl = String(reader.result || '');
+        const base64 = dataUrl.split(',')[1] || '';
+        resolve({ base64, mime: forcedMime || blob.type || 'application/octet-stream' });
       };
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
   }
+  function countBaseline() {
+    const images = generatedImages();
+    const videos = generatedVideos();
+    baselineImageKeys = new Set(images.map(imageKey));
+    log(`baseline: ${images.length} generated images, ${videos.length} generated videos`);
+    return images.length + videos.length;
+  }
 
-  function countBaseline() { return generatedImages().length; }
+  async function ensureCloseImageViewer() {
+    try {
+      const backBtn = qDeep('button[aria-label*="Back" i]')
+        || qDeep('button[aria-label*="Quay lại" i]')
+        || qDeep('button[aria-label*="Close" i]')
+        || qDeep('button[aria-label*="Đóng" i]')
+        || qDeep('button[aria-label*="close" i]')
+        || qAllDeep('button').find(b => {
+          const icon = b.querySelector('mat-icon');
+          const name = icon?.getAttribute('data-mat-icon-name') || icon?.textContent || '';
+          return /arrow_back|close/i.test(name) || textMatches(b, ['arrow_back', 'close', 'quay lai', 'dong']);
+        });
+
+      const viewerActive = qDeep('.immersive-viewer, [class*="immersive"], [class*="viewer-container"], [class*="lightbox"]');
+
+      if (backBtn && (viewerActive || visible(backBtn))) {
+        log('Immersive image viewer detected. Clicking back button to return to chat...');
+        realClick(backBtn);
+        await sleep(1200);
+      }
+    } catch (e) {
+      log('ensureCloseImageViewer error: ' + e.message);
+    }
+  }
 
   async function waitReady(timeoutMs = 10000) {
+    await ensureCloseImageViewer();
     const start = Date.now();
     while (Date.now() - start < timeoutMs) {
       if (promptInput()) return true;
@@ -593,4 +712,7 @@
   };
 
   log('provider module loaded');
+  } catch (err) {
+    console.error('[DB9-Gemini] FATAL ERROR IN PROVIDER INIT:', err);
+  }
 })();
