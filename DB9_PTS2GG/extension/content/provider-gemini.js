@@ -111,6 +111,7 @@
       'button[aria-label="Send" i], ' +
       'button[aria-label*="Run" i], ' +
       'button[aria-label*="Gửi tin nhắn" i], ' +
+      'button[data-test-id="send-button"], ' +
       'button[data-test-id*="send" i], ' +
       'button[data-test-id*="submit" i], ' +
       'button:has(mat-icon[data-mat-icon-name="arrow_upward"]), ' +
@@ -178,8 +179,13 @@
   }
 
   function toolsButton() {
-    return qDeep('button[aria-label="Tools"]')
+    // v0.4.7.3: added Vietnamese "Nội dung tải lên và công cụ" (confirmed DOM evidence 2026-05-27)
+    return qDeep('button[aria-label="Nội dung tải lên và công cụ"]')
+        || qDeep('button[aria-label*="tải lên và công cụ" i]')
+        || qDeep('button[aria-label*="upload and tools" i]')
+        || qDeep('button[aria-label="Tools"]')
         || qDeep('button[aria-label="Open tools" i]')
+        || qDeep('button[aria-label*="công cụ" i]')
         || qAllDeep('button.mat-mdc-tooltip-trigger, button.mdc-icon-button').find(b => textMatches(b, ['+']));
   }
 
@@ -193,7 +199,15 @@
   async function dedupeUploadPreviews(maxAllowed = 1) {
     const previews = uploadPreviewImages();
     if (previews.length > maxAllowed) {
-      log('cleaned garbled log');
+      log(`deduping ${previews.length} upload previews, keeping last ${maxAllowed}`);
+      // Remove excess previews by clicking their delete/close buttons
+      const excess = previews.slice(0, previews.length - maxAllowed);
+      for (const preview of excess) {
+        const closeBtn = preview.querySelector('button[aria-label*="Remove" i], button[aria-label*="Delete" i], button[aria-label*="Xóa" i], button[aria-label*="close" i]')
+          || preview.closest('[data-test-id="uploaded-img"]')?.querySelector('button')
+          || preview.parentElement?.querySelector('button');
+        if (closeBtn) { realClick(closeBtn); await sleep(200); }
+      }
     }
     return previews.slice(-maxAllowed);
   }
@@ -270,16 +284,16 @@
     if (btn) {
       btn.click();
       await sleep(800);
-      log('cleaned garbled log');
+      log('new chat started');
     } else {
-      log('cleaned garbled log');
+      log('new chat button not found, reloading page');
       await sleep(500);
     }
   }
 
   async function toggleCreateImage() {
     const active = isCreateImageActive();
-    if (active) { log('cleaned garbled log'); return; }
+    if (active) { log('create image already active'); return; }
     let btn = createImageToggle();
     if (!btn) {
       const tools = toolsButton();
@@ -292,9 +306,9 @@
     if (btn) {
       realClick(btn);
       await sleep(500);
-      log('cleaned garbled log');
+      log('create image toggled');
     } else {
-      log('cleaned garbled log');
+      log('create image toggle button not found');
     }
   }
 
@@ -347,39 +361,17 @@
 
   // Upload primary method: open menu -> click Upload files -> native setter on hidden input
   async function uploadViaMenu(file, base64) {
-    // v0.4.7.2: robust tools selection + popover menu item search with retry polling + local safety checks
-    log('menu path: Tools -> Open upload file menu -> Upload images & files -> native setter on hidden input');
+    // v0.4.7.3: use toolsButton() directly (DOM-confirmed aria-label "Nội dung tải lên và công cụ")
+    // inputArea guard removed — Gemini no longer uses <chat-input> wrapper element
+    log('menu path: Tools ("Nội dung tải lên và công cụ") -> "Tải tệp lên" -> native setter on hidden input');
 
-    const input = promptInput();
-    let inputArea = input ? (input.closest('chat-input') || input.closest('uploader') || input.closest('rich-textarea')) : null;
-    if (!inputArea && input) {
-      let p = input;
-      for (let i = 0; i < 6 && p.parentElement; i++) p = p.parentElement;
-      inputArea = p;
-    }
-    
-    // Strict safety check: do not search entire page if prompt input itself is not found/active
-    if (!inputArea) {
-      log('inputArea not found, aborting upload menu path to prevent dangerous clicks');
-      return false;
-    }
-
-    // 1. Tools / Plus button - look for any plus, upload, or attach buttons specifically within inputArea
-    const toolsBtn = qDeep('button[aria-label*="upload" i]', inputArea)
-      || qDeep('button[aria-label*="tải" i]', inputArea)
-      || qDeep('button[aria-label*="tệp" i]', inputArea)
-      || qDeep('button[aria-label*="file" i]', inputArea)
-      || qDeep('button[aria-label*="Add" i]', inputArea)
-      || qDeep('button[aria-label*="Thêm" i]', inputArea)
-      || qDeep('button[aria-label*="công cụ" i]', inputArea)
-      || qDeep('button[aria-label*="Tools" i]', inputArea)
-      || qAllDeep('button', inputArea).find(b => textMatches(b, ['+', 'add', 'attach', 'thêm', 'tải']))
-      || toolsButton(); // fallback
+    // 1. Find and click the Tools/Upload button (searches full document via toolsButton())
+    const toolsBtn = toolsButton();
 
     if (toolsBtn) {
-      log('Clicking tools/plus button to open menu...');
+      log('Clicking tools button: ' + (toolsBtn.getAttribute('aria-label') || toolsBtn.innerText.trim()));
       realClick(toolsBtn);
-      await sleep(400);
+      await sleep(500);
     } else {
       log('Tools button not found, checking if upload menu is already open...');
     }
@@ -481,7 +473,7 @@
             await sleep(300);
             if (await quickPreviewCheck()) {
               await dedupeUploadPreviews(1);
-              log('cleaned garbled log');
+              log('upload confirmed via menu method');
               return;
             }
           }
@@ -489,25 +481,25 @@
       } catch (e) { log('method 3 threw: ' + e.message); }
 
       // FALLBACK: paste (only if method 3 failed to confirm)
-      log('cleaned garbled log');
+      log('method 3 failed or no preview, falling back to clipboard paste');
       try {
         const dt1 = new DataTransfer();
         dt1.items.add(file);
         const evt = new ClipboardEvent('paste', { bubbles: true, cancelable: true, composed: true });
         Object.defineProperty(evt, 'clipboardData', { value: dt1 });
         input.dispatchEvent(evt);
-        log('cleaned garbled log');
+        log('paste event dispatched');
         for (let i = 0; i < 12; i++) {
           await sleep(300);
           if (await quickPreviewCheck()) {
             await dedupeUploadPreviews(1);
-            log('cleaned garbled log');
+            log('upload confirmed via paste method');
             return;
           }
         }
       } catch (e) { log('paste threw: ' + e.message); }
 
-      log('cleaned garbled log');
+      log('all upload methods failed, waiting for waitForUploadPreview');
       // IF nothing worked, we still do a final wait, which will throw if missing
       await waitForUploadPreview(30000);
     } finally {
@@ -525,7 +517,7 @@
     const start = Date.now();
     while (Date.now() - start < timeoutMs) {
       if (await getUploadMonitorOk()) {
-        log('cleaned garbled log');
+        log('upload confirmed via network monitor');
         return true;
       }
       const candidates = [
@@ -535,7 +527,7 @@
         ...qAll('img').filter(i => visible(i) && i.src.startsWith('blob:') && i.naturalWidth > 50 && !/AI generated/i.test(i.alt || ''))
       ];
       if (candidates.length > 0) {
-        log('cleaned garbled log');
+        log('upload preview element detected in DOM');
         return true;
       }
       await sleep(500);
