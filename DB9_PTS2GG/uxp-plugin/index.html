@@ -2,27 +2,27 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>DB9 Multi-Provider</title>
+  <title>DB9 PTS Inpaint Test</title>
   <style>
     :root {
-      --db9-bg: #0f141a;
-      --db9-bg-2: #151d26;
-      --db9-panel: #1b2530;
-      --db9-panel-2: #22303d;
-      --db9-surface: #121922;
-      --db9-border: #314150;
-      --db9-border-strong: #43607a;
-      --db9-text: #edf3fb;
-      --db9-muted: #93a7bc;
-      --db9-accent: #4da3ff;
-      --db9-accent-2: #79d7ff;
-      --db9-ok: #37c38f;
-      --db9-danger: #ff6b6b;
-      --db9-shadow: 0 14px 32px rgba(0, 0, 0, 0.24);
-      --db9-radius: 10px;
-      --db9-radius-sm: 6px;
+      --db9-bg: #070a0e;
+      --db9-bg-2: #0d1117;
+      --db9-panel: #121720;
+      --db9-panel-2: #1b222d;
+      --db9-surface: #0a0d13;
+      --db9-border: rgba(255, 255, 255, 0.07);
+      --db9-border-strong: rgba(255, 255, 255, 0.16);
+      --db9-text: #f0f3f6;
+      --db9-muted: #6f7f91;
+      --db9-accent: #3b82f6;
+      --db9-accent-2: #60a5fa;
+      --db9-ok: #10b981;
+      --db9-danger: #ef4444;
+      --db9-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      --db9-radius: 2px;
+      --db9-radius-sm: 2px;
     }
-    /* ===== DB9 v0.4.7 dark layout ===== */
+    /* ===== DB9 v0.4.7 Obsidian layout ===== */
     html, body {
       height: 100%;
       margin: 0;
@@ -33,13 +33,11 @@
     body {
       padding: 12px;
       padding-bottom: 48px;
-      font-family: "Segoe UI", "Adobe Clean", system-ui, sans-serif;
-      font-size: 12px;
-      line-height: 1.45;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Adobe Clean", "SF Pro Text", system-ui, sans-serif;
+      font-size: 11px;
+      line-height: 1.5;
       color: var(--db9-text);
-      background:
-        radial-gradient(circle at top left, rgba(77, 163, 255, 0.14), transparent 34%),
-        linear-gradient(180deg, var(--db9-bg-2), var(--db9-bg));
+      background: var(--db9-bg);
       overflow-y: auto;
       overflow-x: hidden;
     }
@@ -47,207 +45,203 @@
       font-family: inherit;
       font-size: 11px;
       color: var(--db9-text);
-      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--db9-border);
       border-radius: var(--db9-radius-sm);
-      padding: 7px 11px;
+      padding: 6px 10px;
       cursor: pointer;
-      min-height: 32px;
-      transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+      min-height: 28px;
+      transition: background 120ms ease, border-color 120ms ease;
     }
     button:hover:not(:disabled) {
-      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+      background: rgba(255, 255, 255, 0.08);
       border-color: var(--db9-border-strong);
-      transform: translateY(-1px);
     }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button:disabled { opacity: 0.35; cursor: not-allowed; }
     textarea {
       width: 100%;
       min-height: 60px;
       resize: vertical;
-      background: rgba(12, 18, 25, 0.9);
+      background: var(--db9-surface);
       color: var(--db9-text);
       border: 1px solid var(--db9-border);
       border-radius: var(--db9-radius-sm);
-      padding: 8px 9px;
+      padding: 7px 9px;
       font-family: inherit;
-      font-size: 12px;
+      font-size: 11px;
+      line-height: 1.4;
     }
-    textarea:focus { outline: none; border-color: var(--db9-accent); box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.16); }
+    textarea:focus { outline: none; border-color: var(--db9-accent); }
     input[type="radio"] { accent-color: var(--db9-accent); vertical-align: middle; }
-    label { font-size: 11px; color: #d7e2ef; cursor: pointer; padding: 2px 6px; }
+    label { font-size: 11px; color: #cbd5e1; cursor: pointer; padding: 2px 4px; }
     .db9-radio-row { display: flex; flex-wrap: wrap; gap: 4px; }
     details summary::-webkit-details-marker { color: var(--db9-muted); }
+    
     /* Header */
     .db9-header {
       display: flex; align-items: center; justify-content: space-between;
       gap: 10px;
-      padding: 10px 12px;
-      margin-bottom: 10px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
       border: 1px solid var(--db9-border);
-      border-radius: 12px;
-      background: linear-gradient(180deg, rgba(34, 48, 61, 0.96), rgba(20, 29, 37, 0.96));
+      border-radius: var(--db9-radius);
+      background: var(--db9-panel);
       box-shadow: var(--db9-shadow);
     }
-    #db9-title { font-size: 0; font-weight: 700; letter-spacing: 0.3px; }
+    #db9-title { font-size: 0; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
     #db9-title::before {
-      content: "DB9 Multi-Provider";
-      font-size: 14px;
+      content: "DB9 PTS Inpaint Test";
+      font-size: 11px;
       color: var(--db9-text);
     }
-    .db9-header-status { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+    .db9-header-status { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
     .db9-dot {
       display: inline-block;
-      width: 10px; height: 10px; border-radius: 50%;
-      margin: 0 4px;
+      width: 6px; height: 6px; border-radius: 50%;
+      margin: 0 2px;
       vertical-align: middle;
-      background: #5f7388;
-      box-shadow: 0 0 0 2px rgba(255,255,255,0.06);
+      background: #475569;
     }
-    .db9-dot-off { background: #5f7388; }
+    .db9-dot-off { background: #475569; }
     .db9-dot-on  { background: var(--db9-ok); }
     .db9-dot-busy{ background: var(--db9-accent); }
     .db9-dot-err { background: var(--db9-danger); }
-    .db9-dot-label { font-size: 10px; color: var(--db9-muted); margin-right: 4px; }
+    .db9-dot-label { font-size: 9px; color: var(--db9-muted); margin-right: 2px; font-weight: 500; }
     #btn-settings {
       background: transparent;
       border: 1px solid var(--db9-border);
-      color: var(--db9-text);
-      border-radius: 999px;
-      padding: 4px 10px;
+      color: var(--db9-muted);
+      border-radius: var(--db9-radius-sm);
+      padding: 2px 6px;
       cursor: pointer;
+      min-height: 20px;
+    }
+    #btn-settings:hover {
+      color: var(--db9-text);
+      border-color: var(--db9-border-strong);
     }
 
     /* Section card */
     .db9-section {
-      background: linear-gradient(180deg, rgba(29, 40, 51, 0.96), rgba(22, 31, 40, 0.98));
+      background: var(--db9-panel);
       border: 1px solid var(--db9-border);
       border-radius: var(--db9-radius);
       padding: 12px;
       margin: 0 0 10px;
-      box-shadow: var(--db9-shadow);
     }
     .db9-section-title {
-      font-size: 11px;
+      font-size: 9px;
       text-transform: uppercase;
-      color: var(--db9-text);
-      letter-spacing: 0.6px;
+      color: var(--db9-muted);
+      letter-spacing: 1px;
       margin-bottom: 8px;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     /* Inputs */
     input[type="text"], textarea, select {
-      background: rgba(12, 18, 25, 0.9);
+      background: var(--db9-surface);
       border: 1px solid var(--db9-border);
       color: var(--db9-text);
-      padding: 8px 9px;
+      padding: 6px 8px;
       border-radius: var(--db9-radius-sm);
       width: 100%;
       box-sizing: border-box;
       font-family: inherit;
-      font-size: 12px;
+      font-size: 11px;
     }
     textarea { min-height: 56px; resize: vertical; }
     input[type="text"]:focus, textarea:focus {
-      outline: none; border-color: var(--db9-accent); box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.16);
+      outline: none; border-color: var(--db9-accent);
     }
 
     /* Buttons */
-    button {
-      background: #383838;
-      border: 1px solid #4d4d4d;
-      color: #e6e6e6;
-      padding: 5px 10px;
-      border-radius: 3px;
-      cursor: pointer;
-      font-size: 11px;
-    }
-    button:hover { background: #454545; }
-    button[disabled] { opacity: 0.5; cursor: not-allowed; }
     .db9-btn-primary {
-      background: linear-gradient(135deg, var(--db9-accent), var(--db9-accent-2));
+      background: var(--db9-accent);
       color: white;
-      border: 0;
-      height: 46px;
+      border: 1px solid rgba(255,255,255,0.08);
+      height: 38px;
       width: 100%;
-      border-radius: 12px;
+      border-radius: var(--db9-radius-sm);
       font-weight: 600;
-      font-size: 13px;
-      letter-spacing: 0.4px;
-      box-shadow: 0 12px 24px rgba(77, 163, 255, 0.28);
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: background 120ms ease;
     }
-    .db9-btn-primary:hover { filter: brightness(1.08); }
+    .db9-btn-primary:hover { background: #2563eb; }
 
     /* Radios */
-    .db9-radio-row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .db9-radio-row label { font-size: 12px; color: #d0d0d0; cursor: pointer; }
-    .db9-radio-row input { vertical-align: middle; margin-right: 3px; }
+    .db9-radio-row { display: flex; gap: 12px; flex-wrap: wrap; padding: 2px 0; }
+    .db9-radio-row label { font-size: 11px; color: #cbd5e1; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    .db9-radio-row input { margin: 0; }
 
     /* Group dropdowns (for presets/negatives) */
     .db9-group {
-      border: 1px solid #3d3d3d;
-      border-radius: 3px;
+      border: 1px solid var(--db9-border);
+      border-radius: var(--db9-radius-sm);
       margin-bottom: 4px;
-      background: #1a1a1a;
+      background: var(--db9-surface);
     }
     .db9-group-header {
-      padding: 5px 8px;
+      padding: 6px 8px;
       cursor: pointer;
       font-size: 11px;
       display: flex; justify-content: space-between; align-items: center;
       user-select: none;
-      color: #c8c8c8;
+      color: #94a3b8;
     }
-    .db9-group-header:hover { background: #232323; }
+    .db9-group-header:hover { background: rgba(255,255,255,0.03); }
     .db9-group-body {
       display: none;
-      padding: 4px 8px 6px;
-      border-top: 1px solid #3d3d3d;
+      padding: 6px 8px;
+      border-top: 1px solid var(--db9-border);
     }
     .db9-group.open .db9-group-body { display: block; }
     .db9-chk-row {
       display: flex; align-items: center; gap: 6px;
-      padding: 3px 0; font-size: 11px;
+      padding: 4px 0; font-size: 11px;
       cursor: pointer;
     }
     .db9-chk-row input { margin: 0; }
-    .db9-chk-row .lbl { flex: 1; color: #d6d6d6; }
-    .db9-chk-row .lbl-en { color: #888; font-size: 10px; }
-    .db9-chk-row.def .lbl::after { content: " ⭐"; color: #f59e0b; }
+    .db9-chk-row .lbl { flex: 1; color: #cbd5e1; }
+    .db9-chk-row .lbl-en { color: #64748b; font-size: 10px; }
+    .db9-chk-row.def .lbl::after { content: " *"; color: var(--db9-accent); }
 
     /* Custom chips */
     #customList { display: flex; flex-wrap: wrap; gap: 4px; min-height: 22px; }
     .db9-chip {
-      background: rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.02);
       border: 1px solid var(--db9-border);
-      padding: 4px 9px;
-      border-radius: 12px;
-      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: var(--db9-radius-sm);
+      font-size: 10px;
       cursor: pointer;
       user-select: none;
+      transition: background 120ms ease, border-color 120ms ease;
     }
-    .db9-chip:hover { background: rgba(77, 163, 255, 0.15); border-color: var(--db9-accent); }
+    .db9-chip:hover { background: rgba(255, 255, 255, 0.06); border-color: var(--db9-border-strong); }
 
     /* Selection info */
-    #selectionInfo { font-size: 11px; color: #d4deea; }
+    #selectionInfo { font-size: 11px; color: #94a3b8; line-height: 1.4; }
     #promptHint, #presetCount { font-size: 10px; color: var(--db9-muted); margin-top: 6px; }
 
     /* Progress */
-    #progressSteps { display: flex; flex-direction: column; gap: 2px; font-size: 11px; }
-    .db9-step { color: #8e8e8e; padding: 2px 0; }
-    .db9-step.active { color: #2680eb; font-weight: 600; }
-    .db9-step.done { color: #33ab84; }
-    .db9-step.error { color: #d7373f; }
+    #progressSteps { display: flex; flex-direction: column; gap: 4px; font-size: 11px; }
+    .db9-step { color: var(--db9-muted); padding: 2px 0; font-weight: 500; }
+    .db9-step.active { color: var(--db9-accent); font-weight: 600; }
+    .db9-step.done { color: var(--db9-ok); }
+    .db9-step.error { color: var(--db9-danger); }
     #progressLog {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
       font-size: 10px;
-      color: #b4c3d2;
+      color: #94a3b8;
       margin-top: 8px;
       max-height: 110px;
       overflow-y: auto;
       white-space: pre-wrap;
-      background: rgba(10, 15, 20, 0.5);
-      border: 1px solid rgba(255,255,255,0.05);
+      background: var(--db9-surface);
+      border: 1px solid var(--db9-border);
       border-radius: var(--db9-radius-sm);
       padding: 8px;
     }
@@ -255,16 +249,19 @@
     /* History */
     #historyGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
     .db9-history-cell {
-      background: rgba(10, 15, 20, 0.7);
+      background: var(--db9-surface);
       border: 1px solid var(--db9-border);
       border-radius: var(--db9-radius-sm);
       aspect-ratio: 1;
       overflow: hidden;
       cursor: pointer;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+      transition: border-color 120ms ease;
+    }
+    .db9-history-cell:hover {
+      border-color: var(--db9-border-strong);
     }
     .db9-history-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .db9-history-empty { grid-column: 1/-1; color: #707070; text-align: center; padding: 16px 0; font-size: 11px; }
+    .db9-history-empty { grid-column: 1/-1; color: var(--db9-muted); text-align: center; padding: 16px 0; font-size: 11px; }
 
     /* Modal (dual) */
     .db9-modal {
@@ -277,110 +274,92 @@
       z-index: 1000;
     }
     .db9-modal-content {
-      background: linear-gradient(180deg, rgba(28, 39, 50, 0.98), rgba(18, 26, 34, 0.98));
+      background: var(--db9-panel);
       width: 660px;
       max-width: 95%;
       padding: 20px;
-      border-radius: 14px;
+      border-radius: var(--db9-radius);
       border: 1px solid var(--db9-border);
-      box-shadow: 0 28px 60px rgba(0,0,0,0.42);
+      box-shadow: var(--db9-shadow);
     }
-    .db9-modal-header { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #e6e6e6; }
+    .db9-modal-header { font-size: 12px; font-weight: 600; margin-bottom: 12px; color: var(--db9-text); text-transform: uppercase; letter-spacing: 0.5px; }
     .db9-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .db9-modal-cell { background: #1a1a1a; border: 1px solid #3d3d3d; border-radius: 4px; padding: 8px; text-align: center; }
-    .db9-modal-cell h4 { font-size: 11px; margin: 0 0 6px; color: #b0b0b0; text-transform: uppercase; letter-spacing: 0.5px; }
-    .db9-modal-cell img { max-width: 100%; max-height: 280px; object-fit: contain; border-radius: 3px; background: #000; display: block; margin: 0 auto 6px; }
+    .db9-modal-cell { background: var(--db9-surface); border: 1px solid var(--db9-border); border-radius: var(--db9-radius-sm); padding: 12px; text-align: center; }
+    .db9-modal-cell h4 { font-size: 10px; margin: 0 0 8px; color: var(--db9-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .db9-modal-cell img { max-width: 100%; max-height: 280px; object-fit: contain; border-radius: var(--db9-radius-sm); background: #000; display: block; margin: 0 auto 8px; }
     .db9-modal-cell button { width: 100%; }
-    .db9-modal-cell .db9-status { font-size: 10px; color: #8e8e8e; margin: 4px 0; }
+    .db9-modal-cell .db9-status { font-size: 10px; color: var(--db9-muted); margin: 6px 0; }
     .db9-modal-actions { margin-top: 12px; text-align: right; }
 
     /* Provider helper buttons */
     .provider-extra { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
-    .provider-extra button { font-size: 10px; padding: 3px 6px; }
+    .provider-extra button { font-size: 10px; padding: 4px 8px; }
 
     /* Sub-row utilities */
     .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
     .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
-    .small { font-size: 10px; color: #8e8e8e; }
+    .small { font-size: 10px; color: var(--db9-muted); }
 
-    /* TAB NAV v0.4.7 */
+    /* TAB NAV v0.4.7 Obsidian - line tabs */
     .db9-tabs {
       display: flex;
-      gap: 4px;
-      flex-wrap: wrap;
-      margin: 0 0 10px;
-      background: rgba(18, 25, 34, 0.92);
+      gap: 1px;
+      margin: 0 0 12px;
+      background: var(--db9-panel);
       border: 1px solid var(--db9-border);
-      border-radius: 12px;
-      padding: 4px;
-      box-shadow: var(--db9-shadow);
+      border-radius: var(--db9-radius);
+      padding: 2px;
     }
     .db9-tab {
-      flex: 1 1 88px;
-      padding: 8px 6px;
+      flex: 1 1 auto;
+      padding: 8px 4px;
       font-size: 0;
       background: transparent;
       color: var(--db9-muted);
       border: none;
-      border-radius: 10px;
+      border-radius: 0;
       cursor: pointer;
       text-align: center;
+      min-height: 28px;
+      transition: color 120ms ease;
     }
     .db9-tab::before {
-      display: inline-flex;
-      width: 19px;
-      height: 19px;
-      border-radius: 999px;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      background: rgba(255,255,255,0.09);
-      border: 1px solid rgba(255,255,255,0.08);
-      margin-right: 7px;
-      vertical-align: middle;
-      content: "•";
+      display: none !important;
     }
     .db9-tab::after {
       font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       vertical-align: middle;
       content: attr(data-tab);
     }
-    .db9-tab[data-tab="pane-main"]::before { content: "M"; }
     .db9-tab[data-tab="pane-main"]::after { content: "Main"; }
-    .db9-tab[data-tab="pane-prompt"]::before { content: "P"; }
     .db9-tab[data-tab="pane-prompt"]::after { content: "Prompt"; }
-    .db9-tab[data-tab="pane-presets"]::before { content: "S"; }
     .db9-tab[data-tab="pane-presets"]::after { content: "Style"; }
-    .db9-tab[data-tab="pane-negative"]::before { content: "N"; }
     .db9-tab[data-tab="pane-negative"]::after { content: "Negative"; }
-    .db9-tab[data-tab="pane-reference"]::before { content: "R"; }
-    .db9-tab[data-tab="pane-reference"]::after { content: "Reference"; }
-    .db9-tab[data-tab="pane-saved"]::before { content: "C"; }
+    .db9-tab[data-tab="pane-reference"]::after { content: "Ref"; }
     .db9-tab[data-tab="pane-saved"]::after { content: "Combos"; }
-    .db9-tab[data-tab="pane-log"]::before { content: "L"; }
     .db9-tab[data-tab="pane-log"]::after { content: "Logs"; }
-    .db9-tab:hover { color: var(--db9-text); background: rgba(255,255,255,0.04); }
+    .db9-tab:hover { color: var(--db9-text); }
     .db9-tab.active {
-      background: linear-gradient(135deg, rgba(77,163,255,0.95), rgba(121,215,255,0.9));
-      color: #08131d;
-      font-weight: 700;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--db9-text);
+      font-weight: 600;
+      border-bottom: 2px solid var(--db9-accent);
+      box-shadow: none !important;
     }
     .db9-pane { display: none; }
     .db9-pane.active { display: block; }
-
-    /* v0.4.7 polish */
-    .db9-tab.active { box-shadow: 0 10px 20px rgba(77,163,255,0.22); }
 
     /* Reference section */
     #refImagePreview {
       width: 100%;
       max-height: 200px;
       object-fit: contain;
-      background: #1a1a1a;
-      border: 1px dashed #3d3d3d;
-      border-radius: 4px;
+      background: var(--db9-surface);
+      border: 1px dashed var(--db9-border);
+      border-radius: var(--db9-radius-sm);
       display: none;
       margin-top: 6px;
     }
@@ -388,17 +367,17 @@
     #refDescBox {
       margin-top: 6px;
       padding: 8px;
-      background: #1a1a1a;
-      border: 1px solid #3d3d3d;
-      border-radius: 4px;
+      background: var(--db9-surface);
+      border: 1px solid var(--db9-border);
+      border-radius: var(--db9-radius-sm);
       font-size: 10px;
-      color: #b0b0b0;
+      color: #94a3b8;
       max-height: 100px;
       overflow-y: auto;
       white-space: pre-wrap;
       display: none;
     }
-    #refDescBox.has-desc { display: block; color: #d0d0d0; }
+    #refDescBox.has-desc { display: block; color: var(--db9-text); }
 
     /* HORIZONTAL LAYOUT (when panel ≥ 600px wide) */
     @media (max-width: 520px) {
@@ -412,39 +391,89 @@
       }
     }
 
-    @media (min-width: 760px) {
-      body.h-layout {
-        display: grid;
-        grid-template-columns: minmax(380px, 1.25fr) minmax(280px, 0.9fr);
-        gap: 12px;
-        align-content: start;
-      }
-      body.h-layout .db9-header,
-      body.h-layout .db9-tabs,
-      body.h-layout .db9-pane.active {
-        grid-column: 1 / -1;
-      }
-      body.h-layout #pane-main.active { grid-column: 1; }
-      body.h-layout #pane-main-bottom.active { grid-column: 2; }
-      body.h-layout #pane-main-history.active { grid-column: 1 / -1; }
-      body.h-layout .db9-tabs {
-        position: sticky;
-        top: 0;
-        z-index: 50;
-        backdrop-filter: blur(10px);
-      }
+    body.h-layout {
+      display: grid;
+      grid-template-columns: minmax(380px, 1.25fr) minmax(280px, 0.9fr);
+      gap: 12px;
+      align-content: start;
     }
+    body.h-layout .db9-header,
+    body.h-layout .db9-tabs,
+    body.h-layout .db9-pane.active {
+      grid-column: 1 / -1;
+    }
+    body.h-layout #pane-main.active { grid-column: 1; }
+    body.h-layout #pane-main-bottom.active { grid-column: 2; }
+    body.h-layout #pane-main-history.active { grid-column: 1 / -1; }
+    body.h-layout .db9-tabs {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--db9-bg);
+    }
+
+
+    /* TEST CLEANUP: show only the PTS inpaint runtime surface. */
+    body.db9-test-mode .db9-tabs,
+    body.db9-test-mode #btn-settings,
+    body.db9-test-mode .db9-test-hide,
+    body.db9-test-mode #dot-chatgpt,
+    body.db9-test-mode #dot-chatgpt + .db9-dot-label,
+    body.db9-test-mode .db9-tab[data-tab="pane-presets"],
+    body.db9-test-mode .db9-tab[data-tab="pane-negative"],
+    body.db9-test-mode .db9-tab[data-tab="pane-reference"],
+    body.db9-test-mode .db9-tab[data-tab="pane-saved"],
+    body.db9-test-mode #pane-presets,
+    body.db9-test-mode #pane-negative,
+    body.db9-test-mode #pane-reference,
+    body.db9-test-mode #pane-saved,
+    body.db9-test-mode #dualModal,
+    body.db9-test-mode .provider-extra,
+    body.db9-test-mode #sec-mode label:not(:first-child),
+    body.db9-test-mode #sec-provider label:not(:first-child) {
+      display: none !important;
+    }
+    body.db9-test-mode .db9-pane,
+    body.db9-test-mode .db9-pane.active {
+      display: block;
+    }
+    body.db9-test-mode #pane-prompt,
+    body.db9-test-mode #pane-main,
+    body.db9-test-mode #pane-main-bottom,
+    body.db9-test-mode #pane-log,
+    body.db9-test-mode #pane-main-history {
+      display: block !important;
+    }
+    body.db9-test-mode #pane-main-bottom,
+    body.db9-test-mode #pane-log,
+    body.db9-test-mode #pane-main-history {
+      margin-top: 10px;
+    }
+    body.db9-test-mode #promptInput {
+      min-height: 88px;
+    }
+    body.db9-test-mode .db9-header {
+      margin-bottom: 10px;
+    }
+    body.db9-test-mode .db9-section-title::after {
+      content: " test";
+      margin-left: 6px;
+      color: var(--db9-muted);
+      font-weight: 500;
+      text-transform: none;
+    }
+
   </style>
 </head>
-<body>
+<body class="db9-test-mode">
   <!-- 1. HEADER -->
   <header class="db9-header">
-    <div id="db9-title">🍌 DB9 Multi-Provider <span style="font-size:10px;color:#8e8e8e;font-weight:400;">v0.4.7.1</span></div>
+    <div id="db9-title">🍌 DB9 PTS Inpaint Test <span style="font-size:10px;color:#8e8e8e;font-weight:400;">v0.4.7.1</span></div>
     <div class="db9-header-status">
       <span class="db9-dot-label">Bridge</span><span class="db9-dot db9-dot-off" id="dot-bridge" title="bridge"></span>
       <span class="db9-dot-label">Gemini</span><span class="db9-dot db9-dot-off" id="dot-gemini" title="gemini tab"></span>
-      <span class="db9-dot-label">ChatGPT</span><span class="db9-dot db9-dot-off" id="dot-chatgpt" title="chatgpt tab"></span>
-      <span style="background:#d7373f;color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;font-weight:700;">v0.4.7.1 NEW</span>
+      <span class="db9-dot-label db9-test-hide">ChatGPT</span><span class="db9-dot db9-dot-off db9-test-hide" id="dot-chatgpt" title="chatgpt tab"></span>
+      <span style="background:#d7373f;color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;font-weight:700;">TEST BUILD</span>
       <button id="btn-reconnect" title="Reconnect to bridge">🔄</button>
       <button id="btn-settings" title="Settings">⚙</button>
     </div>
@@ -467,7 +496,21 @@
   <!-- 2. SELECTION -->
   <section class="db9-section" id="sec-selection">
     <div class="db9-section-title">📷 Selection</div>
-    <div id="selectionInfo">Make a marquee or lasso selection in Photoshop, then click Generate.</div>
+        <div id="selectionInfo">Make a marquee or lasso selection in Photoshop, then click Generate.</div>
+    <div class="row-2" style="margin-top:8px;">
+      <label style="display:flex;align-items:center;gap:6px;padding:0;">
+        Expand
+        <select id="selectionExpandMode" style="width:auto;min-width:96px;">
+          <option value="auto" selected>Auto</option>
+          <option value="manual">Manual</option>
+        </select>
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;padding:0;">
+        px
+        <input id="selectionExpandPx" type="number" min="0" max="1024" step="8" value="96" style="width:82px;">
+      </label>
+    </div>
+    <div class="small" style="margin-top:6px;">DB9 expands the selection, makes a 1:1 square, creates a masked Smart Object, then replaces its contents with the Gemini result.</div>
   </section>
 
   </div><!-- /pane-main split -->
@@ -573,7 +616,8 @@
 
   <!-- 9. ACTION -->
   <section class="db9-section" id="sec-action">
-    <button id="btn-generate" class="db9-btn-primary">🚀 GENERATE</button>
+        <button id="btn-generate" class="db9-btn-primary">🚀 GENERATE</button>
+    <button id="btn-regenerate" style="width:100%;margin-top:6px;" disabled>Regenerate last Gemini result</button>
   </section>
 
   </div><!-- /pane-main-bottom -->

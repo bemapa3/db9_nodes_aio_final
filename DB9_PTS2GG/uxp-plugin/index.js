@@ -14,7 +14,7 @@ const { batchPlay } = action;
 const { executeAsModal } = core;
 
 // ===== Constants / state =====
-const VERSION = '0.4.7.1';
+const VERSION = '0.4.7.2';
 const BRIDGE = 'http://127.0.0.1:8765';
 const PRESET_MAX = 6;
 
@@ -26,14 +26,18 @@ let history = [];           // {jobId, prompt, thumb, ts, provider}
 let savedCombos = [];       // {id, name, positive[], negative[], userPrompt, userNegative, provider}
 let providersOnline = [];
 let bridgeOnline = false;
+let lastBridgeError = null;
 let activeJob = null;
 let refImage = null; // { base64, mime, description }
+let lastInpaintContext = null; // { squareBounds, dims, prompt, provider, mode, smartObjectLayerId }
 let presetSearchQ = '';
 let negativeSearchQ = '';
 let dualState = null;       // {parentId, gemini:{status,base64}, chatgpt:{status,base64}}
 let settings = {
   useStructuredPrompt: true,
   autoTranslateVN: true,
+  selectionExpandMode: 'auto',
+  selectionExpandPx: 96,
 };
 
 // ===== DOM helpers =====
@@ -255,9 +259,9 @@ function renderPresetGroups() {
   for (const cat of Object.keys(presetLib.categories)) {
     const items = presetLib.categories[cat] || [];
     const det = document.createElement('details');
-    det.style.cssText = 'border:1px solid #3d3d3d;border-radius:3px;margin-bottom:4px;background:#1a1a1a;';
+    det.style.cssText = 'border:1px solid var(--db9-border);border-radius:var(--db9-radius-sm);margin-bottom:4px;background:var(--db9-surface);';
     const sum = document.createElement('summary');
-    sum.style.cssText = 'padding:6px 8px;cursor:pointer;font-size:11px;color:#c8c8c8;';
+    sum.style.cssText = 'padding:6px 8px;cursor:pointer;font-size:11px;color:#94a3b8;font-weight:500;';
     const selCount = items.filter(i => selectedPositive.has(i.id)).length;
     sum.textContent = `${cat} (${selCount}/${items.length})`;
     det.appendChild(sum);
@@ -271,7 +275,7 @@ function renderPresetGroups() {
       const chip = document.createElement('span');
       const isOn = selectedPositive.has(item.id);
       chip.className = 'db9-chip';
-      chip.style.cssText = `display:inline-block;padding:3px 8px;border-radius:12px;font-size:10px;cursor:pointer;border:1px solid ${isOn ? '#2680eb' : '#3d3d3d'};background:${isOn ? '#1a4070' : '#2a2a2a'};color:#e6e6e6;`;
+      chip.style.cssText = `display:inline-block;padding:3px 8px;border-radius:var(--db9-radius-sm);font-size:10px;cursor:pointer;border:1px solid ${isOn ? 'var(--db9-accent)' : 'var(--db9-border)'};background:${isOn ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255, 255, 255, 0.02)'};color:${isOn ? '#ffffff' : '#cbd5e1'};transition:background 120ms, border-color 120ms;`;
       chip.textContent = (item.icon || '') + ' ' + (item.label || item.labelEn || item.id);
       chip.title = item.prompt || '';
       chip.onclick = () => {
@@ -299,9 +303,9 @@ function renderNegativeGroups() {
   for (const cat of Object.keys(negativeLib.categories)) {
     const items = negativeLib.categories[cat] || [];
     const det = document.createElement('details');
-    det.style.cssText = 'border:1px solid #3d3d3d;border-radius:3px;margin-bottom:4px;background:#1a1a1a;';
+    det.style.cssText = 'border:1px solid var(--db9-border);border-radius:var(--db9-radius-sm);margin-bottom:4px;background:var(--db9-surface);';
     const sum = document.createElement('summary');
-    sum.style.cssText = 'padding:6px 8px;cursor:pointer;font-size:11px;color:#c8c8c8;';
+    sum.style.cssText = 'padding:6px 8px;cursor:pointer;font-size:11px;color:#94a3b8;font-weight:500;';
     const selCount = items.filter(i => selectedNegative.has(i.id)).length;
     sum.textContent = `${cat} (${selCount}/${items.length})`;
     det.appendChild(sum);
@@ -314,7 +318,7 @@ function renderNegativeGroups() {
       }
       const chip = document.createElement('span');
       const isOn = selectedNegative.has(item.id);
-      chip.style.cssText = `display:inline-block;padding:3px 8px;border-radius:12px;font-size:10px;cursor:pointer;border:1px solid ${isOn ? '#d7373f' : '#3d3d3d'};background:${isOn ? '#5a1f24' : '#2a2a2a'};color:#e6e6e6;`;
+      chip.style.cssText = `display:inline-block;padding:3px 8px;border-radius:var(--db9-radius-sm);font-size:10px;cursor:pointer;border:1px solid ${isOn ? 'var(--db9-danger)' : 'var(--db9-border)'};background:${isOn ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255, 255, 255, 0.02)'};color:${isOn ? '#ffffff' : '#cbd5e1'};transition:background 120ms, border-color 120ms;`;
       chip.textContent = (item.icon || '🚫') + ' ' + (item.label || item.labelEn || item.id);
       chip.title = item.prompt || '';
       chip.onclick = () => {
@@ -343,6 +347,9 @@ function detectVietnamese(text) {
 function buildStructuredPrompt(state) {
   const { userPrompt, userNegative, positiveItems, negativeItems } = state;
   let intent = (userPrompt || '').trim();
+  if (state.selectionContext) {
+    intent = (intent ? intent + '. ' : '') + state.selectionContext;
+  }
   // v0.4.7.1: inject reference description if present
   if (typeof refImage !== 'undefined' && refImage && refImage.description) {
     intent = (intent ? intent + '. ' : '') + 'Match style/mood of reference: ' + refImage.description;
@@ -362,7 +369,7 @@ function buildStructuredPrompt(state) {
     // Plain text mode: presets prepended, then intent, then negative trailer
     const parts = [];
     if (stylePresets.length) parts.push(stylePresets.join('. '));
-    parts.push(intentField || '(no prompt)');
+    parts.push((intentField || '(no prompt)') + ', 1024x1024 square image (aspect ratio 1:1)');
     if (negativeMerged) parts.push(`Avoid: ${negativeMerged}.`);
     return parts.join('\n\n');
   }
@@ -372,7 +379,7 @@ function buildStructuredPrompt(state) {
     intent: intentField || '(no prompt)',
     style_presets: stylePresets,
     negative: negativeMerged,
-    output: '1024x1024 photoreal architectural visualization',
+    output: '1024x1024 photoreal architectural visualization, square image (aspect ratio 1:1)',
   };
   return [
     'ROLE: architectural visualization render assistant.',
@@ -383,6 +390,27 @@ function buildStructuredPrompt(state) {
   ].join('\n');
 }
 
+function selectionWorkflowOptionsFromUI() {
+  const mode = $('selectionExpandMode')?.value || settings.selectionExpandMode || 'auto';
+  const pxRaw = Number($('selectionExpandPx')?.value ?? settings.selectionExpandPx ?? 96);
+  const px = Number.isFinite(pxRaw) ? Math.max(0, Math.min(1024, Math.round(pxRaw))) : 96;
+  settings.selectionExpandMode = mode;
+  settings.selectionExpandPx = px;
+  try { localStorage.setItem('db9_settings', JSON.stringify(settings)); } catch (_) {}
+  return { mode, px };
+}
+
+function buildSelectionContext(dims, squareBounds, options) {
+  if (!dims || !squareBounds) return '';
+  return [
+    'Edit only the masked central selection while preserving the surrounding architectural context.',
+    'The input image is a square 1:1 crop expanded around the user selection.',
+    `Original selection ${Math.round(dims.originalW)}x${Math.round(dims.originalH)} px; expanded square ${Math.round(dims.w)}x${Math.round(dims.h)} px.`,
+    `Expansion mode ${options?.mode || 'auto'}, margin ${Math.round(options?.px || 0)} px before square fitting.`,
+    'Match perspective, lighting direction, materials, scale, camera angle, color temperature, shadows, reflections, and edge continuity with the visible surroundings.',
+    'Generate a seamless replacement suitable for being clipped by the original Photoshop selection mask.'
+  ].join(' ');
+}
 function getStateFromUI() {
   const userPrompt = $('promptInput')?.value || '';
   const userNegative = $('negativePrompt')?.value || '';
@@ -431,7 +459,7 @@ function renderSavedCombos() {
   root.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;';
   for (const c of savedCombos) {
     const chip = document.createElement('span');
-    chip.style.cssText = 'display:inline-block;padding:4px 10px;border-radius:12px;font-size:10px;cursor:pointer;border:1px solid #2680eb;background:#1a4070;color:#e6e6e6;';
+    chip.style.cssText = 'display:inline-block;padding:4px 8px;border-radius:var(--db9-radius-sm);font-size:10px;cursor:pointer;border:1px solid var(--db9-accent);background:rgba(59, 130, 246, 0.1);color:#ffffff;';
     chip.textContent = '💾 ' + c.name;
     chip.title = `${c.positive?.length || 0} presets · ${c.negative?.length || 0} negatives · provider=${c.provider}`;
     chip.onclick = () => loadCombo(c.id);
@@ -554,13 +582,18 @@ async function pollHealth() {
     const data = JSON.parse(text);
     if (!bridgeOnline) log('✓ bridge ONLINE v' + data.version + ' providers=[' + (data.providers || []).join(',') + ']');
     bridgeOnline = true;
+    lastBridgeError = null;
     setDot('dot-bridge', 'on');
     providersOnline = data.providers || [];
     setDot('dot-gemini', providersOnline.includes('gemini') ? 'on' : 'off');
     setDot('dot-chatgpt', providersOnline.includes('chatgpt') ? 'on' : 'off');
     syncGenerateAvailability();
   } catch (e) {
-    if (bridgeOnline !== false) log('⚠ bridge OFFLINE: ' + (e.message || e));
+    const errMsg = e.message || String(e);
+    if (bridgeOnline !== false || lastBridgeError !== errMsg) {
+      log('⚠ bridge OFFLINE: ' + errMsg);
+      lastBridgeError = errMsg;
+    }
     bridgeOnline = false;
     setDot('dot-bridge', 'err');
     setDot('dot-gemini', 'off');
@@ -575,16 +608,143 @@ function startHealthPolling() {
 }
 
 // ===== Photoshop selection → Smart Object → base64 =====
-async function exportSelectionAsPng() {
-  // v0.4.7.1: detect selection bounds → expand to 1:1 square (use longest edge centered) → export PNG
+function unitValue(v) {
+  return typeof v === 'number' ? v : Number(v?._value ?? v) || 0;
+}
+
+function clampSquareBounds(left, top, right, bottom, docW, docH, options) {
+  const selW = Math.max(1, right - left);
+  const selH = Math.max(1, bottom - top);
+  const autoPad = Math.round(Math.max(selW, selH) * 0.18);
+  const pad = options?.mode === 'manual' ? Number(options.px || 0) : Math.max(Number(options?.px || 0), autoPad);
+  left -= pad; top -= pad; right += pad; bottom += pad;
+  const expandedW = Math.max(1, right - left);
+  const expandedH = Math.max(1, bottom - top);
+  const S = Math.min(Math.max(expandedW, expandedH), Math.min(docW, docH));
+  const cx = (left + right) / 2;
+  const cy = (top + bottom) / 2;
+  let sLeft = Math.round(cx - S / 2);
+  let sTop = Math.round(cy - S / 2);
+  let sRight = sLeft + S;
+  let sBottom = sTop + S;
+  if (sLeft < 0) { sRight -= sLeft; sLeft = 0; }
+  if (sTop < 0) { sBottom -= sTop; sTop = 0; }
+  if (sRight > docW) { sLeft -= (sRight - docW); sRight = docW; }
+  if (sBottom > docH) { sTop -= (sBottom - docH); sBottom = docH; }
+  sLeft = Math.max(0, sLeft); sTop = Math.max(0, sTop);
+  return { left: sLeft, top: sTop, right: sRight, bottom: sBottom, size: sRight - sLeft, pad };
+}
+
+async function selectRectangle(bounds) {
+  await batchPlay([{
+    _obj: 'set',
+    _target: [{ _ref: 'channel', _property: 'selection' }],
+    to: { _obj: 'rectangle', top: { _unit: 'pixelsUnit', _value: bounds.top }, left: { _unit: 'pixelsUnit', _value: bounds.left }, bottom: { _unit: 'pixelsUnit', _value: bounds.bottom }, right: { _unit: 'pixelsUnit', _value: bounds.right } }
+  }], { synchronousExecution: true });
+}
+
+async function prepareSelectionSmartObject(squareBounds, hasSelection) {
+  try {
+    const doc = app.activeDocument;
+    const originalLayer = doc.activeLayers[0];
+    if (!originalLayer) throw new Error('No active layer');
+    const originalLayerId = originalLayer.id;
+
+    let selectionLayerId = null;
+    if (hasSelection) {
+      // 1. Copy the original selection to a temporary layer (Ctrl+J-like layer)
+      await batchPlay([{ _obj: 'copyToLayer' }], { synchronousExecution: true });
+      const selLayer = doc.activeLayers[0];
+      if (selLayer) selectionLayerId = selLayer.id;
+      
+      // Select the original layer again to copy the square bounds context
+      await selectLayerById(originalLayerId);
+    }
+
+    // 2. Select the squareBounds
+    await selectRectangle(squareBounds);
+
+    // 3. Copy square bounds to a new layer
+    await batchPlay([{ _obj: 'copyToLayer' }], { synchronousExecution: true });
+    const contextLayer = doc.activeLayers[0];
+    if (!contextLayer) throw new Error('Failed to create context layer');
+
+    // 4. Convert context layer to a Smart Object
+    await batchPlay([{ _obj: 'newPlacedLayer' }], { synchronousExecution: true });
+    const smartObjectLayer = doc.activeLayers[0];
+    if (!smartObjectLayer) throw new Error('Failed to create Smart Object layer');
+    if (smartObjectLayer) {
+      smartObjectLayer.name = 'DB9 Inpaint Smart Object ' + new Date().toLocaleTimeString();
+    }
+
+    // 5. Apply the mask if there was a selection
+    if (hasSelection && selectionLayerId) {
+      try {
+        // Load the temporary layer transparency as the active document selection.
+        await selectLayerById(selectionLayerId);
+        await batchPlay([{
+          _obj: 'set',
+          _target: [{ _ref: 'channel', _property: 'selection' }],
+          to: { _ref: 'channel', _enum: 'channel', _value: 'transparencyEnum' }
+        }], { synchronousExecution: true });
+
+        // Select the Smart Object layer again, keeping the loaded selection active.
+        await selectLayerById(smartObjectLayer.id);
+
+        // Create the user mask revealing the original selection.
+        try {
+          await batchPlay([{
+            _obj: 'make',
+            new: { _class: 'channel' },
+            at: { _ref: 'channel', _enum: 'channel', _value: 'mask' },
+            using: { _enum: 'userMaskEnabled', _value: 'revealSelection' }
+          }], { synchronousExecution: true });
+        } catch (maskError) {
+          log('  ⚠ smart object mask skipped: ' + maskError.message);
+        }
+      } finally {
+        try {
+          await batchPlay([{
+            _obj: 'delete',
+            _target: [{ _ref: 'layer', _id: selectionLayerId }]
+          }], { synchronousExecution: true });
+        } catch (cleanupError) {
+          log('  ⚠ temp selection layer cleanup skipped: ' + cleanupError.message);
+        }
+      }
+    }
+
+    return smartObjectLayer ? smartObjectLayer.id : null;
+  } catch (e) {
+    log('  ⚠ smart object preparation skipped: ' + e.message);
+    return null;
+  }
+}
+
+function base64ToBytes(base64) {
+  const bin = atob(base64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+async function writeTempPng(base64, prefix = 'db9_result_') {
+  const tmpFolder = await fsLfs.getTemporaryFolder();
+  const outFile = await tmpFolder.createFile(prefix + Date.now() + '.png', { overwrite: true });
+  const bytes = base64ToBytes(base64);
+  await outFile.write(bytes.buffer, { format: formats.binary });
+  return outFile;
+}
+
+async function exportSelectionAsPng(options = {}) {
   let base64 = null;
   let dims = null;
   let squareBounds = null;
+  let smartObjectLayerId = null;
   await executeAsModal(async (ctx) => {
     const doc = app.activeDocument;
     if (!doc) throw new Error('No document open in Photoshop');
 
-    // Read selection bounds via batchPlay
     let sel = null;
     try {
       const r = await batchPlay([{ _obj: 'get', _target: [{ _property: 'selection' }, { _ref: 'document', _enum: 'ordinal', _value: 'targetEnum' }] }], { synchronousExecution: true, modalBehavior: 'execute' });
@@ -593,78 +753,116 @@ async function exportSelectionAsPng() {
 
     let left, top, right, bottom;
     if (sel) {
-      left = sel.left._value; top = sel.top._value;
-      right = sel.right._value; bottom = sel.bottom._value;
+      left = unitValue(sel.left); top = unitValue(sel.top);
+      right = unitValue(sel.right); bottom = unitValue(sel.bottom);
     } else {
-      // No selection: use whole doc
-      left = 0; top = 0; right = doc.width; bottom = doc.height;
+      left = 0; top = 0; right = unitValue(doc.width); bottom = unitValue(doc.height);
     }
     const selW = right - left;
     const selH = bottom - top;
-    const S = Math.max(selW, selH);
-    const cx = (left + right) / 2;
-    const cy = (top + bottom) / 2;
+    squareBounds = clampSquareBounds(left, top, right, bottom, unitValue(doc.width), unitValue(doc.height), options);
+    dims = { w: squareBounds.size, h: squareBounds.size, originalW: selW, originalH: selH, pad: squareBounds.pad };
+    log(`📐 selection ${Math.round(selW)}x${Math.round(selH)} +${squareBounds.pad}px -> square ${dims.w}x${dims.h} at (${squareBounds.left},${squareBounds.top})`);
 
-    // Square bounds, clamped to canvas
-    let sLeft = Math.round(cx - S / 2);
-    let sTop = Math.round(cy - S / 2);
-    let sRight = sLeft + S;
-    let sBottom = sTop + S;
-    // Clamp
-    if (sLeft < 0) { sRight -= sLeft; sLeft = 0; }
-    if (sTop < 0) { sBottom -= sTop; sTop = 0; }
-    if (sRight > doc.width) { sLeft -= (sRight - doc.width); sRight = doc.width; }
-    if (sBottom > doc.height) { sTop -= (sBottom - doc.height); sBottom = doc.height; }
-    sLeft = Math.max(0, sLeft); sTop = Math.max(0, sTop);
-    squareBounds = { left: sLeft, top: sTop, right: sRight, bottom: sBottom, size: sRight - sLeft };
-    dims = { w: squareBounds.size, h: squareBounds.size, originalW: selW, originalH: selH };
+    smartObjectLayerId = await prepareSelectionSmartObject(squareBounds, sel !== null);
 
-    log(`📐 selection ${selW}x${selH} → square ${dims.w}x${dims.h} at (${sLeft},${sTop})`);
-
-    // Duplicate doc, crop to square bounds, export PNG
-    const dup = await doc.duplicate('db9-temp', false);
-    await batchPlay([{
-      _obj: 'crop',
-      to: { _obj: 'rectangle', top: squareBounds.top, left: squareBounds.left, bottom: squareBounds.bottom, right: squareBounds.right },
-      delete: true
-    }], { synchronousExecution: true });
-
-    // Optional: resize to 1024 if huge
-    if (squareBounds.size > 1536) {
-      await batchPlay([{
-        _obj: 'imageSize',
-        width: { _unit: 'pixelsUnit', _value: 1024 },
-        height: { _unit: 'pixelsUnit', _value: 1024 },
-        scaleStyles: true,
-        constrainProportions: true,
-        interfaceIconFrameDimmed: { _enum: 'interpolationType', _value: 'bicubicSharper' }
-      }], { synchronousExecution: true });
-      log('  ↓ downsized 1024x1024 for transport');
-    }
+    // CORRECT APPROACH: select squareBounds on original doc, copy merged, save
+    await selectRectangle(squareBounds);
+    await batchPlay([{ _obj: 'copyMerged' }], { synchronousExecution: true });
 
     const tmpFolder = await fsLfs.getTemporaryFolder();
     const outFile = await tmpFolder.createFile('db9_sel_' + Date.now() + '.png', { overwrite: true });
-    await dup.saveAs.png(outFile);
-    await dup.closeWithoutSaving();
+
+    // Create new doc from clipboard at exact squareBounds size, save, close
+    const newDoc = await app.createDocument({
+      width: squareBounds.size, height: squareBounds.size,
+      resolution: doc.resolution, fill: 'transparent', mode: 'RGBColorMode'
+    });
+    await batchPlay([{ _obj: 'paste' }], { synchronousExecution: true });
+    await batchPlay([{ _obj: 'flattenImage' }], { synchronousExecution: true });
+    await newDoc.saveAs.png(outFile);
+    await newDoc.closeWithoutSaving();
+
     const buf = await outFile.read({ format: formats.binary });
     const bytes = new Uint8Array(buf);
+
+    // Validate PNG header dimensions (bytes 16-23 = IHDR width/height)
+    const view = new DataView(bytes.buffer);
+    const pngW = view.getUint32(16, false);
+    const pngH = view.getUint32(20, false);
+    if (pngW !== dims.w || pngH !== dims.h) {
+      throw new Error(`Export dimension mismatch: got ${pngW}x${pngH}, expected ${dims.w}x${dims.h}. Aborting.`);
+    }
+    log(`✓ export validated ${pngW}x${pngH} ${Math.round(bytes.byteLength/1024)}KB smartObjectId=${smartObjectLayerId}`);
+    if (bytes.byteLength > 10 * 1024 * 1024) {
+      throw new Error(`Export too large: ${Math.round(bytes.byteLength/1024/1024)}MB. Reduce selection size.`);
+    }
+
     let bin = '';
     for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
     base64 = btoa(bin);
-  }, { commandName: 'DB9 export selection (1:1 expand)' });
-  return { base64, dims, squareBounds };
+  }, { commandName: 'DB9 prepare selection Smart Object + export 1:1' });
+  return { base64, dims, squareBounds, smartObjectLayerId };
+}
+async function selectLayerById(layerId) {
+  if (!layerId) return false;
+  try {
+    await batchPlay([{
+      _obj: 'select',
+      _target: [{ _ref: 'layer', _id: layerId }],
+      makeVisible: false
+    }], { synchronousExecution: true });
+    return true;
+  } catch (e) {
+    log('  ⚠ select smart object skipped: ' + e.message);
+    return false;
+  }
 }
 
-async function applyResultToPS(base64, label, placementBounds) {
+async function replaceSmartObjectContents(base64, label, context = lastInpaintContext) {
+  if (!context?.smartObjectLayerId) return false;
+  const outFile = await writeTempPng(base64, 'db9_smart_replace_');
+  const token = await fsLfs.createSessionToken(outFile);
+  
+  await executeAsModal(async () => {
+    const selected = await selectLayerById(context.smartObjectLayerId);
+    if (!selected) throw new Error('Target DB9 smart object layer is not available');
+    
+    // 1. Open the smart object
+    await batchPlay([{ _obj: 'placedLayerEditContents' }], { synchronousExecution: true });
+    
+    const soDoc = app.activeDocument;
+    
+    // 2. Place the new image (Photoshop auto-scales to fit the canvas bounds)
+    await batchPlay([{
+      _obj: 'placeEvent',
+      null: { _path: token, _kind: 'local' },
+      freeTransformCenterState: { _enum: 'quadCenterState', _value: 'QCSAverage' }
+    }], { synchronousExecution: true });
+    
+    // 3. Rename the newly placed layer
+    const layer = soDoc.activeLayers[0];
+    if (layer) layer.name = 'DB9 ' + (label || 'Gemini') + ' Smart Result ' + new Date().toLocaleTimeString();
+    
+    // 4. Save and close the smart object to update the parent document
+    await soDoc.save();
+    await soDoc.close();
+  }, { commandName: 'DB9 Smart Object auto-scale replace' });
+  
+  log('✅ updated Smart Object with auto-scaling' + (label ? ' (' + label + ')' : ''));
+  return true;
+}
+
+async function applyResultToPS(base64, label, placementBounds, context = lastInpaintContext) {
+  try {
+    if (await replaceSmartObjectContents(base64, label, context)) return;
+  } catch (e) {
+    log('  ⚠ smart object replace failed, placing result layer: ' + e.message);
+  }
+
   await executeAsModal(async (ctx) => {
-    const tmpFolder = await fsLfs.getTemporaryFolder();
-    const outFile = await tmpFolder.createFile('db9_result_' + Date.now() + '.png', { overwrite: true });
-    const bin = atob(base64);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    await outFile.write(bytes.buffer, { format: formats.binary });
+    const outFile = await writeTempPng(base64);
     const token = await fsLfs.createSessionToken(outFile);
-    // Place as new smart object layer
     await batchPlay([{
       _obj: 'placeEvent',
       null: { _path: token, _kind: 'local' },
@@ -672,15 +870,13 @@ async function applyResultToPS(base64, label, placementBounds) {
     }], { synchronousExecution: true });
     log('✅ placed new layer' + (label ? ' (' + label + ')' : '') + (placementBounds ? ` at ${placementBounds.left},${placementBounds.top} size ${placementBounds.size}` : ''));
 
-    // If we have placement bounds, move + scale the freshly-placed layer to fit them
     if (placementBounds) {
       try {
         const doc = app.activeDocument;
         const layer = doc.activeLayers[0];
         if (layer) {
-          // Place puts the smart object centered on doc; reposition to placementBounds center
-          const docCx = doc.width / 2;
-          const docCy = doc.height / 2;
+          const docCx = unitValue(doc.width) / 2;
+          const docCy = unitValue(doc.height) / 2;
           const targetCx = (placementBounds.left + placementBounds.right) / 2;
           const targetCy = (placementBounds.top + placementBounds.bottom) / 2;
           const dx = targetCx - docCx;
@@ -699,7 +895,6 @@ async function applyResultToPS(base64, label, placementBounds) {
     }
   }, { commandName: 'DB9 apply result as new layer' });
 }
-
 async function runGenerate() {
   if (activeJob) { log('⚠ job in progress, please wait'); return; }
   if (!bridgeOnline) { log('❌ bridge offline'); return; }
@@ -716,8 +911,19 @@ async function runGenerate() {
   $('progressSteps').innerHTML = '<div class="db9-step active">📤 Exporting selection…</div>';
 
   try {
-    const { base64, dims, squareBounds } = await exportSelectionAsPng();
+    const { base64, dims, squareBounds, smartObjectLayerId } = await exportSelectionAsPng(selectionWorkflowOptionsFromUI());
     window.__db9_lastSquareBounds = squareBounds;
+    lastInpaintContext = {
+      squareBounds,
+      dims,
+      prompt: finalPrompt,
+      provider: state.provider,
+      mode: state.mode,
+      smartObjectLayerId,
+      imageBase64: base64
+    };
+    const btnRegen = $('btn-regenerate');
+    if (btnRegen) btnRegen.disabled = false;
     log(`✓ exported ${dims?.w}x${dims?.h} (${Math.round((base64?.length || 0) * 0.75 / 1024)} KB)`);
 
     $('progressSteps').innerHTML += '<div class="db9-step active">📡 Posting to bridge…</div>';
@@ -850,8 +1056,61 @@ function renderHistory() {
   }
 }
 
+async function runRegenerate() {
+  if (activeJob) { log('⚠ job in progress, please wait'); return; }
+  if (!bridgeOnline) { log('❌ bridge offline'); return; }
+  if (!lastInpaintContext || !lastInpaintContext.smartObjectLayerId || !lastInpaintContext.imageBase64) {
+    log('❌ No active Smart Object context to regenerate');
+    return;
+  }
+
+  activeJob = 'local-preflight';
+  syncGenerateAvailability();
+
+  const state = getStateFromUI();
+  const finalPrompt = buildStructuredPrompt(state);
+  log(`▶ regenerate provider=${state.provider} mode=${state.mode} smartObjectId=${lastInpaintContext.smartObjectLayerId}`);
+  console.log('[DB9] structured prompt:\n' + finalPrompt);
+
+  $('progressLog').textContent = '';
+  $('progressSteps').innerHTML = '<div class="db9-step active">📡 Posting regenerate to bridge…</div>';
+
+  try {
+    const body = {
+      imageBase64: lastInpaintContext.imageBase64,
+      prompt: finalPrompt,
+      provider: state.provider,
+      mode: state.mode,
+    };
+    log('📡 POST /generate provider=' + body.provider + ' bytes=' + (body.imageBase64?.length || 0));
+    const respText = await xhrPost(BRIDGE + '/generate', JSON.stringify(body), 20000);
+    const data = JSON.parse(respText);
+    log('✓ regenerate job ' + (data.jobId || data.parentId) + ' queued');
+
+    // Update the prompt in the context
+    lastInpaintContext.prompt = finalPrompt;
+
+    if (state.provider === 'both') {
+      await runDualPolling(data.parentId || data.jobId, finalPrompt);
+    } else {
+      await runSinglePolling(data.jobId, state.provider, finalPrompt);
+    }
+  } catch (e) {
+    log('❌ ' + e.message);
+    $('progressSteps').innerHTML += '<div class="db9-step error">❌ ' + e.message + '</div>';
+  } finally {
+    activeJob = null;
+    syncGenerateAvailability();
+  }
+}
+
 // ===== Wire up DOM events =====
 function wire() {
+  const btnRegen = $('btn-regenerate');
+  if (btnRegen) {
+    btnRegen.onclick = () => runRegenerate().catch(e => log('❌ ' + e.message));
+  }
+
   $('btn-generate').onclick = () => runGenerate().catch(e => log('❌ ' + e.message));
   $('btn-clear').onclick = () => {
     selectedPositive.clear();
@@ -888,11 +1147,11 @@ function wire() {
   // Test buttons (send dummy prompt to each provider)
   const testGem = document.createElement('button');
   testGem.textContent = 'Test Gemini';
-  testGem.style.cssText = 'font-size:10px;padding:3px 6px;margin-left:4px;';
+  testGem.style.cssText = 'font-size:10px;padding:3px 6px;margin-left:4px;border-radius:var(--db9-radius-sm);';
   testGem.onclick = () => testProvider('gemini');
   const testCG = document.createElement('button');
   testCG.textContent = 'Test ChatGPT';
-  testCG.style.cssText = 'font-size:10px;padding:3px 6px;margin-left:4px;';
+  testCG.style.cssText = 'font-size:10px;padding:3px 6px;margin-left:4px;border-radius:var(--db9-radius-sm);';
   testCG.onclick = () => testProvider('chatgpt');
   const providerExtra = document.querySelector('.provider-extra');
   if (providerExtra) { providerExtra.appendChild(testGem); providerExtra.appendChild(testCG); }
@@ -1068,9 +1327,9 @@ async function testProvider(provider) {
   const recBtn = $('btn-reconnect');
   if (recBtn) recBtn.onclick = () => { log('🔄 forcing reconnect...'); pollHealth(); };
 
-  // Auto horizontal layout when panel wide
+  // Auto horizontal layout when panel wide (landscape orientation)
   const applyLayout = () => {
-    if (window.innerWidth >= 760) document.body.classList.add('h-layout');
+    if (window.innerWidth > window.innerHeight) document.body.classList.add('h-layout');
     else document.body.classList.remove('h-layout');
   };
   applyLayout();

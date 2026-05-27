@@ -1,59 +1,114 @@
 {
-  "manifest_version": 3,
-  "name": "DB9 Multi-Provider Auto",
-  "version": "0.4.7.1",
-  "description": "Bridge automation for Gemini and ChatGPT — receives jobs from Photoshop via local bridge. v0.4.2 moves the preset library into the UXP plugin; extension is now a thin browser-automation relay.",
-  "permissions": ["storage", "scripting", "activeTab", "tabs"],
-  "host_permissions": [
-    "https://gemini.google.com/*",
-    "https://chatgpt.com/*",
-    "https://*.chatgpt.com/*",
-    "http://127.0.0.1:8765/*",
-    "ws://127.0.0.1:8765/*"
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "content/injected-monitor-chatgpt.js",
-        "content/injected-monitor-gemini.js"
-      ],
-      "matches": [
-        "https://gemini.google.com/*",
-        "https://chatgpt.com/*",
-        "https://*.chatgpt.com/*"
-      ]
-    }
-  ],
-  "background": {
-    "service_worker": "background/worker.js",
-    "type": "module"
-  },
-  "content_scripts": [
-    {
-      "matches": ["https://gemini.google.com/*"],
-      "js": ["content/provider-gemini.js", "content/content-script.js"],
-      "run_at": "document_start",
-      "all_frames": false
-    },
-    {
-      "matches": ["https://chatgpt.com/*", "https://*.chatgpt.com/*"],
-      "js": ["content/provider-chatgpt.js", "content/content-script.js"],
-      "run_at": "document_start",
-      "all_frames": false
-    }
-  ],
-  "action": {
-    "default_popup": "popup/popup.html",
-    "default_title": "DB9 Multi-Provider Auto",
-    "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
-    }
-  },
-  "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
-  }
+    "manifest_version":  3,
+    "name":  "DB9 Multi-Provider Auto",
+    "version":  "0.4.7.1",
+    "description":  "Bridge automation for Gemini, ChatGPT, and Google Flow via local bridge. v0.4.2 moves the preset library into the UXP plugin; extension is now a thin browser-automation relay.",
+    "permissions":  [
+                        "storage",
+                        "scripting",
+                        "activeTab",
+                        "tabs"
+                    ],
+    "host_permissions":  [
+                             "https://gemini.google.com/*",
+                             "https://chatgpt.com/*",
+                             "https://*.chatgpt.com/*",
+                             "https://aisandbox-pa.googleapis.com/*",
+                             "https://labs.google/fx/*/tools/*",
+                             "https://labs.google/fx/tools/*",
+                             "http://127.0.0.1:8765/*",
+                             "ws://127.0.0.1:8765/*",
+                             "https://labs.google/fx/*"
+                         ],
+    "web_accessible_resources":  [
+                                     {
+                                         "resources":  [
+                                                           "content/injected-monitor-chatgpt.js",
+                                                           "content/injected-monitor-gemini.js",
+                                                           "content/injected-monitor-flow.js"
+                                                       ],
+                                         "matches":  [
+                                                         "https://gemini.google.com/*",
+                                                         "https://chatgpt.com/*",
+                                                         "https://*.chatgpt.com/*",
+                                                         "https://labs.google/*"
+                                                     ]
+                                     }
+                                 ],
+    "background":  {
+                       "service_worker":  "background/worker.js"
+                   },
+    "content_scripts":  [
+                            {
+                                "matches": [ "https://gemini.google.com/*" ],
+                                "js": [ "content/injected-monitor-gemini.js" ],
+                                "run_at": "document_start",
+                                "world": "MAIN",
+                                "all_frames": false
+                            },
+                            {
+                                "matches": [ "https://chatgpt.com/*", "https://*.chatgpt.com/*" ],
+                                "js": [ "content/injected-monitor-chatgpt.js" ],
+                                "run_at": "document_start",
+                                "world": "MAIN",
+                                "all_frames": false
+                            },
+                            {
+                                "matches": [ "https://labs.google/fx/tools/*", "https://labs.google/fx/*/tools/*", "https://labs.google/fx/*" ],
+                                "js": [ "content/injected-monitor-flow.js" ],
+                                "run_at": "document_start",
+                                "world": "MAIN",
+                                "all_frames": false
+                            },
+                            {
+                                "matches":  [
+                                                "https://gemini.google.com/*"
+                                            ],
+                                "js":  [
+                                           "content/provider-gemini.js",
+                                           "content/content-script.js"
+                                       ],
+                                "run_at":  "document_start",
+                                "all_frames":  false
+                            },
+                            {
+                                "matches":  [
+                                                "https://chatgpt.com/*",
+                                                "https://*.chatgpt.com/*"
+                                            ],
+                                "js":  [
+                                           "content/provider-chatgpt.js",
+                                           "content/content-script.js"
+                                       ],
+                                "run_at":  "document_start",
+                                "all_frames":  false
+                            },
+                            {
+                                "matches":  [
+                                                "https://labs.google/fx/tools/*",
+                                                "https://labs.google/fx/*/tools/*",
+                                                "https://labs.google/fx/*"
+                                            ],
+                                "js":  [
+                                           "content/provider-flow.js",
+                                           "content/content-script.js"
+                                       ],
+                                "run_at":  "document_start",
+                                "all_frames":  false
+                            }
+                        ],
+    "action":  {
+                   "default_popup":  "popup/popup.html",
+                   "default_title":  "DB9 Multi-Provider Auto",
+                   "default_icon":  {
+                                        "16":  "icons/icon16.png",
+                                        "48":  "icons/icon48.png",
+                                        "128":  "icons/icon128.png"
+                                    }
+               },
+    "icons":  {
+                  "16":  "icons/icon16.png",
+                  "48":  "icons/icon48.png",
+                  "128":  "icons/icon128.png"
+              }
 }
