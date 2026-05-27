@@ -91,12 +91,7 @@
   ],
   "requiredPermissions": {
     "network": {
-      "domains": [
-        "127.0.0.1:8765",
-        "localhost:8765",
-        "127.0.0.1",
-        "localhost"
-      ]
+      "domains": "all"
     },
     "clipboard": "read",
     "localFileSystem": "request",
