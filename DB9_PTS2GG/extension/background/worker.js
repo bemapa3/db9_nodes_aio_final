@@ -611,31 +611,76 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true; // keep channel open
   }
 
-  // BUG-103 FIX: Privileged Service Worker Downloader & Fetcher
-  // Bypass CSP + CORS 403 by fetching the image resource directly in the service worker context,
-  // converting it to Base64, and returning the actual bytes to the caller.
+  // BUG-103 FIX: Privileged Service Worker Downloader & Fetcher with Soft Redirect Support
+  // Bypass CSP + CORS 403 and follow soft redirect chains (e.g. text/plain URLs) up to 5 hops
   if (msg.action === 'download-file') {
     (async () => {
       try {
         log('BUG-103 FIX: Privileged fetch/download triggered for:', msg.url);
         
-        // 1. Fetch image directly from privileged SW context
-        const resp = await fetch(msg.url);
-        if (!resp.ok) throw new Error(`HTTP status ${resp.status}`);
-        const arrayBuffer = await resp.arrayBuffer();
+        let currentUrl = msg.url;
+        let resp = null;
+        let contentBytes = null;
+        let mime = 'image/png';
+        const maxHops = 5;
         
-        // 2. Convert ArrayBuffer to Base64 (Chunked to prevent stack overflow)
+        for (let hop = 1; hop <= maxHops; hop++) {
+          const urlHost = new URL(currentUrl).hostname;
+          log(`Hop ${hop}: Fetching URL: ${currentUrl.slice(0, 100)} (Host: ${urlHost})`);
+          
+          resp = await fetch(currentUrl);
+          if (!resp.ok) {
+            throw new Error(`HTTP status ${resp.status} on hop ${hop} at ${urlHost}`);
+          }
+          
+          const contentType = resp.headers.get('content-type') || '';
+          log(`Hop ${hop} Response: status=${resp.status}, content-type=${contentType}`);
+          
+          if (contentType.includes('text/plain')) {
+            const textBody = (await resp.text()).trim();
+            log(`Hop ${hop} text body (length=${textBody.length}): ${textBody.slice(0, 150)}`);
+            if (textBody.startsWith('http://') || textBody.startsWith('https://')) {
+              currentUrl = textBody;
+              continue; // Follow soft redirect to next hop
+            } else {
+              throw new Error(`Hop ${hop} returned text/plain but it is not a valid URL: ${textBody.slice(0, 80)}`);
+            }
+          }
+          
+          // Not text/plain, read as binary buffer
+          const arrayBuffer = await resp.arrayBuffer();
+          contentBytes = new Uint8Array(arrayBuffer);
+          mime = contentType;
+          break;
+        }
+        
+        if (!contentBytes) {
+          throw new Error(`Failed to resolve final media bytes after ${maxHops} hops`);
+        }
+        
+        const byteLength = contentBytes.byteLength;
+        log(`Resolved final media bytes: mime=${mime}, length=${byteLength}`);
+        
+        // Validation:
+        // Must be image/* or video/* and byte length > 100 bytes
+        const isMedia = mime.startsWith('image/') || mime.startsWith('video/');
+        if (!isMedia) {
+          throw new Error(`Resolved media content-type "${mime}" is not a valid image/* or video/*`);
+        }
+        if (byteLength < 100) {
+          throw new Error(`Resolved media body is too tiny (${byteLength} bytes)`);
+        }
+        
+        // Convert ArrayBuffer to Base64 (Chunked to prevent stack overflow)
         let binary = '';
-        const bytes = new Uint8Array(arrayBuffer);
-        const len = bytes.byteLength;
+        const len = contentBytes.byteLength;
         const chunkSize = 65535;
         for (let i = 0; i < len; i += chunkSize) {
-          binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+          binary += String.fromCharCode.apply(null, contentBytes.subarray(i, i + chunkSize));
         }
         const base64 = btoa(binary);
-        const mime = resp.headers.get('content-type') || 'image/png';
         
-        log(`Privileged fetch successful. Size: ${base64.length} bytes. Mime: ${mime}`);
+        log(`Privileged fetch successful. Size: ${base64.length} base64 chars. Mime: ${mime}`);
         
         // 3. Trigger native browser download in background (for debug/local file copy)
         let downloadId = null;

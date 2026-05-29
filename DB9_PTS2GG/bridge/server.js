@@ -13,7 +13,7 @@ const http = require('http');
 const { WebSocketServer } = require('ws');
 const crypto = require('crypto');
 
-const VERSION = '0.4.7.2';
+const VERSION = '0.4.7.3';
 const PORT = 8765;
 const SUPPORTED_PROVIDERS = new Set(['gemini', 'chatgpt', 'flow']);
 

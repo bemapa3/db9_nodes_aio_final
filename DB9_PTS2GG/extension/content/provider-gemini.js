@@ -921,72 +921,99 @@
       }
     }
 
-    let targetSrc = extractedUrl || mediaEl.currentSrc || mediaEl.src;
+    const candidates = [];
     if (extractedUrl) {
-      log('extracted full-res URL from download button: ' + extractedUrl.slice(0, 80));
-      if (!targetSrc.startsWith('http') && !targetSrc.startsWith('blob') && !targetSrc.startsWith('data')) {
-        try {
-          targetSrc = new URL(targetSrc, window.location.href).href;
-          log('resolved relative extracted URL to: ' + targetSrc.slice(0, 80));
-        } catch (e) {}
+      candidates.push({ url: extractedUrl, source: 'download_button' });
+    }
+    const mediaSrc = mediaEl.currentSrc || mediaEl.src;
+    if (mediaSrc) {
+      candidates.push({ url: mediaSrc, source: 'media_src' });
+    }
+    
+    // De-duplicate candidates
+    const seenUrls = new Set();
+    const uniqueCandidates = [];
+    for (const c of candidates) {
+      let resolved = c.url;
+      if (!resolved.startsWith('http') && !resolved.startsWith('blob') && !resolved.startsWith('data')) {
+        try { resolved = new URL(resolved, window.location.href).href; } catch (e) {}
       }
-    } else {
-      log('download fallback to mediaEl.src: ' + targetSrc.slice(0, 80));
+      if (!seenUrls.has(resolved)) {
+        seenUrls.add(resolved);
+        uniqueCandidates.push({ url: resolved, source: c.source });
+      }
     }
 
-    if (targetSrc.startsWith('blob:')) {
-      log('blob URL detected, downloading via page-world to bypass isolated-world CSP constraints');
-      const res = await downloadBlobViaPageWorld(targetSrc);
-      log('download full quality mime=' + res.mime + ' bytes=' + res.base64.length);
-      reportProgress('downloading', 96, 'Downloading asset binary package...');
-      return res;
-    }
-
-    if (/googleusercontent\.com\//.test(targetSrc) && /=[swh]\d+/.test(targetSrc)) {
-      targetSrc = targetSrc.replace(/=[swh]\d+[^?&]*/g, '=s0');
-      log('stripped size suffix ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ fetching full resolution from googleusercontent');
-    } else if (/googleusercontent\.com\//.test(targetSrc)) {
-      // Try appending =s0 for full resolution
-      targetSrc = targetSrc.split('?')[0] + '=s0';
-      log('appended =s0 for full resolution');
-    }
-    // BUG-103 FIX: Use privileged service worker downloader to bypass CSP + CORS 403
-    try {
-      log('BUG-103 FIX: Using privileged service worker downloader for: ' + targetSrc.slice(0, 80));
-      
-      const filename = 'db9-generated-' + Date.now() + '.png';
-      const response = await new Promise((resolve, reject) => {
-        chrome.runtime.sendMessage({
-          action: 'download-file',
-          url: targetSrc,
-          filename: filename
-        }, (response) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message));
-          } else if (!response || !response.ok) {
-            reject(new Error(response?.error || 'Service worker download failed'));
-          } else {
-            resolve(response);
-          }
-        });
-      });
-      
-      log('BUG-103 FIX: Privileged fetch/download successful, base64 length=' + (response.base64 ? response.base64.length : 0));
-      reportProgress('downloading', 96, 'Download complete...');
-      
-      return { 
-        base64: response.base64 || '', 
-        mime: response.mime || 'image/png',
-        downloaded: true,
-        downloadId: response.downloadId
-      };
-      
-    } catch (err) {
-      log('BUG-103 FIX: Privileged download failed: ' + err.message + '; falling back to page-world method');
-      
+    let lastError = null;
+    for (const cand of uniqueCandidates) {
       try {
-        log('downloading via page-world from: ' + targetSrc.slice(0, 80));
-        const res = await downloadBlobViaPageWorld(targetSrc);
+        log(`Trying download candidate from ${cand.source}: ${cand.url.slice(0, 80)}`);
+        
+        let targetSrc = cand.url;
+        if (targetSrc.startsWith('blob:')) {
+          log('blob URL detected, downloading via page-world to bypass isolated-world CSP constraints');
+          const res = await downloadBlobViaPageWorld(targetSrc);
+          if (!res || !res.base64 || res.base64.length < 100) {
+            throw new Error(`Blob fetch returned empty or tiny base64 (${res ? res.base64.length : 0} bytes)`);
+          }
+          log('download full quality mime=' + res.mime + ' bytes=' + res.base64.length);
+          reportProgress('downloading', 96, 'Downloading asset binary package...');
+          return res;
+        }
+
+        if (/googleusercontent\.com\//.test(targetSrc) && /=[swh]\d+/.test(targetSrc)) {
+          targetSrc = targetSrc.replace(/=[swh]\d+[^?&]*/g, '=s0');
+          log('stripped size suffix ➔ fetching full resolution from googleusercontent');
+        } else if (/googleusercontent\.com\//.test(targetSrc)) {
+          targetSrc = targetSrc.split('?')[0] + '=s0';
+          log('appended =s0 for full resolution');
+        }
+
+        log('BUG-103 FIX: Using privileged service worker downloader for: ' + targetSrc.slice(0, 80));
+        
+        const filename = 'db9-generated-' + Date.now() + '.png';
+        const response = await new Promise((resolve, reject) => {
+          chrome.runtime.sendMessage({
+            action: 'download-file',
+            url: targetSrc,
+            filename: filename
+          }, (response) => {
+            if (chrome.runtime.lastError) {
+              reject(new Error(chrome.runtime.lastError.message));
+            } else if (!response || !response.ok) {
+              reject(new Error(response?.error || 'Service worker download failed'));
+            } else {
+              resolve(response);
+            }
+          });
+        });
+        
+        if (!response.base64 || response.base64.length < 100) {
+          throw new Error(`Privileged fetch returned empty or tiny base64 (${response.base64 ? response.base64.length : 0} bytes)`);
+        }
+        
+        log('BUG-103 FIX: Privileged fetch/download successful, base64 length=' + response.base64.length);
+        reportProgress('downloading', 96, 'Download complete...');
+        
+        return { 
+          base64: response.base64, 
+          mime: response.mime || 'image/png',
+          downloaded: true,
+          downloadId: response.downloadId
+        };
+      } catch (err) {
+        log(`Candidate from ${cand.source} failed: ${err.message}`);
+        lastError = err;
+      }
+    }
+    
+    // If all candidates failed, fallback to page-world download of the first candidate
+    log('All candidates failed, trying page-world download fallback...');
+    if (uniqueCandidates.length > 0) {
+      const fallbackUrl = uniqueCandidates[0].url;
+      try {
+        log('downloading via page-world from: ' + fallbackUrl.slice(0, 80));
+        const res = await downloadBlobViaPageWorld(fallbackUrl);
         log('download full quality mime=' + res.mime + ' bytes=' + res.base64.length);
         reportProgress('downloading', 96, 'Downloading asset binary package...');
         return res;
@@ -999,6 +1026,8 @@
         throw fallbackErr;
       }
     }
+    
+    throw lastError || new Error('No valid download candidates found');
   }
 
   async function blobToTransparentPngBase64(blob) {

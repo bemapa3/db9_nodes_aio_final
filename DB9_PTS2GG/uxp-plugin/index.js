@@ -14,7 +14,7 @@ const { batchPlay } = action;
 const { executeAsModal } = core;
 
 // ===== Constants / state =====
-const VERSION = '0.4.7.2';
+const VERSION = '0.4.7.3';
 const BRIDGE = 'http://127.0.0.1:8765';
 const PRESET_MAX = 6;
 
