@@ -207,11 +207,11 @@
       if (src.startsWith('data:')) return false;
       if (/avatar|profile|logo|icon/i.test(alt + ' ' + src)) return false;
       
-      // BUG-102 FIX: Exclude upload preview images
-      // Upload previews are inside xap-file-selector, .input-preview, or uploader-file-preview containers, or have specific alt text
-      const isUploadAlt = /bản xem trước hình ảnh|uploaded image|upload preview|tai len|upload|xem truoc/i.test(alt.toLowerCase());
-      const parent = img.closest('xap-file-selector, xap-file-preview, xap-uploaded-file, .input-preview, .uploader-file-preview, .thumbnail-container, .image-thumbnail, [class*="upload"], [class*="preview"]');
-      if (isUploadAlt || parent || (src.startsWith('blob:') && alt.includes('tải lên'))) {
+      // BUG-102 FIX: Exclude upload preview images (v0.4.8.0: narrowed to avoid excluding generated images)
+      // Only exclude images inside upload-specific containers, not generic "preview" containers
+      const isUploadAlt = /bản xem trước hình ảnh|uploaded image|upload preview|xem truoc/i.test(alt.toLowerCase());
+      const parent = img.closest('xap-file-selector, xap-file-preview, xap-uploaded-file, .input-preview, .uploader-file-preview, uploader-file-preview, .uploader-file-preview-container, .file-preview-chip');
+      if (isUploadAlt || parent) {
         console.log('[DB9] BUG-102 FIX: Excluding upload preview image:', src.substring(0, 60), 'alt:', alt);
         return false;
       }
