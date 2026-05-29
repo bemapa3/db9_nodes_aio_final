@@ -226,7 +226,7 @@
   }
   let baselineImageKeys = new Set();
   function imageKey(img) {
-    return [img.currentSrc || img.src || '', img.alt || '', img.naturalWidth || img.width || 0, img.naturalHeight || img.height || 0].join('|');
+    return img.currentSrc || img.src || '';
   }
 
   function uploadMenuButton() {
@@ -806,13 +806,12 @@
         log('waiting for generated output: images=' + imgs.length + ', videos=' + generatedVideos().length + ', baseline images=' + baselineCount);
       }
       const newImgs = imgs.filter((img) => !baselineImageKeys.has(imageKey(img)) && !baselineOutputs.has(outputKey(img)));
-      if (newImgs.length > 0 || imgs.length > baselineCount) {
+      if (newImgs.length > 0) {
         if (!firstImageSeenAt) {
           firstImageSeenAt = Date.now();
           log('first image appeared, waiting for full media to load');
         }
-        const newOnes = newImgs.length > 0 ? newImgs : imgs.slice(baselineCount);
-        const best = newOnes.sort((a, b) => (b.naturalWidth * b.naturalHeight) - (a.naturalWidth * a.naturalHeight))[0];
+        const best = newImgs.sort((a, b) => (b.naturalWidth * b.naturalHeight) - (a.naturalWidth * a.naturalHeight))[0];
         const area = best.naturalWidth * best.naturalHeight;
         if (area > lastArea) {
           lastArea = area;
@@ -1080,10 +1079,11 @@
     });
   }
   function countBaseline() {
+    const allImages = qAllDeep('img');
+    baselineImageKeys = new Set(allImages.map(img => img.currentSrc || img.src).filter(Boolean));
     const images = generatedImages();
     const videos = generatedVideos();
-    baselineImageKeys = new Set(images.map(imageKey));
-    log(`baseline: ${images.length} generated images, ${videos.length} generated videos`);
+    log(`baseline: ${images.length} generated images, ${videos.length} generated videos, total broad images=${baselineImageKeys.size}`);
     return images.length + videos.length;
   }
 
