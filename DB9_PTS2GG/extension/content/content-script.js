@@ -1,4 +1,4 @@
-// DB9 Multi-Provider — Shared Orchestrator (v0.4.7.7)
+// DB9 Multi-Provider — Shared Orchestrator (v0.4.8.0)
 // Loaded AFTER one of the provider-*.js modules (which sets window.__DB9_PROVIDER).
 // Drives the same job lifecycle for every provider via the provider interface:
 //   { name, installNetworkMonitor, waitReady, startNewChat, toggleCreateImage,
@@ -88,7 +88,7 @@
   const PROVIDER_NAME = providerResult.name;
   _providerName = PROVIDER_NAME;
   _providerReady = true;
-  console.log(`[DB9-Orchestrator] v0.4.7.7 build=${ORCHESTRATOR_BUILD} loaded for provider="${PROVIDER_NAME}" on`, location.href);
+  console.log(`[DB9-Orchestrator] v0.4.8.0 build=${ORCHESTRATOR_BUILD} loaded for provider="${PROVIDER_NAME}" on`, location.href);
 
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
   const rand = (min, max) => min + Math.random() * (max - min);
@@ -291,6 +291,6 @@
     try { chrome.runtime.onMessage.removeListener(messageHandler); } catch (_) {}
   };
 
-  log(`ready, waiting for jobs (v0.4.7.7, build=${ORCHESTRATOR_BUILD}, provider=${PROVIDER_NAME})`);
+  log(`ready, waiting for jobs (v0.4.8.0, build=${ORCHESTRATOR_BUILD}, provider=${PROVIDER_NAME})`);
 })();
 
