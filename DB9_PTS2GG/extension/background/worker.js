@@ -449,6 +449,26 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     })();
     return true; // async
   }
+  // v0.4.8.0: Content scripts can't access chrome.storage.session — proxy via worker
+  if (msg.type === 'get-storage-payload') {
+    (async () => {
+      try {
+        const key = msg.key;
+        const useLocal = !!msg.useLocalStore;
+        const store = useLocal ? chrome.storage.local : (chrome.storage.session || chrome.storage.local);
+        log(`get-storage-payload: retrieving key=${key} useLocal=${useLocal}`);
+        const result = await store.get(key);
+        const payload = result[key] || null;
+        await store.remove(key);
+        log(`get-storage-payload: key=${key} length=${payload ? payload.length : 'NULL'}`);
+        sendResponse({ ok: true, payload });
+      } catch (e) {
+        log(`get-storage-payload error: ${e.message}`);
+        sendResponse({ ok: false, error: e.message });
+      }
+    })();
+    return true; // async
+  }
   // Do not return true unconditionally so other listeners (e.g. debugger click) can handle their messages asynchronously!
 });
 

@@ -127,14 +127,17 @@
 
     if (job.imageStorageKey) {
       try {
-        log(`retrieving large payload from storage key=${job.imageStorageKey} useLocalStore=${!!job.useLocalStore}`);
-        const store = job.useLocalStore ? chrome.storage.local : (chrome.storage.session || chrome.storage.local);
-        if (!store) throw new Error('No storage API available in content script');
-        
-        const result = await store.get(job.imageStorageKey);
-        job.imageBase64 = result[job.imageStorageKey] || null;
-        await store.remove(job.imageStorageKey);
-        log(`storage retrieved: key=${job.imageStorageKey} length=${job.imageBase64 ? job.imageBase64.length : 'NULL'}`);
+        log(`retrieving large payload from worker via messaging key=${job.imageStorageKey}`);
+        const response = await chrome.runtime.sendMessage({
+          type: 'get-storage-payload',
+          key: job.imageStorageKey,
+          useLocalStore: !!job.useLocalStore
+        });
+        if (!response || !response.ok) {
+          throw new Error(response?.error || 'Worker returned error');
+        }
+        job.imageBase64 = response.payload;
+        log(`storage retrieved via worker: key=${job.imageStorageKey} length=${job.imageBase64 ? job.imageBase64.length : 'NULL'}`);
       } catch (storageError) {
         throw new Error('Storage retrieval failed for key=' + job.imageStorageKey + ': ' + storageError.message);
       }
