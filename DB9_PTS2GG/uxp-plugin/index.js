@@ -1,4 +1,4 @@
-// DB9 Multi-Provider — Photoshop UXP Plugin v0.4.7.2
+// DB9 Multi-Provider — Photoshop UXP Plugin v0.4.7.5
 // All preset/negative state lives in the plugin. Bridge is a dumb pipe.
 
 const photoshop = require('photoshop');
@@ -14,7 +14,7 @@ const { batchPlay } = action;
 const { executeAsModal } = core;
 
 // ===== Constants / state =====
-const VERSION = '0.4.7.3';
+const VERSION = '0.4.7.5';
 const BRIDGE = 'http://127.0.0.1:8765';
 const PRESET_MAX = 6;
 

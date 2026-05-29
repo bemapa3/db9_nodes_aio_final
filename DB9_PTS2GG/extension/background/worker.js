@@ -1,4 +1,4 @@
-// DB9 Multi-Provider Auto - Background Service Worker (v0.4.7.2)
+// DB9 Multi-Provider Auto - Background Service Worker (v0.4.7.5)
 // Maintains persistent WebSocket to local bridge, routes jobs to the correct
 // provider tab (gemini, chatgpt, or flow) based on job.provider.
 
@@ -301,7 +301,7 @@ function connect() {
     // Announce which providers we have tabs for
     const providers = await connectedProviders();
     log('hello providers=', providers);
-    sendToBridge({ type: 'hello-extension', version: '0.4.7.2', providers });
+    sendToBridge({ type: 'hello-extension', version: '0.4.7.5', providers });
   };
 
   ws.onmessage = async (e) => {
@@ -626,19 +626,30 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         
         for (let hop = 1; hop <= maxHops; hop++) {
           const urlHost = new URL(currentUrl).hostname;
-          log(`Hop ${hop}: Fetching URL: ${currentUrl.slice(0, 100)} (Host: ${urlHost})`);
+          log(`[Hop ${hop}] Fetching: Host=${urlHost}, URL=${currentUrl.slice(0, 80)}`);
           
-          resp = await fetch(currentUrl);
+          // Fetch the URL. Explicitly do NOT use no-cors to ensure readable bytes.
+          resp = await fetch(currentUrl, { mode: 'cors' });
+          
+          // Reject if status is 403, 401, or 0
+          if (resp.status === 403 || resp.status === 401 || resp.status === 0) {
+            throw new Error(`Fetch rejected with HTTP status ${resp.status} on hop ${hop} at ${urlHost}`);
+          }
           if (!resp.ok) {
-            throw new Error(`HTTP status ${resp.status} on hop ${hop} at ${urlHost}`);
+            throw new Error(`Fetch failed with HTTP status ${resp.status} on hop ${hop} at ${urlHost}`);
           }
           
           const contentType = resp.headers.get('content-type') || '';
-          log(`Hop ${hop} Response: status=${resp.status}, content-type=${contentType}`);
+          const acao = resp.headers.get('access-control-allow-origin') || '(none)';
+          
+          // Read response as arrayBuffer first to get exact byte length
+          const arrayBuffer = await resp.arrayBuffer();
+          const byteLength = arrayBuffer.byteLength;
           
           if (contentType.includes('text/plain')) {
-            const textBody = (await resp.text()).trim();
-            log(`Hop ${hop} text body (length=${textBody.length}): ${textBody.slice(0, 150)}`);
+            const textBody = new TextDecoder().decode(arrayBuffer).trim();
+            log(`[Hop ${hop} Log] host=${urlHost}, status=${resp.status}, content-type=${contentType}, ACAO=${acao}, byteLength=${byteLength}`);
+            
             if (textBody.startsWith('http://') || textBody.startsWith('https://')) {
               currentUrl = textBody;
               continue; // Follow soft redirect to next hop
@@ -647,10 +658,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             }
           }
           
-          // Not text/plain, read as binary buffer
-          const arrayBuffer = await resp.arrayBuffer();
+          // Final media binary hop
           contentBytes = new Uint8Array(arrayBuffer);
           mime = contentType;
+          
+          log(`[Hop ${hop} Final Log] host=${urlHost}, status=${resp.status}, content-type=${contentType}, ACAO=${acao}, byteLength=${byteLength}`);
           break;
         }
         
@@ -659,16 +671,19 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         }
         
         const byteLength = contentBytes.byteLength;
-        log(`Resolved final media bytes: mime=${mime}, length=${byteLength}`);
         
-        // Validation:
-        // Must be image/* or video/* and byte length > 100 bytes
+        // 4. Reject if final content-type is not image/* or video/*
         const isMedia = mime.startsWith('image/') || mime.startsWith('video/');
         if (!isMedia) {
           throw new Error(`Resolved media content-type "${mime}" is not a valid image/* or video/*`);
         }
-        if (byteLength < 100) {
-          throw new Error(`Resolved media body is too tiny (${byteLength} bytes)`);
+        
+        // 5. Reject if final byteLength is 0 or too small, e.g. image < 10KB (10240 bytes)
+        const isImage = mime.startsWith('image/');
+        if (isImage && byteLength < 10240) {
+          throw new Error(`Resolved image body is too tiny (${byteLength} bytes, minimum is 10KB)`);
+        } else if (byteLength === 0) {
+          throw new Error(`Resolved media body is completely empty (0 bytes)`);
         }
         
         // Convert ArrayBuffer to Base64 (Chunked to prevent stack overflow)

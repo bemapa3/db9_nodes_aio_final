@@ -875,66 +875,71 @@
   }
   async function downloadHD(mediaEl) {
     reportProgress('downloading', 90, 'Resolving variant downloads and redirects...');
-    if ((mediaEl.tagName || '').toLowerCase() === 'video') {
-      let targetSrc = mediaEl.currentSrc || mediaEl.src;
-      if (!targetSrc) {
-        const source = mediaEl.querySelector('source[src]');
-        targetSrc = source && source.src;
-      }
-      if (!targetSrc) throw new Error('generated video has no downloadable src');
-      const resp = await fetch(targetSrc);
-      if (!resp.ok) throw new Error('video download HTTP ' + resp.status);
-      const blob = await resp.blob();
-      const res = await blobToBase64(blob, blob.type || 'video/mp4');
-      log('download full quality mime=' + res.mime + ' bytes=' + res.base64.length);
-      reportProgress('downloading', 96, 'Downloading asset binary package...');
-      return res;
-    }
-
-    // v0.4.7.4: try "Download full size image" button first
-    let dlBtn = null;
-    const container = mediaEl.closest('.image-container, .image-card, [class*="image"], [class*="card"], [class*="bubble"], [class*="element"]');
-    if (container) {
-      dlBtn = qDeep('button[aria-label*="kÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­ch thÃƒÆ’Ã¢â‚¬Â Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚Â»ÃƒÂ¢Ã¢â€šÂ¬Ã‚Âºc" i]', container)
-        || qDeep('button[aria-label*="full size" i]', container)
-        || qDeep('button[aria-label*="full-size" i]', container)
-        || qDeep('button[aria-label*="Download full" i]', container)
-        || qDeep('a[download]', container);
-    }
-    if (!dlBtn) {
-      dlBtn = qDeep('button[aria-label*="kÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­ch thÃƒÆ’Ã¢â‚¬Â Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚Â»ÃƒÂ¢Ã¢â€šÂ¬Ã‚Âºc" i]')
-        || qDeep('button[aria-label*="full size" i]')
-        || qDeep('button[aria-label*="full-size" i]')
-        || qDeep('button[aria-label*="Download full" i]')
-        || qDeep('a[download]');
-    }
-
-    let extractedUrl = null;
-    if (dlBtn) {
-      log('found download button near mediaEl: ' + (dlBtn.getAttribute('aria-label') || dlBtn.innerText || dlBtn.tagName));
-      const linkEl = dlBtn.tagName.toLowerCase() === 'a' ? dlBtn : dlBtn.closest('a') || dlBtn.querySelector('a');
-      if (linkEl) {
-        extractedUrl = linkEl.getAttribute('href') || linkEl.getAttribute('data-url') || linkEl.href;
-      }
-      if (!extractedUrl) {
-        extractedUrl = dlBtn.getAttribute('href') || dlBtn.getAttribute('data-url') || dlBtn.getAttribute('url');
-      }
-    }
-
+    
     const candidates = [];
-    if (extractedUrl) {
-      candidates.push({ url: extractedUrl, source: 'download_button' });
+    
+    // 1. Check container of the media element
+    const container = mediaEl.closest('.image-container, .image-card, .video-container, .video-card, [class*="image"], [class*="video"], [class*="card"], [class*="bubble"], [class*="element"]');
+    if (container) {
+      // Find all buttons or links inside the container that could be download triggers
+      const containerButtons = qAllDeep('button, a', container).filter(el => {
+        if (!visible(el)) return false;
+        const text = textOf(el);
+        const ariaLabel = (el.getAttribute('aria-label') || '').toLowerCase();
+        return ariaLabel.includes('kích thước') || ariaLabel.includes('full size') || ariaLabel.includes('full-size') ||
+               ariaLabel.includes('download') || ariaLabel.includes('tải xuống') ||
+               text.includes('kích thước') || text.includes('full size') || text.includes('full-size') ||
+               text.includes('download') || text.includes('tải xuống') || el.hasAttribute('download');
+      });
+      
+      for (const btn of containerButtons) {
+        const url = btn.getAttribute('href') || btn.getAttribute('data-url') || btn.getAttribute('url') || btn.href;
+        if (url) {
+          candidates.push({ url, source: `container_button (${textOf(btn).slice(0, 30)})` });
+        }
+      }
     }
+    
+    // 2. Also check document-wide download buttons as fallback/extra candidates
+    const docButtons = qAllDeep('button[aria-label*="Download full size image" i], button[aria-label*="kích thước" i], a[download]').filter(visible);
+    for (const btn of docButtons) {
+      const url = btn.getAttribute('href') || btn.getAttribute('data-url') || btn.getAttribute('url') || btn.href;
+      if (url) {
+        candidates.push({ url, source: `doc_button (${textOf(btn).slice(0, 30)})` });
+      }
+    }
+
+    // 3. Add the primary media src/currentSrc
     const mediaSrc = mediaEl.currentSrc || mediaEl.src;
     if (mediaSrc) {
       candidates.push({ url: mediaSrc, source: 'media_src' });
     }
     
-    // De-duplicate candidates
+    // 4. Parse source elements inside video, if applicable
+    if ((mediaEl.tagName || '').toLowerCase() === 'video') {
+      const sources = qAll('source', mediaEl);
+      for (const source of sources) {
+        const url = source.src;
+        if (url) {
+          candidates.push({ url, source: 'video_source_tag' });
+        }
+      }
+    }
+
+    // 5. Parse srcset for images, if applicable
+    if (mediaEl.srcset) {
+      const srcsetUrls = mediaEl.srcset.split(',').map(s => s.trim().split(' ')[0]).filter(Boolean);
+      for (const url of srcsetUrls) {
+        candidates.push({ url, source: 'media_srcset' });
+      }
+    }
+
+    // Deduplicate candidates and resolve relative URLs
     const seenUrls = new Set();
     const uniqueCandidates = [];
     for (const c of candidates) {
       let resolved = c.url;
+      if (!resolved) continue;
       if (!resolved.startsWith('http') && !resolved.startsWith('blob') && !resolved.startsWith('data')) {
         try { resolved = new URL(resolved, window.location.href).href; } catch (e) {}
       }
@@ -942,6 +947,15 @@
         seenUrls.add(resolved);
         uniqueCandidates.push({ url: resolved, source: c.source });
       }
+    }
+
+    log(`Collected ${uniqueCandidates.length} unique download candidates:`);
+    uniqueCandidates.forEach((c, idx) => {
+      log(`Candidate [${idx}]: source=${c.source}, url=${c.url.slice(0, 100)}`);
+    });
+
+    if (uniqueCandidates.length === 0) {
+      throw new Error('No valid download candidates found for generated media');
     }
 
     let lastError = null;
@@ -957,21 +971,35 @@
             throw new Error(`Blob fetch returned empty or tiny base64 (${res ? res.base64.length : 0} bytes)`);
           }
           log('download full quality mime=' + res.mime + ' bytes=' + res.base64.length);
+          
+          // Verify final byteLength/size is valid (image > 10KB, or non-zero video)
+          const byteLength = Math.round(res.base64.length * 0.75); // approx size in bytes from base64
+          const isImage = res.mime.startsWith('image/');
+          if (isImage && byteLength < 10240) {
+            throw new Error(`Blob image body is too tiny (${byteLength} bytes, minimum is 10KB)`);
+          } else if (byteLength === 0) {
+            throw new Error('Blob media body is completely empty (0 bytes)');
+          }
+          
           reportProgress('downloading', 96, 'Downloading asset binary package...');
           return res;
         }
 
+        // Apply quality suffix transformations for googleusercontent if applicable
         if (/googleusercontent\.com\//.test(targetSrc) && /=[swh]\d+/.test(targetSrc)) {
           targetSrc = targetSrc.replace(/=[swh]\d+[^?&]*/g, '=s0');
-          log('stripped size suffix ➔ fetching full resolution from googleusercontent');
+          log('stripped size suffix ➔ fetching full resolution from googleusercontent: ' + targetSrc.slice(0, 80));
         } else if (/googleusercontent\.com\//.test(targetSrc)) {
-          targetSrc = targetSrc.split('?')[0] + '=s0';
-          log('appended =s0 for full resolution');
+          // If it doesn't already have =s0, let's split by ? and append =s0
+          if (!targetSrc.includes('=s0')) {
+            targetSrc = targetSrc.split('?')[0] + '=s0';
+            log('appended =s0 for full resolution: ' + targetSrc.slice(0, 80));
+          }
         }
 
         log('BUG-103 FIX: Using privileged service worker downloader for: ' + targetSrc.slice(0, 80));
         
-        const filename = 'db9-generated-' + Date.now() + '.png';
+        const filename = 'db9-generated-' + Date.now() + (targetSrc.includes('video') ? '.mp4' : '.png');
         const response = await new Promise((resolve, reject) => {
           chrome.runtime.sendMessage({
             action: 'download-file',
@@ -1015,14 +1043,19 @@
         log('downloading via page-world from: ' + fallbackUrl.slice(0, 80));
         const res = await downloadBlobViaPageWorld(fallbackUrl);
         log('download full quality mime=' + res.mime + ' bytes=' + res.base64.length);
+        
+        const byteLength = Math.round(res.base64.length * 0.75);
+        const isImage = res.mime.startsWith('image/');
+        if (isImage && byteLength < 10240) {
+          throw new Error(`Fallback image body is too tiny (${byteLength} bytes, minimum is 10KB)`);
+        } else if (byteLength === 0) {
+          throw new Error('Fallback media body is completely empty (0 bytes)');
+        }
+        
         reportProgress('downloading', 96, 'Downloading asset binary package...');
         return res;
       } catch (fallbackErr) {
-        log('page-world fetch failed: ' + fallbackErr.message + '; trying full-size button click fallback');
-        if (dlBtn) {
-          realClick(dlBtn);
-          await sleep(2000);
-        }
+        log('page-world fetch failed: ' + fallbackErr.message);
         throw fallbackErr;
       }
     }
