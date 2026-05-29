@@ -1,4 +1,4 @@
-// DB9 Multi-Provider — Photoshop UXP Plugin v0.4.7.5
+// DB9 Multi-Provider — Photoshop UXP Plugin v0.4.7.6
 // All preset/negative state lives in the plugin. Bridge is a dumb pipe.
 
 const photoshop = require('photoshop');
@@ -14,7 +14,7 @@ const { batchPlay } = action;
 const { executeAsModal } = core;
 
 // ===== Constants / state =====
-const VERSION = '0.4.7.5';
+const VERSION = '0.4.7.6';
 const BRIDGE = 'http://127.0.0.1:8765';
 const PRESET_MAX = 6;
 
@@ -34,8 +34,9 @@ let presetSearchQ = '';
 let negativeSearchQ = '';
 let dualState = null;       // {parentId, gemini:{status,base64}, chatgpt:{status,base64}}
 let settings = {
-  useStructuredPrompt: true,
+  useStructuredPrompt: false,
   autoTranslateVN: true,
+  promptModeVersion: '0.4.7.6',
   selectionExpandMode: 'auto',
   selectionExpandPx: 96,
 };
@@ -366,10 +367,11 @@ function buildStructuredPrompt(state) {
   ].join(', ');
 
   if (!settings.useStructuredPrompt) {
-    // Plain text mode: presets prepended, then intent, then negative trailer
+    // Plain mode is the default because Gemini should receive a natural render prompt,
+    // not the plugin's control scaffold.
     const parts = [];
     if (stylePresets.length) parts.push(stylePresets.join('. '));
-    parts.push((intentField || '(no prompt)') + ', 1024x1024 square image (aspect ratio 1:1)');
+    parts.push((intent || '(no prompt)') + ', photoreal architectural visualization, 1024x1024 square image (aspect ratio 1:1)');
     if (negativeMerged) parts.push(`Avoid: ${negativeMerged}.`);
     return parts.join('\n\n');
   }
@@ -904,7 +906,7 @@ async function runGenerate() {
   const state = getStateFromUI();
   const finalPrompt = buildStructuredPrompt(state);
   log(`▶ generate provider=${state.provider} mode=${state.mode} presets=${state.positiveItems.length} negatives=${state.negativeItems.length}`);
-  console.log('[DB9] structured prompt:\n' + finalPrompt);
+  console.log('[DB9] final prompt:\n' + finalPrompt);
 
   // sec-progress is now always visible
   $('progressLog').textContent = '';
@@ -1070,7 +1072,7 @@ async function runRegenerate() {
   const state = getStateFromUI();
   const finalPrompt = buildStructuredPrompt(state);
   log(`▶ regenerate provider=${state.provider} mode=${state.mode} smartObjectId=${lastInpaintContext.smartObjectLayerId}`);
-  console.log('[DB9] structured prompt:\n' + finalPrompt);
+  console.log('[DB9] final prompt:\n' + finalPrompt);
 
   $('progressLog').textContent = '';
   $('progressSteps').innerHTML = '<div class="db9-step active">📡 Posting regenerate to bridge…</div>';
@@ -1339,7 +1341,15 @@ async function init() {
   log('🍌 DB9 Multi-Provider v' + VERSION + ' starting…');
   try {
     const s = localStorage.getItem('db9_settings');
-    if (s) settings = { ...settings, ...JSON.parse(s) };
+    if (s) {
+      const saved = JSON.parse(s);
+      settings = { ...settings, ...saved };
+      if (!saved.promptModeVersion) {
+        settings.useStructuredPrompt = false;
+        settings.promptModeVersion = VERSION;
+        localStorage.setItem('db9_settings', JSON.stringify(settings));
+      }
+    }
   } catch (e) {}
   sanitizeUiCopy();
   wire();

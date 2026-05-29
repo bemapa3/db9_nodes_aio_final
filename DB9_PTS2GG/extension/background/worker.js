@@ -1,4 +1,4 @@
-// DB9 Multi-Provider Auto - Background Service Worker (v0.4.7.5)
+// DB9 Multi-Provider Auto - Background Service Worker (v0.4.7.6)
 // Maintains persistent WebSocket to local bridge, routes jobs to the correct
 // provider tab (gemini, chatgpt, or flow) based on job.provider.
 
@@ -301,7 +301,7 @@ function connect() {
     // Announce which providers we have tabs for
     const providers = await connectedProviders();
     log('hello providers=', providers);
-    sendToBridge({ type: 'hello-extension', version: '0.4.7.5', providers });
+    sendToBridge({ type: 'hello-extension', version: '0.4.7.6', providers });
   };
 
   ws.onmessage = async (e) => {

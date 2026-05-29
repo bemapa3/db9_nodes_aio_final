@@ -1,4 +1,4 @@
-// DB9 Multi-Provider Bridge - v0.4.7.5
+// DB9 Multi-Provider Bridge - v0.4.7.6
 // Local server connecting Photoshop UXP plugin and Chrome extension.
 // Port 8765 HTTP for Photoshop, WebSocket /ws for extension.
 //
@@ -13,7 +13,7 @@ const http = require('http');
 const { WebSocketServer } = require('ws');
 const crypto = require('crypto');
 
-const VERSION = '0.4.7.5';
+const VERSION = '0.4.7.6';
 const PORT = 8765;
 const SUPPORTED_PROVIDERS = new Set(['gemini', 'chatgpt', 'flow']);
 

@@ -1,6 +1,6 @@
 {
   "name": "db9-gemini-uxp",
-  "version": "0.4.7.5",
+  "version": "0.4.7.6",
   "description": "Photoshop UXP plugin that drives the DB9 Multi-Provider bridge: duplicates a selection into a Smart Object, sends it to Gemini Nano Banana Pro or ChatGPT 4o-image, and replaces the SO contents with the AI result.",
   "main": "index.js",
   "private": true,
