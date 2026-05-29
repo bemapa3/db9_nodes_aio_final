@@ -346,50 +346,7 @@ function detectVietnamese(text) {
 }
 
 function buildStructuredPrompt(state) {
-  const { userPrompt, userNegative, positiveItems, negativeItems } = state;
-  let intent = (userPrompt || '').trim();
-  if (state.selectionContext) {
-    intent = (intent ? intent + '. ' : '') + state.selectionContext;
-  }
-  // v0.4.7.2: inject reference description if present
-  if (typeof refImage !== 'undefined' && refImage && refImage.description) {
-    intent = (intent ? intent + '. ' : '') + 'Match style/mood of reference: ' + refImage.description;
-  }
-  const isVN = detectVietnamese(intent);
-  const intentField = (isVN && settings.autoTranslateVN)
-    ? `Translate this Vietnamese intent to natural English architectural-visualization terminology, then render: "${intent}"`
-    : intent;
-
-  const stylePresets = positiveItems.map(p => p.prompt || p.labelEn || p.label).filter(Boolean);
-  const negativeMerged = [
-    ...(userNegative ? [userNegative.trim()] : []),
-    ...negativeItems.map(n => n.prompt || n.labelEn || n.label).filter(Boolean)
-  ].join(', ');
-
-  if (!settings.useStructuredPrompt) {
-    // Plain mode is the default because Gemini should receive a natural render prompt,
-    // not the plugin's control scaffold.
-    const parts = [];
-    if (stylePresets.length) parts.push(stylePresets.join('. '));
-    parts.push((intent || '(no prompt)') + ', photoreal architectural visualization, 1024x1024 square image (aspect ratio 1:1)');
-    if (negativeMerged) parts.push(`Avoid: ${negativeMerged}.`);
-    return parts.join('\n\n');
-  }
-
-  // Structured JSON payload
-  const payload = {
-    intent: intentField || '(no prompt)',
-    style_presets: stylePresets,
-    negative: negativeMerged,
-    output: '1024x1024 photoreal architectural visualization, square image (aspect ratio 1:1)',
-  };
-  return [
-    'ROLE: architectural visualization render assistant.',
-    'LANGUAGE: respond in English using architectural terminology.',
-    'INPUT (JSON):',
-    JSON.stringify(payload, null, 2),
-    'INSTRUCTION: render the intent using all preset cues; strictly avoid anything in `negative`.',
-  ].join('\n');
+  return (state.userPrompt || '').trim();
 }
 
 function selectionWorkflowOptionsFromUI() {
