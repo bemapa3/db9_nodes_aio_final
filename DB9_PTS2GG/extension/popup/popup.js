@@ -1,4 +1,4 @@
-// DB9 Multi-Provider — Extension Popup (v0.4.7.6)
+// DB9 Multi-Provider — Extension Popup (v0.4.7.7)
 // Presets/negatives are now owned by the UXP plugin. This popup is just a
 // bridge-status indicator + a quick test-job sender.
 

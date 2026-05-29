@@ -60,7 +60,7 @@
   }
   function isUploadText(el) {
     const hay = textOf(el);
-    return hay.includes('upload') || hay.includes('file') || hay.includes('tep') || (hay.includes('tai') && hay.includes('len'));
+    return hay.includes('upload') || hay.includes('file') || hay.includes('tep') || hay.includes('tệp') || (hay.includes('tai') && hay.includes('len')) || (hay.includes('tải') && hay.includes('lên'));
   }
   function scoreUploadCandidate(el) {
     if (!el || !visible(el)) return -1;
@@ -69,11 +69,11 @@
     if (isExcluded) return -1;
 
     let score = 0;
-    if (text.includes('tai tep len') || text.includes('upload file') || text.includes('upload images & files')) {
+    if (text.includes('tai tep len') || text.includes('tải tệp lên') || text.includes('upload file') || text.includes('upload images & files')) {
       score += 100;
-    } else if (text.includes('tai len') || text.includes('upload')) {
+    } else if (text.includes('tai len') || text.includes('tải lên') || text.includes('upload')) {
       score += 80;
-    } else if (text.includes('tep') || text.includes('file')) {
+    } else if (text.includes('tep') || text.includes('tệp') || text.includes('file')) {
       score += 50;
     } else if (isUploadText(el)) {
       score += 30;
@@ -89,7 +89,7 @@
   }
   function isToolsText(el) {
     const hay = textOf(el);
-    return hay.includes('upload and tools') || hay.includes('tools') || hay.includes('noi dung') || (hay.includes('tai') && hay.includes('cong cu'));
+    return hay.includes('upload and tools') || hay.includes('tools') || hay.includes('noi dung') || hay.includes('nội dung') || (hay.includes('tai') && hay.includes('cong cu')) || (hay.includes('tải') && hay.includes('công cụ'));
   }
   const log = (text) => {
     console.log('[DB9-Gemini]', text);
@@ -259,7 +259,7 @@
       // Remove excess previews by clicking their delete/close buttons
       const excess = previews.slice(0, previews.length - maxAllowed);
       for (const preview of excess) {
-        const closeBtn = preview.querySelector('button[aria-label*="Remove" i], button[aria-label*="Delete" i], button[aria-label*="XÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³a" i], button[aria-label*="close" i]')
+        const closeBtn = preview.querySelector('button[aria-label*="Remove" i], button[aria-label*="Delete" i], button[aria-label*="Xóa" i], button[aria-label*="close" i]')
           || preview.closest('[data-test-id="uploaded-img"]')?.querySelector('button')
           || preview.parentElement?.querySelector('button');
         if (closeBtn) { realClick(closeBtn); await sleep(200); }
@@ -475,7 +475,7 @@
   async function uploadViaMenu(file, base64) {
     reportProgress('uploading', 40, 'Staging image payload for dynamic dialog interception...');
     // v0.4.7.4: Stage file for showOpenFilePicker override BEFORE clicking menu
-    log('menu path: Tools ("NÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚Â»ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢i dung tÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚ÂºÃƒâ€šÃ‚Â£i lÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âªn vÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â  cÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â´ng cÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚Â»Ãƒâ€šÃ‚Â¥") -> "TÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚ÂºÃƒâ€šÃ‚Â£i tÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚Â»ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¡p lÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âªn" -> showOpenFilePicker intercept');
+    log('menu path: Tools ("Nội dung tải lên và công cụ") -> "Tải tệp lên" -> showOpenFilePicker intercept');
 
     // Stage the file in page-world so showOpenFilePicker override can return it
     document.dispatchEvent(new CustomEvent('db9-stage-file', {
@@ -510,7 +510,7 @@
       log('Tools button not found, scanning for open menu...');
     }
 
-    // 2. Scan for "Upload images & files" (TÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚ÂºÃƒâ€šÃ‚Â£i tÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚Â»ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¡p lÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âªn) item inside the entire document (since overlay menus are attached to body)
+    // 2. Scan for "Upload images & files" (Tải tệp lên) item inside the entire document (since overlay menus are attached to body)
     // We poll for up to 1.5s in case of anims
     let uploadItem = null;
     const menuStart = Date.now();
@@ -586,7 +586,7 @@
         log('monitor after synthetic fallback click: ' + JSON.stringify(stateAfterTrustedClick));
       }
     } else {
-      log('Upload menu item ("TÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚ÂºÃƒâ€šÃ‚Â£i tÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚Â»ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¡p lÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âªn") not found after waiting 1.5s');
+      log('Upload menu item ("Tải tệp lên") not found after waiting 1.5s');
     }
 
     // 3. Poll for page-world file input up to 5s
@@ -1090,9 +1090,9 @@
   async function ensureCloseImageViewer() {
     try {
       const backBtn = qDeep('button[aria-label*="Back" i]')
-        || qDeep('button[aria-label*="Quay lÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚ÂºÃƒâ€šÃ‚Â¡i" i]')
+        || qDeep('button[aria-label*="Quay lại" i]')
         || qDeep('button[aria-label*="Close" i]')
-        || qDeep('button[aria-label*="ÃƒÆ’Ã¢â‚¬Å¾Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³ng" i]')
+        || qDeep('button[aria-label*="Đóng" i]')
         || qDeep('button[aria-label*="close" i]')
         || qAllDeep('button').find(b => {
           const icon = b.querySelector('mat-icon');
