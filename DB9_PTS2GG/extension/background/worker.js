@@ -615,89 +615,195 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // Bypass CSP + CORS 403 and follow soft redirect chains (e.g. text/plain URLs) up to 5 hops
   if (msg.action === 'download-file') {
     (async () => {
-      try {
-        log('BUG-103 FIX: Privileged fetch/download triggered for:', msg.url);
+      let tabId = sender.tab?.id;
+      if (!tabId) {
+        log('CDP Downloader: No tabId in sender, searching active tabs...');
+        const activeTab = await ensureProviderTab('gemini');
+        tabId = activeTab?.id;
+      }
+      if (!tabId) {
+        return sendResponse({ ok: false, error: 'No active tab found to attach debugger for CDP download' });
+      }
+      
+      log('BUG-103 FIX v2: CDP getResponseBody download triggered for:', msg.url, 'tabId:', tabId);
+      
+      let currentUrl = msg.url;
+      let finalBase64 = null;
+      let finalMime = 'image/png';
+      const maxHops = 5;
+      
+      let targetRequestId = null;
+      let loadingFinished = false;
+      let loadingError = null;
+      let responseMimeType = null;
+      
+      const eventListener = (source, method, params) => {
+        if (source.tabId !== tabId) return;
         
-        let currentUrl = msg.url;
-        let resp = null;
-        let contentBytes = null;
-        let mime = 'image/png';
-        const maxHops = 5;
+        if (method === 'Network.requestWillBeSent') {
+          if (params.request.url === currentUrl) {
+            targetRequestId = params.requestId;
+            log(`[CDP Hop Log] requestWillBeSent targetRequestId: ${targetRequestId}`);
+          }
+        }
+        
+        if (method === 'Network.responseReceived') {
+          if (params.requestId === targetRequestId || params.response.url === currentUrl) {
+            targetRequestId = params.requestId;
+            responseMimeType = params.response.mimeType;
+            log(`[CDP Hop Log] responseReceived: requestId=${targetRequestId}, status=${params.response.status}, mime=${responseMimeType}`);
+          }
+        }
+        
+        if (method === 'Network.loadingFinished') {
+          if (params.requestId === targetRequestId) {
+            log(`[CDP Hop Log] loadingFinished for: ${targetRequestId}`);
+            loadingFinished = true;
+          }
+        }
+        
+        if (method === 'Network.loadingFailed') {
+          if (params.requestId === targetRequestId) {
+            log(`[CDP Hop Log] loadingFailed for: ${targetRequestId}, error: ${params.errorText}`);
+            loadingError = params.errorText || 'Loading failed';
+            loadingFinished = true;
+          }
+        }
+      };
+      
+      try {
+        // Step 1: Attach debugger (reuse connection if already attached)
+        await new Promise((resolve, reject) => {
+          chrome.debugger.attach({ tabId }, '1.3', () => {
+            if (chrome.runtime.lastError) {
+              const errMsg = chrome.runtime.lastError.message;
+              if (errMsg.includes('already attached')) {
+                log('CDP Downloader: Debugger already attached, reusing connection');
+                resolve();
+              } else {
+                reject(new Error('debugger attach failed: ' + errMsg));
+              }
+            } else {
+              resolve();
+            }
+          });
+        });
+        
+        chrome.debugger.onEvent.addListener(eventListener);
+        await chrome.debugger.sendCommand({ tabId }, 'Network.enable');
         
         for (let hop = 1; hop <= maxHops; hop++) {
           const urlHost = new URL(currentUrl).hostname;
-          log(`[Hop ${hop}] Fetching: Host=${urlHost}, URL=${currentUrl.slice(0, 80)}`);
+          log(`[CDP Hop ${hop}] Fetching via page-world: Host=${urlHost}, URL=${currentUrl.slice(0, 80)}`);
           
-          // Fetch the URL. Explicitly do NOT use no-cors to ensure readable bytes.
-          resp = await fetch(currentUrl, { mode: 'cors' });
+          targetRequestId = null;
+          loadingFinished = false;
+          loadingError = null;
+          responseMimeType = null;
           
-          // Reject if status is 403, 401, or 0
-          if (resp.status === 403 || resp.status === 401 || resp.status === 0) {
-            throw new Error(`Fetch rejected with HTTP status ${resp.status} on hop ${hop} at ${urlHost}`);
+          // Trigger the fetch in page-world context (cookies/creds included natively)
+          const evalResult = await chrome.debugger.sendCommand({ tabId }, 'Runtime.evaluate', {
+            expression: `
+              (async () => {
+                try {
+                  const r = await fetch(${JSON.stringify(currentUrl)}, { cache: 'no-store' });
+                  return { ok: r.ok, status: r.status, contentType: r.headers.get('content-type') };
+                } catch(e) {
+                  return { ok: false, error: e.message };
+                }
+              })()
+            `,
+            returnByValue: true,
+            awaitPromise: true
+          });
+          
+          const pageResult = evalResult.result.value;
+          log(`[CDP Hop ${hop} Result]`, JSON.stringify(pageResult));
+          
+          if (pageResult && !pageResult.ok) {
+            throw new Error(`Page-world fetch failed on hop ${hop}: ${pageResult.error || 'HTTP ' + pageResult.status}`);
           }
-          if (!resp.ok) {
-            throw new Error(`Fetch failed with HTTP status ${resp.status} on hop ${hop} at ${urlHost}`);
+          
+          // Wait for CDP loading event to finish (max 10 seconds)
+          const startWait = Date.now();
+          while (!loadingFinished && Date.now() - startWait < 10000) {
+            await new Promise(r => setTimeout(r, 100));
           }
           
-          const contentType = resp.headers.get('content-type') || '';
-          const acao = resp.headers.get('access-control-allow-origin') || '(none)';
+          if (!targetRequestId) {
+            throw new Error(`CDP did not capture requestId on hop ${hop} for ${currentUrl.slice(0, 50)}`);
+          }
+          if (loadingError) {
+            throw new Error(`CDP Network loading failed on hop ${hop}: ${loadingError}`);
+          }
+          if (!loadingFinished) {
+            throw new Error(`CDP Network loading timed out on hop ${hop}`);
+          }
           
-          // Read response as arrayBuffer first to get exact byte length
-          const arrayBuffer = await resp.arrayBuffer();
-          const byteLength = arrayBuffer.byteLength;
+          // Retrieve response body via CDP getResponseBody
+          log(`[CDP Hop ${hop}] Invoking Network.getResponseBody for: ${targetRequestId}`);
+          const bodyResult = await chrome.debugger.sendCommand({ tabId }, 'Network.getResponseBody', {
+            requestId: targetRequestId
+          });
           
-          if (contentType.includes('text/plain')) {
-            const textBody = new TextDecoder().decode(arrayBuffer).trim();
-            log(`[Hop ${hop} Log] host=${urlHost}, status=${resp.status}, content-type=${contentType}, ACAO=${acao}, byteLength=${byteLength}`);
+          if (!bodyResult || !bodyResult.body) {
+            throw new Error(`CDP Network.getResponseBody returned empty body on hop ${hop}`);
+          }
+          
+          let responseText = bodyResult.body;
+          if (bodyResult.base64Encoded && (responseMimeType || '').includes('text/plain')) {
+            responseText = atob(bodyResult.body);
+          }
+          
+          const isText = (responseMimeType || '').includes('text/plain') || 
+                         (pageResult && (pageResult.contentType || '').includes('text/plain'));
+          
+          if (isText) {
+            const nextUrl = responseText.trim();
+            log(`[CDP Hop ${hop} Soft-Redirect] host=${urlHost}, mime=${responseMimeType}, bodyLength=${nextUrl.length}`);
             
-            if (textBody.startsWith('http://') || textBody.startsWith('https://')) {
-              currentUrl = textBody;
-              continue; // Follow soft redirect to next hop
+            if (nextUrl.startsWith('http://') || nextUrl.startsWith('https://')) {
+              currentUrl = nextUrl;
+              continue; // Next hop
             } else {
-              throw new Error(`Hop ${hop} returned text/plain but it is not a valid URL: ${textBody.slice(0, 80)}`);
+              throw new Error(`Hop ${hop} returned text/plain but not a valid URL: ${nextUrl.slice(0, 80)}`);
             }
           }
           
-          // Final media binary hop
-          contentBytes = new Uint8Array(arrayBuffer);
-          mime = contentType;
+          // Final binary content reached!
+          finalBase64 = bodyResult.body;
+          if (!bodyResult.base64Encoded) {
+            finalBase64 = btoa(unescape(encodeURIComponent(bodyResult.body)));
+          }
+          finalMime = responseMimeType || (pageResult && pageResult.contentType) || 'image/png';
           
-          log(`[Hop ${hop} Final Log] host=${urlHost}, status=${resp.status}, content-type=${contentType}, ACAO=${acao}, byteLength=${byteLength}`);
+          log(`[CDP Hop ${hop} Final Log] host=${urlHost}, mime=${finalMime}, base64Length=${finalBase64.length}`);
           break;
         }
         
-        if (!contentBytes) {
+        if (!finalBase64) {
           throw new Error(`Failed to resolve final media bytes after ${maxHops} hops`);
         }
         
-        const byteLength = contentBytes.byteLength;
-        
-        // 4. Reject if final content-type is not image/* or video/*
-        const isMedia = mime.startsWith('image/') || mime.startsWith('video/');
+        const byteLength = Math.round(finalBase64.length * 0.75);
+        const isMedia = finalMime.startsWith('image/') || finalMime.startsWith('video/');
         if (!isMedia) {
-          throw new Error(`Resolved media content-type "${mime}" is not a valid image/* or video/*`);
+          throw new Error(`Resolved media content-type "${finalMime}" is not a valid image/* or video/*`);
         }
         
-        // 5. Reject if final byteLength is 0 or too small, e.g. image < 10KB (10240 bytes)
-        const isImage = mime.startsWith('image/');
+        const isImage = finalMime.startsWith('image/');
         if (isImage && byteLength < 10240) {
           throw new Error(`Resolved image body is too tiny (${byteLength} bytes, minimum is 10KB)`);
         } else if (byteLength === 0) {
           throw new Error(`Resolved media body is completely empty (0 bytes)`);
         }
         
-        // Convert ArrayBuffer to Base64 (Chunked to prevent stack overflow)
-        let binary = '';
-        const len = contentBytes.byteLength;
-        const chunkSize = 65535;
-        for (let i = 0; i < len; i += chunkSize) {
-          binary += String.fromCharCode.apply(null, contentBytes.subarray(i, i + chunkSize));
-        }
-        const base64 = btoa(binary);
+        log(`CDP Download successful! Size: ${finalBase64.length} base64 chars. Mime: ${finalMime}`);
         
-        log(`Privileged fetch successful. Size: ${base64.length} base64 chars. Mime: ${mime}`);
+        chrome.debugger.onEvent.removeListener(eventListener);
+        await chrome.debugger.detach({ tabId });
+        log('CDP detached');
         
-        // 3. Trigger native browser download in background (for debug/local file copy)
         let downloadId = null;
         try {
           downloadId = await new Promise((resolve) => {
@@ -717,9 +823,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           log('Background download trigger exception:', e.message);
         }
         
-        sendResponse({ ok: true, base64: base64, mime: mime, downloadId: downloadId });
+        sendResponse({ ok: true, base64: finalBase64, mime: finalMime, downloadId: downloadId });
       } catch (err) {
-        log('BUG-103 FIX: Privileged fetch/download failed:', err.message);
+        log('BUG-103 FIX v2: CDP download failed:', err.message);
+        try {
+          chrome.debugger.onEvent.removeListener(eventListener);
+          await chrome.debugger.detach({ tabId });
+        } catch (_) {}
         sendResponse({ ok: false, error: err.message });
       }
     })();
