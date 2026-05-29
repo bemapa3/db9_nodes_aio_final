@@ -206,6 +206,38 @@
     }
   });
 
+  // ===== Blob download handler (page-world can access blob: URLs) =====
+  async function handleBlobDownload(detail) {
+    const { id, blobUrl } = detail;
+    try {
+      console.log('[DB9-Monitor] Fetching blob URL:', blobUrl?.slice(0, 60));
+      const response = await fetch(blobUrl);
+      if (!response.ok) throw new Error('Blob fetch failed: HTTP ' + response.status);
+      const blob = await response.blob();
+      const mime = blob.type || 'image/png';
+      const reader = new FileReader();
+      const base64 = await new Promise((resolve, reject) => {
+        reader.onloadend = () => {
+          const dataUrl = String(reader.result || '');
+          resolve(dataUrl.split(',')[1] || '');
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      console.log('[DB9-Monitor] Blob downloaded:', mime, 'base64 length:', base64.length);
+      broadcastEvent('db9-download-blob-response', { id, success: true, base64, mime });
+      try { window.postMessage({ source: 'db9-monitor', type: 'db9-download-blob-response', detail: { id, success: true, base64, mime } }, '*'); } catch (e) {}
+    } catch (e) {
+      console.error('[DB9-Monitor] Blob download failed:', e);
+      broadcastEvent('db9-download-blob-response', { id, success: false, error: e.message });
+      try { window.postMessage({ source: 'db9-monitor', type: 'db9-download-blob-response', detail: { id, success: false, error: e.message } }, '*'); } catch (e2) {}
+    }
+  }
+
+  listenBoth('db9-download-blob-request', (ev) => {
+    if (ev.detail) handleBlobDownload(ev.detail);
+  });
+
   // ===== Probe request/response =====
   function handleProbeRequest(id) {
     const detail = {
@@ -275,6 +307,9 @@
             console.error('[DB9-Monitor] postMessage base64 inject failed:', e);
           }
         }
+        break;
+      case 'db9-download-blob-request':
+        if (data.detail) handleBlobDownload(data.detail);
         break;
     }
   });
