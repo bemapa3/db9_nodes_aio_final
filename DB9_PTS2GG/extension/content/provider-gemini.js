@@ -997,19 +997,19 @@
           }
         }
 
-        log('BUG-103 FIX: Using privileged service worker downloader for: ' + targetSrc.slice(0, 80));
+        log('BUG-103 FIX v2: Using CDP Network.getResponseBody for: ' + targetSrc.slice(0, 80));
         
         const filename = 'db9-generated-' + Date.now() + (targetSrc.includes('video') ? '.mp4' : '.png');
         const response = await new Promise((resolve, reject) => {
           chrome.runtime.sendMessage({
-            action: 'download-file',
+            action: 'download-via-cdp',
             url: targetSrc,
             filename: filename
           }, (response) => {
             if (chrome.runtime.lastError) {
               reject(new Error(chrome.runtime.lastError.message));
             } else if (!response || !response.ok) {
-              reject(new Error(response?.error || 'Service worker download failed'));
+              reject(new Error(response?.error || 'CDP download failed'));
             } else {
               resolve(response);
             }
@@ -1017,11 +1017,11 @@
         });
         
         if (!response.base64 || response.base64.length < 100) {
-          throw new Error(`Privileged fetch returned empty or tiny base64 (${response.base64 ? response.base64.length : 0} bytes)`);
+          throw new Error(`CDP returned empty or tiny base64 (${response.base64 ? response.base64.length : 0} bytes)`);
         }
         
-        log('BUG-103 FIX: Privileged fetch/download successful, base64 length=' + response.base64.length);
-        reportProgress('downloading', 96, 'Download complete...');
+        log('BUG-103 FIX v2: CDP download successful, base64 length=' + response.base64.length);
+        reportProgress('downloading', 96, 'Download complete via CDP...');
         
         return { 
           base64: response.base64, 

@@ -611,9 +611,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true; // keep channel open
   }
 
-  // BUG-103 FIX: Privileged Service Worker Downloader & Fetcher with Soft Redirect Support
-  // Bypass CSP + CORS 403 and follow soft redirect chains (e.g. text/plain URLs) up to 5 hops
-  if (msg.action === 'download-file') {
+  // BUG-103 FIX v2: Privileged Service Worker CDP Downloader using Chrome DevTools Protocol
+  // Bypass CORS/CSP completely by attaching chrome.debugger and using Network.getResponseBody
+  if (msg.action === 'download-via-cdp') {
     (async () => {
       let tabId = sender.tab?.id;
       if (!tabId) {
@@ -830,6 +830,112 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           chrome.debugger.onEvent.removeListener(eventListener);
           await chrome.debugger.detach({ tabId });
         } catch (_) {}
+        sendResponse({ ok: false, error: err.message });
+      }
+    })();
+    return true; // keep channel open for async response
+  }
+
+  // BUG-103 FIX: Backward Compatible Privileged Service Worker Downloader & Fetcher with Soft Redirect Support
+  // Bypass CSP + CORS 403 and follow soft redirect chains (e.g. text/plain URLs) up to 5 hops using standard fetch
+  if (msg.action === 'download-file') {
+    (async () => {
+      let currentUrl = msg.url;
+      let contentBytes = null;
+      let mime = 'image/png';
+      const maxHops = 5;
+      let resp = null;
+      
+      try {
+        log('BUG-103 FIX: Privileged download triggered for:', currentUrl.slice(0, 100));
+        
+        for (let hop = 1; hop <= maxHops; hop++) {
+          const urlHost = new URL(currentUrl).hostname;
+          log(`[Hop ${hop}] Fetching: Host=${urlHost}, URL=${currentUrl.slice(0, 80)}`);
+          
+          resp = await fetch(currentUrl, { mode: 'cors' });
+          
+          if (resp.status === 403 || resp.status === 401 || resp.status === 0) {
+            throw new Error(`Fetch rejected with HTTP status ${resp.status} on hop ${hop} at ${urlHost}`);
+          }
+          if (!resp.ok) {
+            throw new Error(`Fetch failed with HTTP status ${resp.status} on hop ${hop} at ${urlHost}`);
+          }
+          
+          const contentType = resp.headers.get('content-type') || '';
+          const acao = resp.headers.get('access-control-allow-origin') || '(none)';
+          
+          const arrayBuffer = await resp.arrayBuffer();
+          const byteLength = arrayBuffer.byteLength;
+          
+          if (contentType.includes('text/plain')) {
+            const textBody = new TextDecoder().decode(arrayBuffer).trim();
+            log(`[Hop ${hop} Log] host=${urlHost}, status=${resp.status}, content-type=${contentType}, ACAO=${acao}, byteLength=${byteLength}`);
+            
+            if (textBody.startsWith('http://') || textBody.startsWith('https://')) {
+              currentUrl = textBody;
+              continue; // Follow soft redirect to next hop
+            } else {
+              throw new Error(`Hop ${hop} returned text/plain but it is not a valid URL: ${textBody.slice(0, 80)}`);
+            }
+          }
+          
+          contentBytes = new Uint8Array(arrayBuffer);
+          mime = contentType;
+          
+          log(`[Hop ${hop} Final Log] host=${urlHost}, status=${resp.status}, content-type=${contentType}, ACAO=${acao}, byteLength=${byteLength}`);
+          break;
+        }
+        
+        if (!contentBytes) {
+          throw new Error(`Failed to resolve final media bytes after ${maxHops} hops`);
+        }
+        
+        const byteLength = contentBytes.byteLength;
+        const isMedia = mime.startsWith('image/') || mime.startsWith('video/');
+        if (!isMedia) {
+          throw new Error(`Resolved media content-type "${mime}" is not a valid image/* or video/*`);
+        }
+        
+        const isImage = mime.startsWith('image/');
+        if (isImage && byteLength < 10240) {
+          throw new Error(`Resolved image body is too tiny (${byteLength} bytes, minimum is 10KB)`);
+        } else if (byteLength === 0) {
+          throw new Error(`Resolved media body is completely empty (0 bytes)`);
+        }
+        
+        let binary = '';
+        const len = contentBytes.byteLength;
+        const chunkSize = 65535;
+        for (let i = 0; i < len; i += chunkSize) {
+          binary += String.fromCharCode.apply(null, contentBytes.subarray(i, i + chunkSize));
+        }
+        const base64 = btoa(binary);
+        
+        log(`Privileged fetch successful. Size: ${base64.length} base64 chars. Mime: ${mime}`);
+        
+        let downloadId = null;
+        try {
+          downloadId = await new Promise((resolve) => {
+            chrome.downloads.download({
+              url: msg.url,
+              filename: msg.filename || 'db9-generated.png',
+              saveAs: false,
+              conflictAction: 'overwrite'
+            }, (id) => {
+              if (chrome.runtime.lastError) {
+                log('Background downloads.download warning:', chrome.runtime.lastError.message);
+              }
+              resolve(id || null);
+            });
+          });
+        } catch (e) {
+          log('Background download trigger exception:', e.message);
+        }
+        
+        sendResponse({ ok: true, base64: base64, mime: mime, downloadId: downloadId });
+      } catch (err) {
+        log('BUG-103 FIX: Privileged fetch/download failed:', err.message);
         sendResponse({ ok: false, error: err.message });
       }
     })();
