@@ -8,7 +8,7 @@ let reconnectTimer = null;
 
 function log(...args) { console.log('[DB9-bg]', ...args); }
 
-// Map URL → provider name
+// Map URL â†’ provider name
 function providerForUrl(url) {
   if (!url) return null;
   if (url.startsWith('https://gemini.google.com/')) return 'gemini';
@@ -295,7 +295,7 @@ function connect() {
   ws = new WebSocket(BRIDGE_WS);
 
   ws.onopen = async () => {
-    log('✅ connected to bridge');
+    log('âœ… connected to bridge');
     chrome.action.setBadgeText({ text: 'ON' });
     chrome.action.setBadgeBackgroundColor({ color: '#16a34a' });
     // Announce which providers we have tabs for
@@ -314,13 +314,13 @@ function connect() {
     }
     if (msg.type === 'job') {
       const provider = msg.provider || 'gemini';
-      log(`📦 received job ${msg.jobId.slice(0, 8)} (${msg.mode}) provider=${provider}`);
+      log(`ðŸ“¦ received job ${msg.jobId.slice(0, 8)} (${msg.mode}) provider=${provider}`);
       await dispatchToProviderTab(msg, provider);
     }
   };
 
   ws.onclose = () => {
-    log('❌ disconnected, retry in 3s');
+    log('âŒ disconnected, retry in 3s');
     chrome.action.setBadgeText({ text: 'OFF' });
     chrome.action.setBadgeBackgroundColor({ color: '#dc2626' });
     clearTimeout(reconnectTimer);
@@ -364,7 +364,7 @@ async function injectProviderScripts(tabId, provider) {
 }
 
 async function ensureProviderReady(tabId, provider) {
-  // Inject first, then ping — not ping-then-inject
+  // Inject first, then ping â€” not ping-then-inject
   log(`injecting scripts into tab ${tabId} for ${provider}`);
   try { await injectProviderScripts(tabId, provider); } catch (e) {
     log(`initial inject warning: ${e.message}`);
@@ -375,7 +375,7 @@ async function ensureProviderReady(tabId, provider) {
     try {
       const resp = await chrome.tabs.sendMessage(tabId, { type: 'who-are-you' });
       if (resp && resp.ok && resp.provider === provider && resp.ready !== false) {
-        log(`✓ provider ${provider} ready in tab ${tabId} (attempt ${attempt})`);
+        log(`âœ“ provider ${provider} ready in tab ${tabId} (attempt ${attempt})`);
         return true;
       }
       if (resp && resp.ok && resp.ready === false) {
@@ -425,7 +425,7 @@ async function dispatchToProviderTab(job, provider) {
       log(`large payload stored in session storage key=${storageKey} size=${imageB64.length}`);
     }
 
-    log(`forwarding job ${job.jobId.slice(0, 8)} → tab ${tab.id} (${provider})`);
+    log(`forwarding job ${job.jobId.slice(0, 8)} â†’ tab ${tab.id} (${provider})`);
     await chrome.tabs.sendMessage(tab.id, { type: 'run-job', job: messageJob });
     sendToBridge({ type: 'job-status', jobId: job.jobId, status: 'running', provider });
   } catch (err) {
@@ -436,7 +436,7 @@ async function dispatchToProviderTab(job, provider) {
 
 // Receive results from content scripts (any provider)
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.type === 'job-result' || msg.type === 'job-error' || msg.type === 'job-status' || msg.type === 'log' || msg.type === 'action-log') {
+  if (msg.type === 'job-result' || msg.type === 'job-error' || msg.type === 'job-status' || msg.type === 'job-progress' || msg.type === 'log' || msg.type === 'action-log') {
     sendToBridge(msg);
   }
   if (msg.type === 'ping-bridge') {
@@ -449,7 +449,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     })();
     return true; // async
   }
-  return true;
+  // Do not return true unconditionally so other listeners (e.g. debugger click) can handle their messages asynchronously!
 });
 
 // React to tab updates so the bridge can know provider availability changes
@@ -465,9 +465,212 @@ chrome.tabs.onRemoved.addListener(async () => {
   sendToBridge({ type: 'providers-update', providers });
 });
 
+// Handler for trusted debugger clicks (v0.4.8)
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.type === 'debugger-click-upload-item') {
+    (async () => {
+      try {
+        const tabId = sender.tab.id;
+        log(`received debugger-click-upload-item request for tabId=${tabId}`);
+
+        // Step 1: Execute script in the tab to find coordinates of upload candidate
+        const results = await chrome.scripting.executeScript({
+          target: { tabId },
+          func: () => {
+            const visible = (e) => {
+              if (!e) return false;
+              const rect = e.getBoundingClientRect();
+              const style = getComputedStyle(e);
+              return rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden' && style.display !== 'none';
+            };
+            const normalizeText = (value) => (value || '')
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+              .toLowerCase()
+              .trim();
+            const textOf = (el) => normalizeText((el?.textContent || '') + ' ' + (el?.getAttribute?.('aria-label') || ''));
+            
+            const allOpenRoots = (root = document, out = []) => {
+              out.push(root);
+              const nodes = root.querySelectorAll ? root.querySelectorAll('*') : [];
+              for (const node of nodes) {
+                if (node && node.shadowRoot) allOpenRoots(node.shadowRoot, out);
+              }
+              return out;
+            };
+
+            const qAllDeep = (sel, root = document) => {
+              const seen = new Set();
+              const found = [];
+              for (const scope of allOpenRoots(root, [])) {
+                try {
+                  for (const el of scope.querySelectorAll(sel)) {
+                    if (!seen.has(el)) { seen.add(el); found.push(el); }
+                  }
+                } catch (e) {}
+              }
+              return found;
+            };
+
+            const qDeep = (sel, root = document) => qAllDeep(sel, root)[0] || null;
+            const textMatches = (el, phrases) => {
+              const hay = textOf(el);
+              return phrases.some((phrase) => hay.includes(normalizeText(phrase)));
+            };
+
+            const uploadItem = qDeep('[data-test-id="uploader-images-files-button-advanced"]')
+              || qDeep('[data-test-id="local-images-files-uploader-button"]')
+              || qDeep('[data-test-id*="uploader-images"]')
+              || qDeep('[data-test-id*="local-images"]')
+              || qAllDeep('span.menu-text.gem-menu-item-label, div.label.gem-menu-item-label, button, [role="menuitem"], toolbox-drawer-item button, [role="menuitem"] span, .mdc-list-item__primary-text').find((el) => {
+                const text = textOf(el);
+                const isUploadCandidate = text.includes('upload') || text.includes('file') || text.includes('tep') || (text.includes('tai') && text.includes('len'));
+                const isExcluded = /drive|photo|notebook|setting|cai dat|google|anh/i.test(text);
+                return isUploadCandidate && !isExcluded;
+              });
+
+            if (!uploadItem) return null;
+
+            let clickable = uploadItem;
+            const parentBtn = uploadItem.closest('button, [role="menuitem"], [role="button"], toolbox-drawer-item');
+            if (parentBtn) {
+              clickable = parentBtn;
+            }
+
+            const rect = clickable.getBoundingClientRect();
+            if (!visible(clickable)) return { error: 'resolved clickable is not visible' };
+            return {
+              x: Math.round(rect.left + rect.width / 2),
+              y: Math.round(rect.top + rect.height / 2),
+              text: (clickable.textContent || uploadItem.textContent || '').trim().slice(0, 120),
+              tag: clickable.tagName,
+              role: clickable.getAttribute('role') || '',
+              rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height }
+            };
+          }
+        });
+
+        const coords = results && results[0] && results[0].result;
+        if (!coords || typeof coords.x !== 'number' || typeof coords.y !== 'number') {
+          throw new Error('Upload menu item coordinates could not be resolved from DOM' + (coords && coords.error ? ': ' + coords.error : ''));
+        }
+
+        log('resolved upload item coordinates: x=' + coords.x + ', y=' + coords.y + ', tag=' + (coords.tag || '') + ', role=' + (coords.role || '') + ', text="' + (coords.text || '') + '". Attaching debugger...');
+
+        // Step 2: Attach debugger and inject staged file via CDP Runtime.evaluate
+        await new Promise((resolve, reject) => {
+          chrome.debugger.attach({ tabId }, '1.3', async () => {
+            if (chrome.runtime.lastError) {
+              return reject(new Error('debugger attach failed: ' + chrome.runtime.lastError.message));
+            }
+            try {
+              log('CDP attached. Injecting staged file via Runtime.evaluate...');
+              const evalResult = await chrome.debugger.sendCommand({ tabId }, 'Runtime.evaluate', {
+                expression: `
+                  (() => {
+                    const file = window.__db9StagedFile;
+                    if (!file) return { ok: false, error: 'No staged file found in window.__db9StagedFile' };
+                    const input = document.querySelector('[contenteditable="true"]')
+                      || document.querySelector('[role="textbox"]')
+                      || document.querySelector('textarea');
+                    if (!input) return { ok: false, error: 'Prompt input textbox not found in DOM' };
+                    input.focus();
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    const evt = new ClipboardEvent('paste', { bubbles: true, cancelable: true, composed: true });
+                    Object.defineProperty(evt, 'clipboardData', { value: dt });
+                    input.dispatchEvent(evt);
+                    return { ok: true };
+                  })();
+                `,
+                returnByValue: true
+              });
+
+              const res = evalResult.result.value;
+              log('CDP file injection result: ' + JSON.stringify(res));
+              if (res && !res.ok) {
+                throw new Error(res.error || 'Evaluation failed');
+              }
+
+              log('CDP file injection complete. detaching...');
+              chrome.debugger.detach({ tabId });
+              resolve();
+            } catch (err) {
+              try { chrome.debugger.detach({ tabId }); } catch (_) {}
+              reject(err);
+            }
+          });
+        });
+
+        sendResponse({ ok: true, coords });
+      } catch (err) {
+        log(`debugger click error: ${err.message}`);
+        sendResponse({ ok: false, error: err.message });
+      }
+    })();
+    return true; // keep channel open
+  }
+
+  // BUG-103 FIX: Privileged Service Worker Downloader & Fetcher
+  // Bypass CSP + CORS 403 by fetching the image resource directly in the service worker context,
+  // converting it to Base64, and returning the actual bytes to the caller.
+  if (msg.action === 'download-file') {
+    (async () => {
+      try {
+        log('BUG-103 FIX: Privileged fetch/download triggered for:', msg.url);
+        
+        // 1. Fetch image directly from privileged SW context
+        const resp = await fetch(msg.url);
+        if (!resp.ok) throw new Error(`HTTP status ${resp.status}`);
+        const arrayBuffer = await resp.arrayBuffer();
+        
+        // 2. Convert ArrayBuffer to Base64 (Chunked to prevent stack overflow)
+        let binary = '';
+        const bytes = new Uint8Array(arrayBuffer);
+        const len = bytes.byteLength;
+        const chunkSize = 65535;
+        for (let i = 0; i < len; i += chunkSize) {
+          binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+        }
+        const base64 = btoa(binary);
+        const mime = resp.headers.get('content-type') || 'image/png';
+        
+        log(`Privileged fetch successful. Size: ${base64.length} bytes. Mime: ${mime}`);
+        
+        // 3. Trigger native browser download in background (for debug/local file copy)
+        let downloadId = null;
+        try {
+          downloadId = await new Promise((resolve) => {
+            chrome.downloads.download({
+              url: msg.url,
+              filename: msg.filename || 'db9-generated.png',
+              saveAs: false,
+              conflictAction: 'overwrite'
+            }, (id) => {
+              if (chrome.runtime.lastError) {
+                log('Background downloads.download warning:', chrome.runtime.lastError.message);
+              }
+              resolve(id || null);
+            });
+          });
+        } catch (e) {
+          log('Background download trigger exception:', e.message);
+        }
+        
+        sendResponse({ ok: true, base64: base64, mime: mime, downloadId: downloadId });
+      } catch (err) {
+        log('BUG-103 FIX: Privileged fetch/download failed:', err.message);
+        sendResponse({ ok: false, error: err.message });
+      }
+    })();
+    return true; // keep channel open for async response
+  }
+});
+
 connect();
 
 // Keep service worker alive
 setInterval(() => { if (ws && ws.readyState === WebSocket.OPEN) ws.send('{"type":"ping"}'); }, 25000);
+
 
 

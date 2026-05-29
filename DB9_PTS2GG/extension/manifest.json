@@ -7,7 +7,9 @@
                         "storage",
                         "scripting",
                         "activeTab",
-                        "tabs"
+                        "tabs",
+                        "debugger",
+                        "downloads"
                     ],
     "host_permissions":  [
                              "https://gemini.google.com/*",
@@ -18,7 +20,9 @@
                              "https://labs.google/fx/tools/*",
                              "http://127.0.0.1:8765/*",
                              "ws://127.0.0.1:8765/*",
-                             "https://labs.google/fx/*"
+                             "https://labs.google/fx/*",
+                             "https://*.googleusercontent.com/*",
+                             "https://*.google.com/*"
                          ],
     "web_accessible_resources":  [
                                      {
