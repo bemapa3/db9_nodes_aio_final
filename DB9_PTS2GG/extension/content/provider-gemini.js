@@ -872,170 +872,210 @@
       }, 15000);
     });
   }
+
+  function getImageDimensions(base64, mime) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        resolve({ w: img.naturalWidth || img.width || 0, h: img.naturalHeight || img.height || 0 });
+      };
+      img.onerror = () => {
+        resolve({ w: 0, h: 0 });
+      };
+      img.src = 'data:' + (mime || 'image/png') + ';base64,' + base64;
+    });
+  }
+
   async function downloadHD(mediaEl) {
     reportProgress('downloading', 90, 'Resolving variant downloads and redirects...');
     
-    const candidates = [];
-    
-    // 1. Check container of the media element
-    const container = mediaEl.closest('.image-container, .image-card, .video-container, .video-card, [class*="image"], [class*="video"], [class*="card"], [class*="bubble"], [class*="element"]');
-    if (container) {
-      // Find all buttons or links inside the container that could be download triggers
-      const containerButtons = qAllDeep('button, a', container).filter(el => {
-        if (!visible(el)) return false;
-        const text = textOf(el);
-        const ariaLabel = (el.getAttribute('aria-label') || '').toLowerCase();
-        return ariaLabel.includes('kích thước') || ariaLabel.includes('full size') || ariaLabel.includes('full-size') ||
-               ariaLabel.includes('download') || ariaLabel.includes('tải xuống') ||
-               text.includes('kích thước') || text.includes('full size') || text.includes('full-size') ||
-               text.includes('download') || text.includes('tải xuống') || el.hasAttribute('download');
-      });
-      
-      for (const btn of containerButtons) {
-        const url = btn.getAttribute('href') || btn.getAttribute('data-url') || btn.getAttribute('url') || btn.href;
-        if (url) {
-          candidates.push({ url, source: `container_button (${textOf(btn).slice(0, 30)})` });
-        }
-      }
-    }
-    
-    // 2. Also check document-wide download buttons as fallback/extra candidates
-    const docButtons = qAllDeep('button[aria-label*="Download full size image" i], button[aria-label*="kích thước" i], a[download]').filter(visible);
-    for (const btn of docButtons) {
-      const url = btn.getAttribute('href') || btn.getAttribute('data-url') || btn.getAttribute('url') || btn.href;
-      if (url) {
-        candidates.push({ url, source: `doc_button (${textOf(btn).slice(0, 30)})` });
-      }
-    }
-
-    // 3. Add the primary media src/currentSrc
-    const mediaSrc = mediaEl.currentSrc || mediaEl.src;
-    if (mediaSrc) {
-      candidates.push({ url: mediaSrc, source: 'media_src' });
-    }
-    
-    // 4. Parse source elements inside video, if applicable
-    if ((mediaEl.tagName || '').toLowerCase() === 'video') {
-      const sources = qAll('source', mediaEl);
-      for (const source of sources) {
-        const url = source.src;
-        if (url) {
-          candidates.push({ url, source: 'video_source_tag' });
-        }
-      }
-    }
-
-    // 5. Parse srcset for images, if applicable
-    if (mediaEl.srcset) {
-      const srcsetUrls = mediaEl.srcset.split(',').map(s => s.trim().split(' ')[0]).filter(Boolean);
-      for (const url of srcsetUrls) {
-        candidates.push({ url, source: 'media_srcset' });
-      }
-    }
-
-    // Deduplicate candidates and resolve relative URLs
-    const seenUrls = new Set();
-    const uniqueCandidates = [];
-    for (const c of candidates) {
-      let resolved = c.url;
-      if (!resolved) continue;
-      if (!resolved.startsWith('http') && !resolved.startsWith('blob') && !resolved.startsWith('data')) {
-        try { resolved = new URL(resolved, window.location.href).href; } catch (e) {}
-      }
-      if (!seenUrls.has(resolved)) {
-        seenUrls.add(resolved);
-        uniqueCandidates.push({ url: resolved, source: c.source });
-      }
-    }
-
-    log(`Collected ${uniqueCandidates.length} unique download candidates:`);
-    uniqueCandidates.forEach((c, idx) => {
-      log(`Candidate [${idx}]: source=${c.source}, url=${c.url.slice(0, 100)}`);
-    });
-
-    if (uniqueCandidates.length === 0) {
-      throw new Error('No valid download candidates found for generated media');
-    }
-
+    let attempts = 0;
     let lastError = null;
-    for (const cand of uniqueCandidates) {
-      try {
-        log(`Trying download candidate from ${cand.source}: ${cand.url.slice(0, 80)}`);
-        
-        let targetSrc = cand.url;
-        if (targetSrc.startsWith('blob:')) {
-          log('blob URL detected, downloading via page-world to bypass isolated-world CSP constraints');
-          const res = await downloadBlobViaPageWorld(targetSrc);
-          if (!res || !res.base64 || res.base64.length < 100) {
-            throw new Error(`Blob fetch returned empty or tiny base64 (${res ? res.base64.length : 0} bytes)`);
-          }
-          log('download full quality mime=' + res.mime + ' bytes=' + res.base64.length);
-          
-          // Verify final byteLength/size is valid (image > 10KB, or non-zero video)
-          const byteLength = Math.round(res.base64.length * 0.75); // approx size in bytes from base64
-          const isImage = res.mime.startsWith('image/');
-          if (isImage && byteLength < 10240) {
-            throw new Error(`Blob image body is too tiny (${byteLength} bytes, minimum is 10KB)`);
-          } else if (byteLength === 0) {
-            throw new Error('Blob media body is completely empty (0 bytes)');
-          }
-          
-          reportProgress('downloading', 96, 'Downloading asset binary package...');
-          return res;
-        }
-
-        // Apply quality suffix transformations for googleusercontent if applicable
-        if (/googleusercontent\.com\//.test(targetSrc) && /=[swh]\d+/.test(targetSrc)) {
-          targetSrc = targetSrc.replace(/=[swh]\d+[^?&]*/g, '=s0');
-          log('stripped size suffix ➔ fetching full resolution from googleusercontent: ' + targetSrc.slice(0, 80));
-        } else if (/googleusercontent\.com\//.test(targetSrc)) {
-          // If it doesn't already have =s0, let's split by ? and append =s0
-          if (!targetSrc.includes('=s0')) {
-            targetSrc = targetSrc.split('?')[0] + '=s0';
-            log('appended =s0 for full resolution: ' + targetSrc.slice(0, 80));
-          }
-        }
-
-        log('BUG-103 FIX v2: Using CDP Network.getResponseBody for: ' + targetSrc.slice(0, 80));
-        
-        const filename = 'db9-generated-' + Date.now() + (targetSrc.includes('video') ? '.mp4' : '.png');
-        const response = await new Promise((resolve, reject) => {
-          chrome.runtime.sendMessage({
-            action: 'download-via-cdp',
-            url: targetSrc,
-            filename: filename
-          }, (response) => {
-            if (chrome.runtime.lastError) {
-              reject(new Error(chrome.runtime.lastError.message));
-            } else if (!response || !response.ok) {
-              reject(new Error(response?.error || 'CDP download failed'));
-            } else {
-              resolve(response);
-            }
-          });
+    let uniqueCandidates = [];
+    
+    while (attempts < 5) {
+      const candidates = [];
+      
+      // 1. Check container of the media element
+      const container = mediaEl.closest('.image-container, .image-card, .video-container, .video-card, [class*="image"], [class*="video"], [class*="card"], [class*="bubble"], [class*="element"]');
+      if (container) {
+        // Find all buttons or links inside the container that could be download triggers
+        const containerButtons = qAllDeep('button, a', container).filter(el => {
+          if (!visible(el)) return false;
+          const text = textOf(el);
+          const ariaLabel = (el.getAttribute('aria-label') || '').toLowerCase();
+          return ariaLabel.includes('kích thước') || ariaLabel.includes('full size') || ariaLabel.includes('full-size') ||
+                 ariaLabel.includes('download') || ariaLabel.includes('tải xuống') ||
+                 text.includes('kích thước') || text.includes('full size') || text.includes('full-size') ||
+                 text.includes('download') || text.includes('tải xuống') || el.hasAttribute('download');
         });
         
-        if (!response.base64 || response.base64.length < 100) {
-          throw new Error(`CDP returned empty or tiny base64 (${response.base64 ? response.base64.length : 0} bytes)`);
+        for (const btn of containerButtons) {
+          const url = btn.getAttribute('href') || btn.getAttribute('data-url') || btn.getAttribute('url') || btn.href;
+          if (url) {
+            candidates.push({ url, source: `container_button (${textOf(btn).slice(0, 30)})` });
+          }
         }
-        
-        log('BUG-103 FIX v2: CDP download successful, base64 length=' + response.base64.length);
-        reportProgress('downloading', 96, 'Download complete via CDP...');
-        
-        return { 
-          base64: response.base64, 
-          mime: response.mime || 'image/png',
-          downloaded: true,
-          downloadId: response.downloadId
-        };
-      } catch (err) {
-        log(`Candidate from ${cand.source} failed: ${err.message}`);
-        lastError = err;
+      }
+      
+      // 2. Also check document-wide download buttons as fallback/extra candidates
+      const docButtons = qAllDeep('button[aria-label*="Download full size image" i], button[aria-label*="kích thước" i], a[download]').filter(visible);
+      for (const btn of docButtons) {
+        const url = btn.getAttribute('href') || btn.getAttribute('data-url') || btn.getAttribute('url') || btn.href;
+        if (url) {
+          candidates.push({ url, source: `doc_button (${textOf(btn).slice(0, 30)})` });
+        }
+      }
+
+      // 3. Add the primary media src/currentSrc
+      const mediaSrc = mediaEl.currentSrc || mediaEl.src;
+      if (mediaSrc) {
+        candidates.push({ url: mediaSrc, source: 'media_src' });
+      }
+      
+      // 4. Parse source elements inside video, if applicable
+      if ((mediaEl.tagName || '').toLowerCase() === 'video') {
+        const sources = qAll('source', mediaEl);
+        for (const source of sources) {
+          const url = source.src;
+          if (url) {
+            candidates.push({ url, source: 'video_source_tag' });
+          }
+        }
+      }
+
+      // 5. Parse srcset for images, if applicable
+      if (mediaEl.srcset) {
+        const srcsetUrls = mediaEl.srcset.split(',').map(s => s.trim().split(' ')[0]).filter(Boolean);
+        for (const url of srcsetUrls) {
+          candidates.push({ url, source: 'media_srcset' });
+        }
+      }
+
+      // Deduplicate candidates and resolve relative URLs
+      const seenUrls = new Set();
+      uniqueCandidates = [];
+      for (const c of candidates) {
+        let resolved = c.url;
+        if (!resolved) continue;
+        if (!resolved.startsWith('http') && !resolved.startsWith('blob') && !resolved.startsWith('data')) {
+          try { resolved = new URL(resolved, window.location.href).href; } catch (e) {}
+        }
+        if (!seenUrls.has(resolved)) {
+          seenUrls.add(resolved);
+          uniqueCandidates.push({ url: resolved, source: c.source });
+        }
+      }
+
+      log(`[Attempt ${attempts + 1}/5] Collected ${uniqueCandidates.length} unique download candidates`);
+
+      let successResult = null;
+      for (const cand of uniqueCandidates) {
+        try {
+          log(`Trying download candidate from ${cand.source}: ${cand.url.slice(0, 80)}`);
+          
+          let targetSrc = cand.url;
+          if (targetSrc.startsWith('blob:')) {
+            log('blob URL detected, downloading via page-world to bypass isolated-world CSP constraints');
+            const res = await downloadBlobViaPageWorld(targetSrc);
+            if (!res || !res.base64 || res.base64.length < 100) {
+              throw new Error(`Blob fetch returned empty or tiny base64 (${res ? res.base64.length : 0} bytes)`);
+            }
+            
+            const byteLength = Math.round(res.base64.length * 0.75);
+            const isImage = res.mime.startsWith('image/');
+            if (isImage && byteLength < 10240) {
+              throw new Error(`Blob image body is too tiny (${byteLength} bytes, minimum is 10KB)`);
+            } else if (byteLength === 0) {
+              throw new Error('Blob media body is completely empty (0 bytes)');
+            }
+            
+            if (isImage) {
+              const dims = await getImageDimensions(res.base64, res.mime);
+              log(`Candidate downloaded dimensions: ${dims.w}x${dims.h}`);
+              if (dims.w < 2048 || dims.h < 2048) {
+                throw new Error(`Resolution too low: ${dims.w}x${dims.h}. Expected at least 2048x2048.`);
+              }
+            }
+            
+            reportProgress('downloading', 96, 'Downloading asset binary package...');
+            successResult = res;
+            break;
+          }
+
+          // Apply quality suffix transformations for googleusercontent if applicable
+          if (/googleusercontent\.com\//.test(targetSrc) && /=[swh]\d+/.test(targetSrc)) {
+            targetSrc = targetSrc.replace(/=[swh]\d+[^?&]*/g, '=s0');
+            log('stripped size suffix ➔ fetching full resolution from googleusercontent: ' + targetSrc.slice(0, 80));
+          } else if (/googleusercontent\.com\//.test(targetSrc)) {
+            if (!targetSrc.includes('=s0')) {
+              targetSrc = targetSrc.split('?')[0] + '=s0';
+              log('appended =s0 for full resolution: ' + targetSrc.slice(0, 80));
+            }
+          }
+
+          log('BUG-103 FIX v2: Using CDP Network.getResponseBody for: ' + targetSrc.slice(0, 80));
+          
+          const filename = 'db9-generated-' + Date.now() + (targetSrc.includes('video') ? '.mp4' : '.png');
+          const response = await new Promise((resolve, reject) => {
+            chrome.runtime.sendMessage({
+              action: 'download-via-cdp',
+              url: targetSrc,
+              filename: filename
+            }, (response) => {
+              if (chrome.runtime.lastError) {
+                reject(new Error(chrome.runtime.lastError.message));
+              } else if (!response || !response.ok) {
+                reject(new Error(response?.error || 'CDP download failed'));
+              } else {
+                resolve(response);
+              }
+            });
+          });
+          
+          if (!response.base64 || response.base64.length < 100) {
+            throw new Error(`CDP returned empty or tiny base64 (${response.base64 ? response.base64.length : 0} bytes)`);
+          }
+          
+          const outMime = response.mime || 'image/png';
+          const isImage = outMime.startsWith('image/');
+          if (isImage) {
+            const dims = await getImageDimensions(response.base64, outMime);
+            log(`Candidate downloaded dimensions: ${dims.w}x${dims.h}`);
+            if (dims.w < 2048 || dims.h < 2048) {
+              throw new Error(`Resolution too low: ${dims.w}x${dims.h}. Expected at least 2048x2048.`);
+            }
+          }
+          
+          log('BUG-103 FIX v2: CDP download successful, base64 length=' + response.base64.length);
+          reportProgress('downloading', 96, 'Download complete via CDP...');
+          
+          successResult = { 
+            base64: response.base64, 
+            mime: outMime,
+            downloaded: true,
+            downloadId: response.downloadId
+          };
+          break;
+        } catch (err) {
+          log(`Candidate from ${cand.source} failed: ${err.message}`);
+          lastError = err;
+        }
+      }
+      
+      if (successResult) {
+        return successResult;
+      }
+      
+      attempts++;
+      if (attempts < 5) {
+        log(`All candidate downloads failed 2048x2048 check. Sleeping 1.5s to wait for high-res sources to hydrate...`);
+        await sleep(1500);
       }
     }
     
-    // If all candidates failed, fallback to page-world download of the first candidate
-    log('All candidates failed, trying page-world download fallback...');
+    // If all candidates failed, fallback to page-world download of the first candidate with 2048x2048 check
+    log('All candidates failed including retries, trying page-world download fallback...');
     if (uniqueCandidates.length > 0) {
       const fallbackUrl = uniqueCandidates[0].url;
       try {
@@ -1051,11 +1091,19 @@
           throw new Error('Fallback media body is completely empty (0 bytes)');
         }
         
+        if (isImage) {
+          const dims = await getImageDimensions(res.base64, res.mime);
+          log(`Fallback downloaded dimensions: ${dims.w}x${dims.h}`);
+          if (dims.w < 2048 || dims.h < 2048) {
+            throw new Error(`Resolution too low: ${dims.w}x${dims.h}. Expected at least 2048x2048.`);
+          }
+        }
+        
         reportProgress('downloading', 96, 'Downloading asset binary package...');
         return res;
       } catch (fallbackErr) {
-        log('page-world fetch failed: ' + fallbackErr.message);
-        throw fallbackErr;
+        log(`Fallback failed: ${fallbackErr.message}`);
+        lastError = fallbackErr;
       }
     }
     
