@@ -1,4 +1,4 @@
-// DB9 Multi-Provider â€” Shared Orchestrator (v0.4.7.1)
+// DB9 Multi-Provider â€” Shared Orchestrator (v0.4.7.2)
 // Loaded AFTER one of the provider-*.js modules (which sets window.__DB9_PROVIDER).
 // Drives the same job lifecycle for every provider via the provider interface:
 //   { name, installNetworkMonitor, waitReady, startNewChat, toggleCreateImage,
@@ -88,7 +88,7 @@
   const PROVIDER_NAME = providerResult.name;
   _providerName = PROVIDER_NAME;
   _providerReady = true;
-  console.log(`[DB9-Orchestrator] v0.4.7.1 build=${ORCHESTRATOR_BUILD} loaded for provider="${PROVIDER_NAME}" on`, location.href);
+  console.log(`[DB9-Orchestrator] v0.4.7.2 build=${ORCHESTRATOR_BUILD} loaded for provider="${PROVIDER_NAME}" on`, location.href);
 
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
   const rand = (min, max) => min + Math.random() * (max - min);
@@ -106,7 +106,7 @@
   }
 
   // ===== Main job runner =====
-  // v0.4.7.1: presets/negatives are now composed on the UXP side. The extension
+  // v0.4.7.2: presets/negatives are now composed on the UXP side. The extension
   // receives the final prompt string as-is and just drives the browser UI.
   async function runJob(job) {
     // If provider is not loaded yet, wait up to 4000ms
@@ -156,7 +156,7 @@
       const ready = await provider.waitReady(15000);
       if (!ready) throw new Error('prompt input never appeared');
 
-      // v0.4.7.1: describe-only mode â€” upload image, ask for text only, no Create Image
+      // v0.4.7.2: describe-only mode â€” upload image, ask for text only, no Create Image
       const isDescribeOnly = (mode === 'describe-only');
 
       if (!isDescribeOnly) await provider.toggleCreateImage();
@@ -291,6 +291,6 @@
     try { chrome.runtime.onMessage.removeListener(messageHandler); } catch (_) {}
   };
 
-  log(`ready, waiting for jobs (v0.4.7.1, build=${ORCHESTRATOR_BUILD}, provider=${PROVIDER_NAME})`);
+  log(`ready, waiting for jobs (v0.4.7.2, build=${ORCHESTRATOR_BUILD}, provider=${PROVIDER_NAME})`);
 })();
 

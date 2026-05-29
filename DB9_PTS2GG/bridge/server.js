@@ -1,8 +1,8 @@
-// DB9 Multi-Provider Bridge - v0.4.7.1
+// DB9 Multi-Provider Bridge - v0.4.7.2
 // Local server connecting Photoshop UXP plugin and Chrome extension.
 // Port 8765 HTTP for Photoshop, WebSocket /ws for extension.
 //
-// v0.4.7.1 changes:
+// v0.4.7.2 changes:
 //   - CORS preflight (OPTIONS) handled, Access-Control-Allow-* on every response
 //   - provider="both" spawns child jobs for gemini + chatgpt in parallel
 //   - New /job/:parentId/dual endpoint returns combined status of both children
@@ -13,7 +13,7 @@ const http = require('http');
 const { WebSocketServer } = require('ws');
 const crypto = require('crypto');
 
-const VERSION = '0.4.7.1';
+const VERSION = '0.4.7.2';
 const PORT = 8765;
 const SUPPORTED_PROVIDERS = new Set(['gemini', 'chatgpt', 'flow']);
 

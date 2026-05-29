@@ -1,4 +1,4 @@
-// DB9 Multi-Provider — Photoshop UXP Plugin v0.4.7.1
+// DB9 Multi-Provider — Photoshop UXP Plugin v0.4.7.2
 // All preset/negative state lives in the plugin. Bridge is a dumb pipe.
 
 const photoshop = require('photoshop');
@@ -350,7 +350,7 @@ function buildStructuredPrompt(state) {
   if (state.selectionContext) {
     intent = (intent ? intent + '. ' : '') + state.selectionContext;
   }
-  // v0.4.7.1: inject reference description if present
+  // v0.4.7.2: inject reference description if present
   if (typeof refImage !== 'undefined' && refImage && refImage.description) {
     intent = (intent ? intent + '. ' : '') + 'Match style/mood of reference: ' + refImage.description;
   }
@@ -577,7 +577,7 @@ function xhrPost(url, bodyStr, timeoutMs = 30000) {
 
 async function pollHealth() {
   try {
-    // v0.4.7.1: use XMLHttpRequest — UXP PS has better localhost support via XHR than fetch
+    // v0.4.7.2: use XMLHttpRequest — UXP PS has better localhost support via XHR than fetch
     const text = await xhrGet(BRIDGE + '/health', 3500);
     const data = JSON.parse(text);
     if (!bridgeOnline) log('✓ bridge ONLINE v' + data.version + ' providers=[' + (data.providers || []).join(',') + ']');
@@ -1238,7 +1238,7 @@ async function testProvider(provider) {
 }
 
 
-  // Reference image handlers (v0.4.7.1)
+  // Reference image handlers (v0.4.7.2)
   const refBtn = $('btn-ref-upload');
   if (refBtn) refBtn.onclick = async () => {
     try {

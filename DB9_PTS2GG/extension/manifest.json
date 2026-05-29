@@ -1,7 +1,7 @@
 {
     "manifest_version":  3,
     "name":  "DB9 Multi-Provider Auto",
-    "version":  "0.4.7.1",
+    "version":  "0.4.7.2",
     "description":  "Bridge automation for Gemini, ChatGPT, and Google Flow via local bridge. v0.4.2 moves the preset library into the UXP plugin; extension is now a thin browser-automation relay.",
     "permissions":  [
                         "storage",
