@@ -206,27 +206,87 @@
     }
   });
 
-  // ===== Blob download handler (page-world can access blob: URLs) =====
+  // ===== Blob download handler (CSP blocks fetch(blob:), use canvas instead) =====
   async function handleBlobDownload(detail) {
     const { id, blobUrl } = detail;
     try {
-      console.log('[DB9-Monitor] Fetching blob URL:', blobUrl?.slice(0, 60));
-      const response = await fetch(blobUrl);
-      if (!response.ok) throw new Error('Blob fetch failed: HTTP ' + response.status);
-      const blob = await response.blob();
-      const mime = blob.type || 'image/png';
-      const reader = new FileReader();
-      const base64 = await new Promise((resolve, reject) => {
-        reader.onloadend = () => {
-          const dataUrl = String(reader.result || '');
-          resolve(dataUrl.split(',')[1] || '');
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-      console.log('[DB9-Monitor] Blob downloaded:', mime, 'base64 length:', base64.length);
-      broadcastEvent('db9-download-blob-response', { id, success: true, base64, mime });
-      try { window.postMessage({ source: 'db9-monitor', type: 'db9-download-blob-response', detail: { id, success: true, base64, mime } }, '*'); } catch (e) {}
+      console.log('[DB9-Monitor] Downloading blob via canvas:', blobUrl?.slice(0, 60));
+      
+      // Find the existing img/video element with this blob src (already loaded in DOM)
+      let img = document.querySelector(`img[src="${CSS.escape(blobUrl)}"]`);
+      if (!img) {
+        // Search all images for matching currentSrc
+        img = Array.from(document.querySelectorAll('img')).find(i => 
+          (i.currentSrc || i.src) === blobUrl
+        );
+      }
+      
+      const isVideo = !img;
+      let videoEl = null;
+      if (!img) {
+        videoEl = Array.from(document.querySelectorAll('video')).find(v => 
+          (v.currentSrc || v.src) === blobUrl
+        );
+      }
+
+      if (!img && !videoEl) {
+        // Create a new Image and load the blob URL (img-src is not restricted by connect-src)
+        console.log('[DB9-Monitor] No existing element found, creating new Image for blob');
+        img = new Image();
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = () => reject(new Error('Image load from blob URL failed'));
+          const timer = setTimeout(() => reject(new Error('Image load timeout (10s)')), 10000);
+          img.addEventListener('load', () => clearTimeout(timer));
+          img.src = blobUrl;
+        });
+      }
+
+      if (img) {
+        // Wait for complete load if needed
+        if (!img.complete || !img.naturalWidth) {
+          await new Promise((resolve, reject) => {
+            if (img.complete && img.naturalWidth) return resolve();
+            img.onload = resolve;
+            img.onerror = () => reject(new Error('Image not fully loaded'));
+            setTimeout(resolve, 3000); // force after 3s
+          });
+        }
+
+        const w = img.naturalWidth || img.width || 1024;
+        const h = img.naturalHeight || img.height || 1024;
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        
+        const dataUrl = canvas.toDataURL('image/png');
+        const base64 = dataUrl.split(',')[1] || '';
+        const mime = 'image/png';
+        
+        console.log('[DB9-Monitor] Blob downloaded via canvas:', w + 'x' + h, 'base64 length:', base64.length);
+        broadcastEvent('db9-download-blob-response', { id, success: true, base64, mime });
+        try { window.postMessage({ source: 'db9-monitor', type: 'db9-download-blob-response', detail: { id, success: true, base64, mime } }, '*'); } catch (e) {}
+      } else if (videoEl) {
+        // Video: capture current frame via canvas
+        const w = videoEl.videoWidth || 1920;
+        const h = videoEl.videoHeight || 1080;
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoEl, 0, 0, w, h);
+        
+        const dataUrl = canvas.toDataURL('image/png');
+        const base64 = dataUrl.split(',')[1] || '';
+        
+        console.log('[DB9-Monitor] Video frame captured via canvas:', w + 'x' + h, 'base64 length:', base64.length);
+        broadcastEvent('db9-download-blob-response', { id, success: true, base64, mime: 'image/png' });
+        try { window.postMessage({ source: 'db9-monitor', type: 'db9-download-blob-response', detail: { id, success: true, base64, mime: 'image/png' } }, '*'); } catch (e) {}
+      } else {
+        throw new Error('No img or video element found for blob URL');
+      }
     } catch (e) {
       console.error('[DB9-Monitor] Blob download failed:', e);
       broadcastEvent('db9-download-blob-response', { id, success: false, error: e.message });
