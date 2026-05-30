@@ -5,11 +5,11 @@
   <title>PTS2GG Inpaint HUD</title>
   <style>
     :root {
-      --cyber-bg: #0a0a0c;
-      --cyber-surface: #121216;
-      --cyber-input-bg: #050507;
-      --cyber-border: rgba(0, 243, 255, 0.20);
-      --cyber-border-hover: rgba(0, 243, 255, 0.40);
+      --cyber-bg: #131315;
+      --cyber-surface: rgba(32, 31, 33, 0.6);
+      --cyber-input-bg: rgba(5, 5, 7, 0.85);
+      --cyber-border: rgba(58, 73, 75, 0.35);
+      --cyber-border-hover: rgba(0, 220, 230, 0.35);
       
       --cyber-text: #e5e1e4;
       --cyber-muted: #849495;
@@ -18,8 +18,9 @@
       --neon-blue: #0066ff;
       --neon-green: #39ff14;
       --neon-red: #e63535;
+      --red-brand: #E31E24;
       
-      --radius: 4px;
+      --radius: 6px;
     }
     
     html, body {
@@ -29,11 +30,12 @@
       box-sizing: border-box;
       background: var(--cyber-bg);
       color: var(--cyber-text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Adobe Clean", sans-serif;
-      font-size: 11px;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 12px;
       line-height: 1.5;
       overflow-y: auto;
       overflow-x: hidden;
+      position: relative;
     }
     
     *, *::before, *::after {
@@ -56,6 +58,23 @@
       background: var(--neon-cyan);
     }
     
+    /* BACKGROUND SCANLINE MATRIX EFFECT */
+    .scanline {
+      width: 100%;
+      height: 100px;
+      z-index: 1;
+      background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(0, 220, 230, 0.02) 50%, rgba(0, 0, 0, 0) 100%);
+      opacity: 0.15;
+      position: absolute;
+      bottom: 100%;
+      animation: scanline 8s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes scanline {
+      0% { bottom: 100%; }
+      100% { bottom: -100px; }
+    }
+    
     /* SPLASH LOADING OVERLAY */
     #db9-splash {
       position: absolute;
@@ -63,7 +82,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: #060608;
+      background: #0d0d10;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -79,39 +98,40 @@
       width: 260px;
     }
     .db9-splash-logo {
-      width: 72px;
-      height: 72px;
-      border-radius: 8px;
-      box-shadow: 0 0 16px rgba(230, 53, 53, 0.45);
-      margin-bottom: 14px;
-      border: 1px solid rgba(230, 53, 53, 0.3);
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(227, 30, 36, 0.45);
+      margin-bottom: 18px;
+      border: 1px solid rgba(227, 30, 36, 0.35);
       background: #000;
       object-fit: contain;
     }
     .db9-splash-title {
       font-family: 'JetBrains Mono', monospace;
       font-weight: 700;
-      font-size: 22px;
+      font-size: 24px;
       letter-spacing: 2px;
       color: #ffffff;
-      text-shadow: 0 0 8px rgba(0, 243, 255, 0.3);
+      text-shadow: 0 0 10px rgba(0, 220, 230, 0.4);
     }
     .db9-splash-sub {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 8px;
+      font-size: 9px;
       color: var(--cyber-muted);
-      letter-spacing: 0.5px;
-      margin-top: 4px;
+      letter-spacing: 1px;
+      margin-top: 6px;
       margin-bottom: 24px;
       text-transform: uppercase;
+      opacity: 0.8;
     }
     .db9-splash-loader {
       width: 100%;
-      height: 3px;
+      height: 4px;
       background: rgba(255, 255, 255, 0.05);
       border-radius: 2px;
       overflow: hidden;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
     .db9-splash-loader-bar {
       width: 0%;
@@ -122,46 +142,50 @@
     }
     .db9-splash-status {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 8px;
+      font-size: 9px;
       color: var(--neon-cyan);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
     
-    /* HEADER HUD (No sticky positioning to prevent UXP overlapping bug) */
+    /* HEADER HUD */
     .db9-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      padding: 12px;
-      border-bottom: 1px solid rgba(0, 243, 255, 0.15);
-      background: #0a0a0c;
+      gap: 12px;
+      padding: 14px 16px;
+      border-b: 1px solid rgba(58, 73, 75, 0.3);
+      background: rgba(19, 19, 21, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 10;
+      position: relative;
     }
     
     #db9-title {
       font-family: 'JetBrains Mono', monospace;
       font-weight: 700;
-      font-size: 12px;
-      letter-spacing: 0.5px;
+      font-size: 13px;
+      letter-spacing: 0.8px;
       color: #ffffff;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
     
     .db9-header-logo {
-      width: 16px;
-      height: 16px;
-      border-radius: 2px;
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
       object-fit: cover;
-      box-shadow: 0 0 4px rgba(230, 53, 53, 0.5);
+      box-shadow: 0 0 6px rgba(227, 30, 36, 0.55);
+      border: 1px solid rgba(227, 30, 36, 0.2);
     }
     
     .db9-header-status {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
     }
     
     .db9-dot {
@@ -180,25 +204,32 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 9px;
       color: var(--cyber-muted);
-      font-weight: 500;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
     .db9-main-pane {
-      padding: 12px;
+      padding: 16px;
+      z-index: 5;
+      position: relative;
     }
     
-    /* Obsidian Glass Section Cards (Solid dark gray backgrounds with solid cyan outlines) */
-    .db9-section {
+    /* Obsidian Glass Panel Cards (Premium design matching Stitch specifications) */
+    .glass-panel {
       background: var(--cyber-surface);
+      backdrop-filter: blur(12px);
       border: 1px solid var(--cyber-border);
       border-radius: var(--radius);
-      padding: 12px;
-      margin-bottom: 10px;
-      transition: all 0.2s;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
-    .db9-section:hover {
+    .glass-panel:hover {
       border-color: var(--cyber-border-hover);
+      box-shadow: 0 8px 36px rgba(0, 220, 230, 0.05);
     }
     
     .db9-section-title {
@@ -207,46 +238,49 @@
       font-weight: 700;
       text-transform: uppercase;
       color: var(--neon-cyan);
-      letter-spacing: 1px;
-      margin-bottom: 8px;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
       gap: 6px;
+      opacity: 0.9;
     }
     
-    /* Inputs */
+    /* Custom Styled Inputs & Toggles */
     input[type="text"], input[type="number"], textarea, select {
       background: var(--cyber-input-bg);
-      border: 1px solid var(--cyber-border);
+      border: 1px solid rgba(58, 73, 75, 0.4);
       color: var(--cyber-text);
-      border-radius: var(--radius);
-      padding: 6px 10px;
-      font-size: 11px;
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-size: 12px;
       width: 100%;
       box-sizing: border-box;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
       font-family: inherit;
     }
     
     input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
       outline: none;
       border-color: var(--neon-cyan);
-      box-shadow: 0 0 8px rgba(0, 243, 255, 0.15);
+      box-shadow: 0 0 10px rgba(0, 220, 230, 0.2);
+      background: rgba(0, 0, 0, 0.9);
     }
     
     textarea {
-      min-height: 72px;
+      min-height: 84px;
       resize: vertical;
+      line-height: 1.5;
     }
     
-    /* Selection controls layout (Flexbox flow to ensure perfect UXP rendering) */
+    /* Selection layout controls flow (Flexible flow to avoid overlapping in UXP) */
     .selection-controls-row {
       display: flex;
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      margin-top: 4px;
+      margin-top: 6px;
     }
     
     .selection-control-item {
@@ -256,59 +290,78 @@
       gap: 8px;
     }
     
-    .small { font-size: 10px; color: var(--cyber-muted); line-height: 1.4; }
+    .selection-control-item span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--cyber-muted);
+      text-transform: uppercase;
+    }
     
-    /* Cyber Primary Button (Red background, cyan glows) */
+    .small { font-size: 10px; color: var(--cyber-muted); line-height: 1.5; opacity: 0.85; }
+    
+    /* Cyber Primary Red Button (Shimmer animation sweep on hover) */
     .db9-btn-primary {
-      background: var(--neon-red);
+      background: var(--red-brand);
+      background-size: 200% 100%;
       color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       cursor: pointer;
       font-size: 11px;
       border-radius: var(--radius);
-      padding: 10px 12px;
+      padding: 12px;
       width: 100%;
-      transition: all 0.2s;
-      box-shadow: 0 0 10px rgba(230, 53, 53, 0.2);
+      transition: all 0.2s ease;
+      box-shadow: 0 0 16px rgba(227, 30, 36, 0.25);
     }
     
     .db9-btn-primary:hover:not(:disabled) {
-      background: #ff4d4d;
-      box-shadow: 0 0 15px rgba(230, 53, 53, 0.45);
+      background: linear-gradient(45deg, var(--red-brand) 0%, #ff4d4d 50%, var(--red-brand) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+      box-shadow: 0 0 20px rgba(227, 30, 36, 0.45);
+    }
+    @keyframes shimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
     }
     
     .db9-btn-primary:disabled {
-      background: #251213;
+      background: rgba(30, 10, 12, 0.8);
       color: var(--cyber-muted);
       box-shadow: none;
       cursor: not-allowed;
-      opacity: 0.5;
+      opacity: 0.4;
       border-color: rgba(255,255,255,0.02);
     }
     
-    /* Standard buttons */
-    button:not(.db9-btn-primary) {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--cyber-border);
-      color: var(--cyber-text);
+    /* Secondary Technical Buttons */
+    .neon-btn {
+      background: transparent;
+      border: 1px solid var(--neon-cyan);
+      color: var(--neon-cyan);
       border-radius: var(--radius);
-      padding: 6px 10px;
+      padding: 8px 14px;
       cursor: pointer;
       font-size: 11px;
-      transition: all 0.2s;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      transition: all 0.2s ease;
     }
     
-    button:not(.db9-btn-primary):hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: var(--cyber-border-hover);
+    .neon-btn:hover:not(:disabled) {
+      background: rgba(0, 243, 255, 0.08);
+      box-shadow: 0 0 12px rgba(0, 243, 255, 0.25);
     }
     
-    button:not(.db9-btn-primary):disabled {
-      opacity: 0.35;
+    .neon-btn:disabled {
+      opacity: 0.3;
       cursor: not-allowed;
+      border-color: var(--cyber-border);
+      color: var(--cyber-muted);
     }
     
     /* Terminal Console */
@@ -317,20 +370,21 @@
       font-size: 10px;
       color: var(--neon-green);
       background: #040406;
-      border: 1px solid var(--cyber-border);
+      border: 1px solid rgba(58, 73, 75, 0.5);
       border-radius: var(--radius);
-      padding: 8px;
-      max-height: 140px;
+      padding: 10px;
+      max-height: 150px;
       overflow-y: auto;
       white-space: pre-wrap;
-      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
-      margin-top: 8px;
+      box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.95);
+      margin-top: 10px;
+      line-height: 1.4;
     }
     
     #progressSteps {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
       font-size: 11px;
     }
     
@@ -341,6 +395,9 @@
   </style>
 </head>
 <body>
+
+  <!-- BACKGROUND SCANLINE ANIMATION -->
+  <div class="scanline"></div>
 
   <!-- SPLASH LOADING SCREEN -->
   <div id="db9-splash">
@@ -363,8 +420,8 @@
     </div>
     <div class="db9-header-status">
       <span class="db9-dot-label">Bridge</span><span class="db9-dot db9-dot-off" id="dot-bridge" title="bridge status"></span>
-      <span class="db9-dot-label">Gemini</span><span class="db9-dot db9-dot-off" id="dot-gemini" title="gemini provider"></span>
-      <button id="btn-reconnect" title="Reconnect to Bridge Server" style="padding: 4px 8px; font-size: 10px; margin-left: 6px;">FORCE RECONNECT</button>
+      <span class="db9-dot-label" style="margin-left: 6px;">Gemini</span><span class="db9-dot db9-dot-off" id="dot-gemini" title="gemini provider"></span>
+      <button id="btn-reconnect" class="neon-btn" style="padding: 4px 8px; font-size: 9px; margin-left: 10px;">FORCE RECONNECT</button>
     </div>
   </header>
 
@@ -372,12 +429,12 @@
   <div class="db9-main-pane">
     
     <!-- 1. PHOTOSHOP SELECTION ADJUSTMENT -->
-    <section class="db9-section" id="sec-selection">
+    <section class="glass-panel" id="sec-selection">
       <div class="db9-section-title">[PHOTOSHOP SELECTION BOUNDS]</div>
       <div class="selection-controls-row">
         <div class="selection-control-item">
           <span>Expand:</span>
-          <select id="selectionExpandMode" style="height: 26px; padding: 2px 6px; font-size: 10px; width: 140px;">
+          <select id="selectionExpandMode" style="height: 28px; padding: 4px 8px; font-size: 11px; width: 140px;">
             <option value="auto" selected>Auto Expand</option>
             <option value="manual">Manual Margin</option>
             <option value="none">Keep Original (None)</option>
@@ -385,27 +442,27 @@
         </div>
         <div class="selection-control-item">
           <span>Margin:</span>
-          <input id="selectionExpandPx" type="number" min="0" max="1024" step="8" value="96" style="height: 26px; padding: 2px 6px; font-size: 10px; width: 64px;">
-          <span>px</span>
+          <input id="selectionExpandPx" type="number" min="0" max="1024" step="8" value="96" style="height: 28px; padding: 4px 8px; font-size: 11px; width: 64px;">
+          <span style="text-transform: lowercase; color: var(--cyber-text);">px</span>
         </div>
       </div>
-      <div class="small" style="margin-top: 8px;">Dynamically expands Photoshop selected pixels to form a stable 1:1 context Smart Object.</div>
+      <div class="small" style="margin-top: 10px;">Dynamically expands Photoshop selected pixels to form a stable 1:1 context Smart Object.</div>
     </section>
 
     <!-- 2. INPAINT PROMPT FIELD -->
-    <section class="db9-section" id="sec-prompt">
+    <section class="glass-panel" id="sec-prompt">
       <div class="db9-section-title">[GENERATION PROMPT]</div>
       <textarea id="promptInput" placeholder="Mô tả ý tưởng bạn muốn thêm/sửa vào vùng chọn... (Tự động dịch sang Tiếng Anh)"></textarea>
     </section>
 
     <!-- 3. MAIN ACTION ACTIONS -->
-    <section class="db9-section" id="sec-actions" style="border: none; padding: 0; background: transparent;">
+    <section class="glass-panel" id="sec-actions" style="border: none; padding: 0; background: transparent; box-shadow: none;">
       <button id="btn-generate" class="db9-btn-primary">GENERATE INPAINT</button>
-      <button id="btn-regenerate" style="width: 100%; margin-top: 6px; font-weight: bold; border-color: rgba(0, 243, 255, 0.25);" disabled>REGENERATE LAST RESULT</button>
+      <button id="btn-regenerate" class="neon-btn" style="width: 100%; margin-top: 8px;" disabled>REGENERATE LAST RESULT</button>
     </section>
 
     <!-- 4. MONOSPACED CONSOLE TERMINAL -->
-    <section class="db9-section" id="sec-progress" style="margin-top: 10px;">
+    <section class="glass-panel" id="sec-progress" style="margin-top: 12px;">
       <div class="db9-section-title">[AUTOMATION LOGGER]</div>
       <div id="progressSteps"></div>
       <div id="progressLog"></div>
