@@ -826,26 +826,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         await chrome.debugger.detach({ tabId });
         log('CDP detached');
         
-        let downloadId = null;
-        try {
-          downloadId = await new Promise((resolve) => {
-            chrome.downloads.download({
-              url: msg.url,
-              filename: msg.filename || 'db9-generated.png',
-              saveAs: false,
-              conflictAction: 'overwrite'
-            }, (id) => {
-              if (chrome.runtime.lastError) {
-                log('Background downloads.download warning:', chrome.runtime.lastError.message);
-              }
-              resolve(id || null);
-            });
-          });
-        } catch (e) {
-          log('Background download trigger exception:', e.message);
-        }
+        // BUG-106 FIX: Removed chrome.downloads.download() that was downloading
+        // the original URL (low-quality/403) as a visible browser download.
+        // The base64 data is already captured via CDP and sent back to content script.
         
-        sendResponse({ ok: true, base64: finalBase64, mime: finalMime, downloadId: downloadId });
+        sendResponse({ ok: true, base64: finalBase64, mime: finalMime });
       } catch (err) {
         log('BUG-103 FIX v2: CDP download failed:', err.message);
         try {
@@ -936,26 +921,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         
         log(`Privileged fetch successful. Size: ${base64.length} base64 chars. Mime: ${mime}`);
         
-        let downloadId = null;
-        try {
-          downloadId = await new Promise((resolve) => {
-            chrome.downloads.download({
-              url: msg.url,
-              filename: msg.filename || 'db9-generated.png',
-              saveAs: false,
-              conflictAction: 'overwrite'
-            }, (id) => {
-              if (chrome.runtime.lastError) {
-                log('Background downloads.download warning:', chrome.runtime.lastError.message);
-              }
-              resolve(id || null);
-            });
-          });
-        } catch (e) {
-          log('Background download trigger exception:', e.message);
-        }
-        
-        sendResponse({ ok: true, base64: base64, mime: mime, downloadId: downloadId });
+        // BUG-106 FIX: Removed chrome.downloads.download() - base64 already captured
+        sendResponse({ ok: true, base64: base64, mime: mime });
       } catch (err) {
         log('BUG-103 FIX: Privileged fetch/download failed:', err.message);
         sendResponse({ ok: false, error: err.message });
