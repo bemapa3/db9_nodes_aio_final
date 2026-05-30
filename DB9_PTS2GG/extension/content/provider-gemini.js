@@ -13,6 +13,22 @@
   if (window.__DB9_PROVIDER && window.__DB9_PROVIDER.name === 'gemini') return;
 
   try {
+  let lastHighResUrl = null;
+  document.addEventListener('db9-high-res-url-detected', (ev) => {
+    const url = ev && ev.detail && ev.detail.url;
+    if (url) {
+      console.log('[DB9-Provider] High-resolution URL intercepted:', url.slice(0, 80));
+      lastHighResUrl = url;
+    }
+  });
+  window.addEventListener('db9-high-res-url-detected', (ev) => {
+    const url = ev && ev.detail && ev.detail.url;
+    if (url) {
+      console.log('[DB9-Provider] High-resolution URL intercepted:', url.slice(0, 80));
+      lastHighResUrl = url;
+    }
+  });
+
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
   const rand = (min, max) => min + Math.random() * (max - min);
   const visible = (e) => e && e.offsetParent !== null;
@@ -894,6 +910,46 @@
     let uniqueCandidates = [];
     
     while (attempts < 5) {
+      // 0. Trigger simulated hydration clicks on attempt 2+ if we only found low-res blobs
+      if (attempts > 0 && (uniqueCandidates.length === 0 || uniqueCandidates.every(c => c.url.startsWith('blob:')))) {
+        log('[DB9] Only blob candidates available. Attempting simulated download/media click to hydrate high-resolution URLs...');
+        
+        // Notify page-world script to start automation interception
+        document.dispatchEvent(new CustomEvent('db9-automation-start'));
+        
+        // Find container download button first
+        const container = mediaEl.closest('.image-container, .image-card, .video-container, .video-card, [class*="image"], [class*="video"], [class*="card"], [class*="bubble"], [class*="element"]');
+        let dlBtn = null;
+        if (container) {
+          dlBtn = qAllDeep('button, a', container).find(el => {
+            if (!visible(el)) return false;
+            const text = textOf(el);
+            const ariaLabel = (el.getAttribute('aria-label') || '').toLowerCase();
+            return ariaLabel.includes('kích thước') || ariaLabel.includes('full size') || ariaLabel.includes('full-size') ||
+                   ariaLabel.includes('download') || ariaLabel.includes('tải xuống') ||
+                   text.includes('kích thước') || text.includes('full size') || text.includes('full-size') ||
+                   text.includes('download') || text.includes('tải xuống') || el.hasAttribute('download');
+          });
+        }
+        
+        if (!dlBtn) {
+          dlBtn = qDeep('button[aria-label*="kích thước đầy đủ" i]')
+            || qDeep('button[aria-label*="full size" i]')
+            || qDeep('button[aria-label*="full-size" i]')
+            || qDeep('button[aria-label*="Download full" i]');
+        }
+        
+        if (dlBtn) {
+          log('[DB9] Found full-res download button. Simulating click...');
+          realClick(dlBtn);
+          await sleep(2500); // Wait 2.5s for page-world click hook / download fetch to hydrate CDN URL
+        } else {
+          log('[DB9] No download button found. Simulating click on media element to open immersive viewer...');
+          realClick(mediaEl);
+          await sleep(3000); // Wait 3s for immersive viewer to render and load high-res image
+        }
+      }
+
       const candidates = [];
       
       // 1. Check container of the media element
@@ -916,6 +972,20 @@
             candidates.push({ url, source: `container_button (${textOf(btn).slice(0, 30)})` });
           }
         }
+
+        // Broad container-wide search for googleusercontent.com inside ALL attributes
+        const containerElements = qAllDeep('*', container);
+        for (const el of containerElements) {
+          const attrs = ['src', 'currentSrc', 'href', 'data-url', 'url', 'srcset', 'data-zoom-src', 'data-zoom', 'data-src', 'data-original', 'data-full', 'data-zoom-url', 'data-full-url'];
+          for (const attr of attrs) {
+            try {
+              const val = el.getAttribute(attr);
+              if (val && val.includes('googleusercontent.com')) {
+                candidates.push({ url: val, source: `container_broad_search (${el.tagName}.${attr})` });
+              }
+            } catch (e) {}
+          }
+        }
       }
       
       // 2. Also check document-wide download buttons as fallback/extra candidates
@@ -927,13 +997,18 @@
         }
       }
 
-      // 3. Add the primary media src/currentSrc
+      // 3. Add intercepted page-world high-resolution URLs
+      if (lastHighResUrl) {
+        candidates.push({ url: lastHighResUrl, source: 'intercepted_anchor_click' });
+      }
+
+      // 4. Add the primary media src/currentSrc
       const mediaSrc = mediaEl.currentSrc || mediaEl.src;
       if (mediaSrc) {
         candidates.push({ url: mediaSrc, source: 'media_src' });
       }
       
-      // 4. Parse source elements inside video, if applicable
+      // 5. Parse source elements inside video, if applicable
       if ((mediaEl.tagName || '').toLowerCase() === 'video') {
         const sources = qAll('source', mediaEl);
         for (const source of sources) {
@@ -944,11 +1019,27 @@
         }
       }
 
-      // 5. Parse srcset for images, if applicable
+      // 6. Parse srcset for images, if applicable
       if (mediaEl.srcset) {
         const srcsetUrls = mediaEl.srcset.split(',').map(s => s.trim().split(' ')[0]).filter(Boolean);
         for (const url of srcsetUrls) {
           candidates.push({ url, source: 'media_srcset' });
+        }
+      }
+
+      // 7. Broad document-wide elements search for googleusercontent.com
+      const allDocElements = qAllDeep('*');
+      for (const el of allDocElements) {
+        if (el.tagName === 'A' || el.tagName === 'IMG' || el.tagName === 'BUTTON' || el.hasAttribute('download')) {
+          const attrs = ['src', 'currentSrc', 'href', 'data-url', 'url', 'srcset', 'data-zoom-src', 'data-zoom', 'data-src', 'data-original', 'data-full', 'data-zoom-url', 'data-full-url'];
+          for (const attr of attrs) {
+            try {
+              const val = el.getAttribute(attr);
+              if (val && val.includes('googleusercontent.com')) {
+                candidates.push({ url: val, source: `doc_broad_search (${el.tagName}.${attr})` });
+              }
+            } catch (e) {}
+          }
         }
       }
 
@@ -1064,6 +1155,8 @@
       }
       
       if (successResult) {
+        document.dispatchEvent(new CustomEvent('db9-automation-end'));
+        await ensureCloseImageViewer();
         return successResult;
       }
       
@@ -1076,6 +1169,9 @@
     
     // If all candidates failed, fallback to page-world download of the first candidate with 2048x2048 check
     log('All candidates failed including retries, trying page-world download fallback...');
+    document.dispatchEvent(new CustomEvent('db9-automation-end'));
+    await ensureCloseImageViewer();
+    
     if (uniqueCandidates.length > 0) {
       const fallbackUrl = uniqueCandidates[0].url;
       try {

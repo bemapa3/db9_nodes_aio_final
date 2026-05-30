@@ -120,6 +120,33 @@
     return el;
   };
 
+  // ===== Intercept dynamic high-res anchor downloads and window.open =====
+  const origAnchorClick = HTMLAnchorElement.prototype.click;
+  HTMLAnchorElement.prototype.click = function() {
+    try {
+      const href = this.href || '';
+      if (window.__db9AutomationActive && href && href.includes('googleusercontent.com')) {
+        console.log('[DB9-Monitor] Intercepted high-res anchor click:', href.slice(0, 100));
+        broadcastEvent('db9-high-res-url-detected', { url: href });
+        return; // prevent native browser download dialog
+      }
+    } catch (e) {}
+    return origAnchorClick.apply(this, arguments);
+  };
+
+  const origWindowOpen = window.open;
+  window.open = function(url, target, features) {
+    try {
+      const sUrl = String(url || '');
+      if (window.__db9AutomationActive && sUrl && sUrl.includes('googleusercontent.com')) {
+        console.log('[DB9-Monitor] Intercepted high-res window.open:', sUrl.slice(0, 100));
+        broadcastEvent('db9-high-res-url-detected', { url: sUrl });
+        return null; // prevent new tab opening
+      }
+    } catch (e) {}
+    return origWindowOpen.apply(this, arguments);
+  };
+
   // ===== showOpenFilePicker override =====
   if (window.showOpenFilePicker) {
     const origShowOpenFilePicker = window.showOpenFilePicker.bind(window);
