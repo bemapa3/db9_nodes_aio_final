@@ -6,10 +6,10 @@
   <style>
     :root {
       --cyber-bg: #0a0a0c;
-      --cyber-surface: rgba(22, 22, 26, 0.6);
+      --cyber-surface: #121216;
       --cyber-input-bg: #050507;
-      --cyber-border: rgba(0, 243, 255, 0.09);
-      --cyber-border-hover: rgba(0, 243, 255, 0.25);
+      --cyber-border: rgba(0, 243, 255, 0.20);
+      --cyber-border-hover: rgba(0, 243, 255, 0.40);
       
       --cyber-text: #e5e1e4;
       --cyber-muted: #849495;
@@ -56,10 +56,13 @@
       background: var(--neon-cyan);
     }
     
-    /* SPLASH LOADING SCREEN */
+    /* SPLASH LOADING OVERLAY */
     #db9-splash {
-      position: fixed;
-      inset: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background: #060608;
       display: flex;
       align-items: center;
@@ -125,18 +128,15 @@
       letter-spacing: 0.5px;
     }
     
-    /* HEADER HUD */
+    /* HEADER HUD (No sticky positioning to prevent UXP overlapping bug) */
     .db9-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--cyber-border);
-      background: rgba(10, 10, 12, 0.95);
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      padding: 12px;
+      border-bottom: 1px solid rgba(0, 243, 255, 0.15);
+      background: #0a0a0c;
     }
     
     #db9-title {
@@ -184,10 +184,10 @@
     }
     
     .db9-main-pane {
-      padding: 12px 12px 24px;
+      padding: 12px;
     }
     
-    /* Obsidian Glass Section Cards */
+    /* Obsidian Glass Section Cards (Solid dark gray backgrounds with solid cyan outlines) */
     .db9-section {
       background: var(--cyber-surface);
       border: 1px solid var(--cyber-border);
@@ -239,11 +239,26 @@
       resize: vertical;
     }
     
-    /* Grid system */
-    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    /* Selection controls layout (Flexbox flow to ensure perfect UXP rendering) */
+    .selection-controls-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    
+    .selection-control-item {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+    }
+    
     .small { font-size: 10px; color: var(--cyber-muted); line-height: 1.4; }
     
-    /* Cyber Primary Button */
+    /* Cyber Primary Button (Red background, cyan glows) */
     .db9-btn-primary {
       background: var(--neon-red);
       color: #ffffff;
@@ -340,7 +355,7 @@
     </div>
   </div>
 
-  <!-- HEADER HUD -->
+  <!-- HEADER HUD (Static block layout to resolve UXP overlapping bugs) -->
   <header class="db9-header">
     <div id="db9-title">
       <img src="assets/logo.jpg" class="db9-header-logo" alt="logo">
@@ -349,9 +364,7 @@
     <div class="db9-header-status">
       <span class="db9-dot-label">Bridge</span><span class="db9-dot db9-dot-off" id="dot-bridge" title="bridge status"></span>
       <span class="db9-dot-label">Gemini</span><span class="db9-dot db9-dot-off" id="dot-gemini" title="gemini provider"></span>
-      <span class="db9-dot-label" style="display:none;">ChatGPT</span><span class="db9-dot db9-dot-off" id="dot-chatgpt" title="chatgpt provider" style="display:none;"></span>
-      <button id="btn-reconnect" title="Reconnect to Bridge Server" style="padding: 2px 6px; font-size: 9px; margin-left: 4px;">🔄</button>
-      <button id="btn-settings" title="Toggle prompt configuration" style="padding: 2px 6px; font-size: 9px; display:none;">⚙</button>
+      <button id="btn-reconnect" title="Reconnect to Bridge Server" style="padding: 4px 8px; font-size: 10px; margin-left: 6px;">FORCE RECONNECT</button>
     </div>
   </header>
 
@@ -360,41 +373,40 @@
     
     <!-- 1. PHOTOSHOP SELECTION ADJUSTMENT -->
     <section class="db9-section" id="sec-selection">
-      <div class="db9-section-title">📷 Photoshop Selection Bounds</div>
-      <div class="row-2">
-        <label style="display: flex; align-items: center; gap: 6px; padding: 0;">
-          Expand:
-          <select id="selectionExpandMode" style="height: 26px; padding: 2px 6px; font-size: 10px; min-width: 80px;">
-            <option value="auto" selected>Auto</option>
-            <option value="manual">Manual</option>
+      <div class="db9-section-title">[PHOTOSHOP SELECTION BOUNDS]</div>
+      <div class="selection-controls-row">
+        <div class="selection-control-item">
+          <span>Expand:</span>
+          <select id="selectionExpandMode" style="height: 26px; padding: 2px 6px; font-size: 10px; width: 140px;">
+            <option value="auto" selected>Auto Expand</option>
+            <option value="manual">Manual Margin</option>
             <option value="none">Keep Original (None)</option>
           </select>
-        </label>
-        <label style="display: flex; align-items: center; gap: 6px; padding: 0;">
-          Margin:
+        </div>
+        <div class="selection-control-item">
+          <span>Margin:</span>
           <input id="selectionExpandPx" type="number" min="0" max="1024" step="8" value="96" style="height: 26px; padding: 2px 6px; font-size: 10px; width: 64px;">
-          px
-        </label>
+          <span>px</span>
+        </div>
       </div>
-      <div class="small" style="margin-top: 6px;">Dynamically expands Photoshop selected pixels to form a stable 1:1 context Smart Object.</div>
+      <div class="small" style="margin-top: 8px;">Dynamically expands Photoshop selected pixels to form a stable 1:1 context Smart Object.</div>
     </section>
 
     <!-- 2. INPAINT PROMPT FIELD -->
     <section class="db9-section" id="sec-prompt">
-      <div class="db9-section-title">💭 Generation Prompt</div>
+      <div class="db9-section-title">[GENERATION PROMPT]</div>
       <textarea id="promptInput" placeholder="Mô tả ý tưởng bạn muốn thêm/sửa vào vùng chọn... (Tự động dịch sang Tiếng Anh)"></textarea>
-      <div id="promptHint" class="small" style="margin-top: 6px; display:none;">Auto-translate VN→EN: on</div>
     </section>
 
     <!-- 3. MAIN ACTION ACTIONS -->
     <section class="db9-section" id="sec-actions" style="border: none; padding: 0; background: transparent;">
-      <button id="btn-generate" class="db9-btn-primary">🚀 GENERATE INPAINT</button>
-      <button id="btn-regenerate" style="width: 100%; margin-top: 6px; font-weight: bold; border-color: rgba(0, 243, 255, 0.25);" disabled>🔁 REGENERATE LAST RESULT</button>
+      <button id="btn-generate" class="db9-btn-primary">GENERATE INPAINT</button>
+      <button id="btn-regenerate" style="width: 100%; margin-top: 6px; font-weight: bold; border-color: rgba(0, 243, 255, 0.25);" disabled>REGENERATE LAST RESULT</button>
     </section>
 
     <!-- 4. MONOSPACED CONSOLE TERMINAL -->
     <section class="db9-section" id="sec-progress" style="margin-top: 10px;">
-      <div class="db9-section-title">⏳ Automation Console Log</div>
+      <div class="db9-section-title">[AUTOMATION LOGGER]</div>
       <div id="progressSteps"></div>
       <div id="progressLog"></div>
     </section>

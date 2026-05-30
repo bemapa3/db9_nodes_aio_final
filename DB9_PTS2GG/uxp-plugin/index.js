@@ -56,7 +56,7 @@ function syncGenerateAvailability() {
   const providerReady = bridgeOnline && providersOnline.includes('gemini');
   btn.disabled = !providerReady || !!activeJob;
   if (activeJob) btn.textContent = 'GENERATING...';
-  else btn.textContent = '🚀 GENERATE INPAINT';
+  else btn.textContent = 'GENERATE INPAINT';
   
   if (!bridgeOnline) {
     btn.title = 'Bridge offline - start bridge server';
@@ -152,7 +152,7 @@ async function ensureBridgeServerStarted() {
   if (bridgeAutostartAttempted) return;
   bridgeAutostartAttempted = true;
   updateSplashProgress(45, 'STARTING LOCAL BRIDGE SERVER...');
-  log('⚡ Bridge offline on startup. Attempting to auto-start bridge server...');
+  log('[SYSTEM] Bridge offline on startup. Attempting to auto-start bridge server...');
   try {
     const pluginFolder = await fsLfs.getPluginFolder();
     const nativePath = pluginFolder.nativePath;
@@ -164,12 +164,12 @@ async function ensureBridgeServerStarted() {
     } else {
       batPath = nativePath + '\\..\\bridge\\start-bridge.bat';
     }
-    log(`📂 Resolved bat path: ${batPath}`);
+    log(`[FILES] Resolved bat path: ${batPath}`);
     await uxp.shell.openPath(batPath);
-    log('🚀 Launched start-bridge.bat. Please click "Allow" if Photoshop prompts you.');
+    log('[SHELL] Launched start-bridge.bat. Please click "Allow" if Photoshop prompts you.');
     updateSplashProgress(75, 'AWAITING LOCAL BRIDGE SERVER ONLINE...');
   } catch (e) {
-    log('❌ Failed to auto-start bridge: ' + e.message);
+    log('[ERR] Failed to auto-start bridge: ' + e.message);
     updateSplashProgress(75, 'BRIDGE LAUNCH ERROR. RETRYING...');
   }
 }
@@ -178,7 +178,7 @@ async function pollHealth() {
   try {
     const text = await xhrGet(BRIDGE + '/health', 3500);
     const data = JSON.parse(text);
-    if (!bridgeOnline) log('✓ bridge ONLINE v' + data.version + ' providers=[' + (data.providers || []).join(',') + ']');
+    if (!bridgeOnline) log('[OK] bridge ONLINE v' + data.version + ' providers=[' + (data.providers || []).join(',') + ']');
     bridgeOnline = true;
     lastBridgeError = null;
     setDot('dot-bridge', 'on');
@@ -194,7 +194,7 @@ async function pollHealth() {
   } catch (e) {
     const errMsg = e.message || String(e);
     if (bridgeOnline !== false || lastBridgeError !== errMsg) {
-      log('⚠ bridge OFFLINE: ' + errMsg);
+      log('[WARN] bridge OFFLINE: ' + errMsg);
       lastBridgeError = errMsg;
     }
     bridgeOnline = false;
@@ -376,7 +376,7 @@ async function exportSelectionAsPng(options = {}) {
     const selH = bottom - top;
     squareBounds = clampSquareBounds(left, top, right, bottom, unitValue(doc.width), unitValue(doc.height), options);
     dims = { w: squareBounds.size, h: squareBounds.size, originalW: selW, originalH: selH, pad: squareBounds.pad };
-    log(`📐 selection ${Math.round(selW)}x${Math.round(selH)} +${squareBounds.pad}px -> square ${dims.w}x${dims.h} at (${squareBounds.left},${squareBounds.top})`);
+    log(`[BOUNDS] selection ${Math.round(selW)}x${Math.round(selH)} +${squareBounds.pad}px -> square ${dims.w}x${dims.h} at (${squareBounds.left},${squareBounds.top})`);
 
     smartObjectLayerId = await prepareSelectionSmartObject(squareBounds, sel !== null);
 
@@ -404,7 +404,7 @@ async function exportSelectionAsPng(options = {}) {
     if (pngW !== dims.w || pngH !== dims.h) {
       throw new Error(`Export dimension mismatch: got ${pngW}x${pngH}, expected ${dims.w}x${dims.h}. Aborting.`);
     }
-    log(`✓ export validated ${pngW}x${pngH} ${Math.round(bytes.byteLength/1024)}KB smartObjectId=${smartObjectLayerId}`);
+    log(`[OK] export validated ${pngW}x${pngH} ${Math.round(bytes.byteLength/1024)}KB smartObjectId=${smartObjectLayerId}`);
     
     let bin = '';
     for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
@@ -453,7 +453,7 @@ async function replaceSmartObjectContents(base64, label, context = lastInpaintCo
     await soDoc.close();
   }, { commandName: 'PTS2GG Smart Object replace content' });
   
-  log('✅ updated Smart Object with auto-scaling' + (label ? ' (' + label + ')' : ''));
+  log('[SUCCESS] updated Smart Object with auto-scaling' + (label ? ' (' + label + ')' : ''));
   return true;
 }
 
@@ -461,7 +461,7 @@ async function applyResultToPS(base64, label, placementBounds, context = lastInp
   try {
     if (await replaceSmartObjectContents(base64, label, context)) return;
   } catch (e) {
-    log('  ⚠ smart object replace failed, placing result layer: ' + e.message);
+    log('  [WARN] smart object replace failed, placing result layer: ' + e.message);
   }
 
   await executeAsModal(async (ctx) => {
@@ -472,7 +472,7 @@ async function applyResultToPS(base64, label, placementBounds, context = lastInp
       null: { _path: token, _kind: 'local' },
       freeTransformCenterState: { _enum: 'quadCenterState', _value: 'QCSAverage' }
     }], { synchronousExecution: true });
-    log('✅ placed new layer' + (label ? ' (' + label + ')' : '') + (placementBounds ? ` at ${placementBounds.left},${placementBounds.top} size ${placementBounds.size}` : ''));
+    log('[SUCCESS] placed new layer' + (label ? ' (' + label + ')' : '') + (placementBounds ? ` at ${placementBounds.left},${placementBounds.top} size ${placementBounds.size}` : ''));
 
     if (placementBounds) {
       try {
@@ -501,18 +501,18 @@ async function applyResultToPS(base64, label, placementBounds, context = lastInp
 }
 
 async function runGenerate() {
-  if (activeJob) { log('⚠ job in progress, please wait'); return; }
-  if (!bridgeOnline) { log('❌ bridge offline'); return; }
+  if (activeJob) { log('[WARN] job in progress, please wait'); return; }
+  if (!bridgeOnline) { log('[ERR] bridge offline'); return; }
   activeJob = 'local-preflight';
   syncGenerateAvailability();
 
   const state = getStateFromUI();
   const finalPrompt = buildStructuredPrompt(state);
-  log(`▶ generate provider=${state.provider} mode=${state.mode}`);
+  log(`[RUN] generate provider=${state.provider} mode=${state.mode}`);
   console.log('[PTS2GG] final prompt:\n' + finalPrompt);
 
   $('progressLog').textContent = '';
-  $('progressSteps').innerHTML = '<div class="db9-step active">📤 Exporting selection…</div>';
+  $('progressSteps').innerHTML = '<div class="db9-step active">Exporting selection…</div>';
 
   try {
     const { base64, dims, squareBounds, smartObjectLayerId } = await exportSelectionAsPng(selectionWorkflowOptionsFromUI());
@@ -528,24 +528,24 @@ async function runGenerate() {
     };
     const btnRegen = $('btn-regenerate');
     if (btnRegen) btnRegen.disabled = false;
-    log(`✓ exported ${dims?.w}x${dims?.h} (${Math.round((base64?.length || 0) * 0.75 / 1024)} KB)`);
+    log(`[OK] exported ${dims?.w}x${dims?.h} (${Math.round((base64?.length || 0) * 0.75 / 1024)} KB)`);
 
-    $('progressSteps').innerHTML += '<div class="db9-step active">📡 Posting to bridge…</div>';
+    $('progressSteps').innerHTML += '<div class="db9-step active">Posting to bridge…</div>';
     const body = {
       imageBase64: base64,
       prompt: finalPrompt,
       provider: state.provider,
       mode: state.mode,
     };
-    log('📡 POST /generate provider=' + body.provider + ' bytes=' + (body.imageBase64?.length || 0));
+    log('[POST] POST /generate provider=' + body.provider + ' bytes=' + (body.imageBase64?.length || 0));
     const respText = await xhrPost(BRIDGE + '/generate', JSON.stringify(body), 20000);
     const data = JSON.parse(respText);
-    log('✓ job ' + (data.jobId || data.parentId) + ' queued');
+    log('[OK] job ' + (data.jobId || data.parentId) + ' queued');
 
     await runSinglePolling(data.jobId, state.provider, finalPrompt);
   } catch (e) {
-    log('❌ ' + e.message);
-    $('progressSteps').innerHTML += '<div class="db9-step error">❌ ' + e.message + '</div>';
+    log('[ERR] ' + e.message);
+    $('progressSteps').innerHTML += '<div class="db9-step error">[ERR] ' + e.message + '</div>';
   } finally {
     activeJob = null;
     syncGenerateAvailability();
@@ -554,7 +554,7 @@ async function runGenerate() {
 
 async function runSinglePolling(jobId, provider, prompt) {
   activeJob = jobId;
-  $('progressSteps').innerHTML += '<div class="db9-step active">🎨 Generating in ' + provider + '…</div>';
+  $('progressSteps').innerHTML += '<div class="db9-step active">Generating in ' + provider + '…</div>';
   for (let i = 0; i < 240; i++) { // up to ~8 min
     await new Promise(r => setTimeout(r, 2000));
     let j;
@@ -564,9 +564,9 @@ async function runSinglePolling(jobId, provider, prompt) {
     } catch (e) { continue; }
     const resultBase64 = j.resultBase64 || j.imageBase64 || null;
     if (j.status === 'done' && resultBase64) {
-      log('✓ result received');
+      log('[OK] result received');
       await applyResultToPS(resultBase64, provider, window.__db9_lastSquareBounds);
-      $('progressSteps').innerHTML += '<div class="db9-step done">✅ Done</div>';
+      $('progressSteps').innerHTML += '<div class="db9-step done">Done</div>';
       return;
     }
     if (j.status === 'error') throw new Error(j.error || 'job error');
@@ -575,10 +575,10 @@ async function runSinglePolling(jobId, provider, prompt) {
 }
 
 async function runRegenerate() {
-  if (activeJob) { log('⚠ job in progress, please wait'); return; }
-  if (!bridgeOnline) { log('❌ bridge offline'); return; }
+  if (activeJob) { log('[WARN] job in progress, please wait'); return; }
+  if (!bridgeOnline) { log('[ERR] bridge offline'); return; }
   if (!lastInpaintContext || !lastInpaintContext.smartObjectLayerId || !lastInpaintContext.imageBase64) {
-    log('❌ No active Smart Object context to regenerate');
+    log('[ERR] No active Smart Object context to regenerate');
     return;
   }
 
@@ -587,10 +587,10 @@ async function runRegenerate() {
 
   const state = getStateFromUI();
   const finalPrompt = buildStructuredPrompt(state);
-  log(`▶ regenerate provider=${state.provider} mode=${state.mode} smartObjectId=${lastInpaintContext.smartObjectLayerId}`);
+  log(`[RUN] regenerate provider=${state.provider} mode=${state.mode} smartObjectId=${lastInpaintContext.smartObjectLayerId}`);
 
   $('progressLog').textContent = '';
-  $('progressSteps').innerHTML = '<div class="db9-step active">📡 Posting regenerate to bridge…</div>';
+  $('progressSteps').innerHTML = '<div class="db9-step active">Posting regenerate to bridge…</div>';
 
   try {
     const body = {
@@ -599,16 +599,16 @@ async function runRegenerate() {
       provider: state.provider,
       mode: state.mode,
     };
-    log('📡 POST /generate provider=' + body.provider + ' bytes=' + (body.imageBase64?.length || 0));
+    log('[POST] POST /generate provider=' + body.provider + ' bytes=' + (body.imageBase64?.length || 0));
     const respText = await xhrPost(BRIDGE + '/generate', JSON.stringify(body), 20000);
     const data = JSON.parse(respText);
-    log('✓ regenerate job ' + (data.jobId || data.parentId) + ' queued');
+    log('[OK] regenerate job ' + (data.jobId || data.parentId) + ' queued');
 
     lastInpaintContext.prompt = finalPrompt;
     await runSinglePolling(data.jobId, state.provider, finalPrompt);
   } catch (e) {
-    log('❌ ' + e.message);
-    $('progressSteps').innerHTML += '<div class="db9-step error">❌ ' + e.message + '</div>';
+    log('[ERR] ' + e.message);
+    $('progressSteps').innerHTML += '<div class="db9-step error">[ERR] ' + e.message + '</div>';
   } finally {
     activeJob = null;
     syncGenerateAvailability();
@@ -619,21 +619,21 @@ async function runRegenerate() {
 function wire() {
   const btnRegen = $('btn-regenerate');
   if (btnRegen) {
-    btnRegen.onclick = () => runRegenerate().catch(e => log('❌ ' + e.message));
+    btnRegen.onclick = () => runRegenerate().catch(e => log('[ERR] ' + e.message));
   }
 
-  $('btn-generate').onclick = () => runGenerate().catch(e => log('❌ ' + e.message));
+  $('btn-generate').onclick = () => runGenerate().catch(e => log('[ERR] ' + e.message));
   
   // Reconnect button
   const recBtn = $('btn-reconnect');
   if (recBtn) {
-    recBtn.onclick = () => { log('🔄 forcing reconnect...'); pollHealth(); };
+    recBtn.onclick = () => { log('[SYSTEM] forcing reconnect...'); pollHealth(); };
   }
 }
 
 // ===== Init =====
 async function init() {
-  log('⚡ PTS2GG Inpaint HUD v' + VERSION + ' starting…');
+  log('[SYSTEM] PTS2GG Inpaint HUD v' + VERSION + ' starting…');
   
   // Simulated initial loading animations for splash loading screen
   updateSplashProgress(15, 'INITIALIZING ADOBE UXP ENGINE...');
@@ -651,7 +651,7 @@ async function init() {
   
   wire();
   startHealthPolling();
-  log('✓ core ready');
+  log('[SYSTEM] core ready');
 }
 
-init().catch(e => log('❌ init: ' + e.message));
+init().catch(e => log('[ERR] init: ' + e.message));
