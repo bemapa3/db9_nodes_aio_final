@@ -353,6 +353,28 @@ wss.on('connection', (ws) => {
     if (msg.type === 'log') {
       console.log(`[extension] ${msg.text || ''}`);
     }
+    // BUG-106 FIX: Read a locally downloaded file and return base64
+    if (msg.type === 'read-file') {
+      const fs = require('fs');
+      const path = require('path');
+      try {
+        const filePath = msg.path;
+        if (!filePath || !fs.existsSync(filePath)) {
+          ws.send(JSON.stringify({ type: 'read-file-result', requestId: msg.requestId, ok: false, error: 'File not found: ' + filePath }));
+          return;
+        }
+        const buffer = fs.readFileSync(filePath);
+        const base64 = buffer.toString('base64');
+        const ext = path.extname(filePath).toLowerCase();
+        const mimeMap = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif' };
+        const mime = mimeMap[ext] || 'image/png';
+        console.log(`[bridge] read-file OK: ${filePath} (${Math.round(buffer.length / 1024)} KB, ${mime})`);
+        ws.send(JSON.stringify({ type: 'read-file-result', requestId: msg.requestId, ok: true, base64, mime, size: buffer.length }));
+      } catch (e) {
+        console.error(`[bridge] read-file error:`, e.message);
+        ws.send(JSON.stringify({ type: 'read-file-result', requestId: msg.requestId, ok: false, error: e.message }));
+      }
+    }
   });
 
   ws.on('close', () => {

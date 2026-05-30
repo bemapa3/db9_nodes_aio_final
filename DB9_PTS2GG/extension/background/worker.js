@@ -631,6 +631,125 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true; // keep channel open
   }
 
+  // BUG-106 FIX: Native download approach - click download button, let browser handle auth,
+  // then read the downloaded file via bridge server
+  if (msg.action === 'native-download-and-read') {
+    (async () => {
+      try {
+        log('Native download monitor: waiting for download to start...');
+        
+        // Wait for a download to be created (max 20s)
+        const downloadItem = await new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            chrome.downloads.onCreated.removeListener(listener);
+            reject(new Error('No download detected within 20s'));
+          }, 20000);
+          
+          function listener(item) {
+            // Match googleusercontent downloads or Gemini generated image downloads
+            const url = item.url || '';
+            const filename = item.filename || '';
+            if (url.includes('googleusercontent.com') || 
+                url.includes('gemini') || 
+                filename.includes('Gemini') || 
+                filename.includes('gemini') ||
+                filename.includes('generated')) {
+              clearTimeout(timeout);
+              chrome.downloads.onCreated.removeListener(listener);
+              log('Native download detected: id=' + item.id + ' url=' + (url.slice(0, 80)));
+              resolve(item);
+            }
+          }
+          chrome.downloads.onCreated.addListener(listener);
+        });
+        
+        // Wait for download to complete (max 60s)
+        log('Waiting for download to complete: id=' + downloadItem.id);
+        const completedPath = await new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            chrome.downloads.onChanged.removeListener(listener);
+            reject(new Error('Download did not complete within 60s'));
+          }, 60000);
+          
+          function listener(delta) {
+            if (delta.id !== downloadItem.id) return;
+            if (delta.state && delta.state.current === 'complete') {
+              clearTimeout(timeout);
+              chrome.downloads.onChanged.removeListener(listener);
+              // Get file path
+              chrome.downloads.search({ id: downloadItem.id }, (results) => {
+                if (results && results[0] && results[0].filename) {
+                  log('Download complete: ' + results[0].filename);
+                  resolve(results[0].filename);
+                } else {
+                  reject(new Error('Could not get download file path'));
+                }
+              });
+            } else if (delta.state && delta.state.current === 'interrupted') {
+              clearTimeout(timeout);
+              chrome.downloads.onChanged.removeListener(listener);
+              reject(new Error('Download was interrupted'));
+            }
+          }
+          chrome.downloads.onChanged.addListener(listener);
+          
+          // Also check if already complete
+          chrome.downloads.search({ id: downloadItem.id }, (results) => {
+            if (results && results[0] && results[0].state === 'complete') {
+              clearTimeout(timeout);
+              chrome.downloads.onChanged.removeListener(listener);
+              log('Download already complete: ' + results[0].filename);
+              resolve(results[0].filename);
+            }
+          });
+        });
+        
+        // Ask bridge server to read the file
+        log('Asking bridge to read file: ' + completedPath);
+        const requestId = crypto.randomUUID();
+        
+        const fileResult = await new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error('Bridge read-file timed out after 15s'));
+          }, 15000);
+          
+          // Listen for response from bridge
+          function onMessage(event) {
+            try {
+              const data = JSON.parse(event.data);
+              if (data.type === 'read-file-result' && data.requestId === requestId) {
+                clearTimeout(timeout);
+                ws.removeEventListener('message', onMessage);
+                if (data.ok) {
+                  resolve(data);
+                } else {
+                  reject(new Error(data.error || 'Bridge read-file failed'));
+                }
+              }
+            } catch (_) {}
+          }
+          
+          if (!ws || ws.readyState !== WebSocket.OPEN) {
+            clearTimeout(timeout);
+            reject(new Error('Bridge WebSocket not connected'));
+            return;
+          }
+          
+          ws.addEventListener('message', onMessage);
+          ws.send(JSON.stringify({ type: 'read-file', path: completedPath, requestId }));
+        });
+        
+        log(`Native download+read successful! Size: ${fileResult.base64.length} base64 chars, mime: ${fileResult.mime}`);
+        sendResponse({ ok: true, base64: fileResult.base64, mime: fileResult.mime, filePath: completedPath });
+        
+      } catch (err) {
+        log('Native download+read failed: ' + err.message);
+        sendResponse({ ok: false, error: err.message });
+      }
+    })();
+    return true;
+  }
+
   // BUG-103 FIX v2: Privileged Service Worker CDP Downloader using Chrome DevTools Protocol
   // Bypass CORS/CSP completely by attaching chrome.debugger and using Network.getResponseBody
   if (msg.action === 'download-via-cdp') {

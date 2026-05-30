@@ -99,6 +99,10 @@
       "schemes": [
         "http",
         "https"
+      ],
+      "extensions": [
+        ".bat",
+        ""
       ]
     }
   }

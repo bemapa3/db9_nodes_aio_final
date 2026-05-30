@@ -126,9 +126,10 @@
     try {
       const href = this.href || '';
       if (window.__db9AutomationActive && href && href.includes('googleusercontent.com')) {
-        console.log('[DB9-Monitor] Intercepted high-res anchor click:', href.slice(0, 100));
+        console.log('[DB9-Monitor] High-res anchor click detected (NOT blocking):', href.slice(0, 100));
         broadcastEvent('db9-high-res-url-detected', { url: href });
-        return; // prevent native browser download dialog
+        // BUG-106 FIX: Let the native download proceed - don't block it!
+        // The browser will download with proper auth cookies.
       }
     } catch (e) {}
     return origAnchorClick.apply(this, arguments);
