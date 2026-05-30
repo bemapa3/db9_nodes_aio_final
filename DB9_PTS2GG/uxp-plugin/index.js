@@ -1,5 +1,5 @@
-// DB9 Multi-Provider — Photoshop UXP Plugin v0.4.7.7
-// All preset/negative state lives in the plugin. Bridge is a dumb pipe.
+// PTS2GG Inpaint HUD — Photoshop UXP Plugin v0.5.0
+// Extremely stripped down, robust automation client.
 
 const photoshop = require('photoshop');
 const uxp = require('uxp');
@@ -14,29 +14,20 @@ const { batchPlay } = action;
 const { executeAsModal } = core;
 
 // ===== Constants / state =====
-const VERSION = '0.4.7.7';
+const VERSION = '0.5.0';
 const BRIDGE = 'http://127.0.0.1:8765';
-const PRESET_MAX = 6;
 
-let presetLib = null;       // {version, categories: {Cat: [{id,...}]}}
-let negativeLib = null;
-let selectedPositive = new Set();
-let selectedNegative = new Set();
-let history = [];           // {jobId, prompt, thumb, ts, provider}
-let savedCombos = [];       // {id, name, positive[], negative[], userPrompt, userNegative, provider}
-let providersOnline = [];
 let bridgeOnline = false;
+let providersOnline = [];
 let lastBridgeError = null;
 let activeJob = null;
-let refImage = null; // { base64, mime, description }
-let lastInpaintContext = null; // { squareBounds, dims, prompt, provider, mode, smartObjectLayerId }
-let presetSearchQ = '';
-let negativeSearchQ = '';
-let dualState = null;       // {parentId, gemini:{status,base64}, chatgpt:{status,base64}}
+let lastInpaintContext = null; // { squareBounds, dims, prompt, provider, mode, smartObjectLayerId, imageBase64 }
+let bridgeAutostartAttempted = false;
+let splashScreenActive = true;
+
 let settings = {
   useStructuredPrompt: false,
   autoTranslateVN: true,
-  promptModeVersion: '0.4.7.7',
   selectionExpandMode: 'auto',
   selectionExpandPx: 96,
 };
@@ -50,7 +41,7 @@ function log(msg) {
   const ts = new Date().toLocaleTimeString();
   el.textContent += `[${ts}] ${msg}\n`;
   el.scrollTop = el.scrollHeight;
-  console.log('[DB9]', msg);
+  console.log('[PTS2GG]', msg);
 }
 
 function setDot(id, state) {
@@ -59,290 +50,45 @@ function setDot(id, state) {
   el.className = 'db9-dot db9-dot-' + state; // off|on|busy|err
 }
 
-function sanitizeUiCopy() {
-  const setText = (id, text) => {
-    const el = $(id);
-    if (el) el.textContent = text;
-  };
-  const setPlaceholder = (id, text) => {
-    const el = $(id);
-    if (el) el.placeholder = text;
-  };
-  const setSectionTitle = (sectionId, text) => {
-    const el = document.querySelector(`#${sectionId} .db9-section-title`);
-    if (el) el.textContent = text;
-  };
-
-  setText('db9-title', 'DB9 Multi-Provider');
-  setText('btn-reconnect', 'Reconnect');
-  setText('btn-settings', 'Settings');
-  setPlaceholder('promptInput', 'Describe the edit or render idea. Vietnamese is still accepted and translated automatically.');
-  setPlaceholder('negativeSearch', 'Filter negatives...');
-  setPlaceholder('presetSearch', 'Search...');
-  setText('btn-clear', 'Clear all');
-  setText('btn-save-custom', 'Save combo...');
-  setText('btn-export', 'Export JSON');
-  setText('btn-import', 'Import JSON');
-  setText('btn-ref-upload', 'Upload reference');
-  setText('btn-ref-describe', 'Describe via Gemini');
-  setText('btn-ref-clear', 'Clear');
-  setText('btn-ref-save-preset', 'Save as preset');
-  setText('btn-open-gemini', 'Open Gemini');
-  setText('btn-open-chatgpt', 'Open ChatGPT');
-  setText('dual-cancel', 'Cancel');
-  setText('dual-use-gemini', 'Use Gemini');
-  setText('dual-use-chatgpt', 'Use ChatGPT');
-
-  setSectionTitle('sec-selection', 'Selection');
-  setSectionTitle('sec-prompt', 'Prompt');
-  setSectionTitle('sec-negative', 'Negative');
-  setSectionTitle('sec-presets', 'Presets');
-  setSectionTitle('sec-custom', 'Saved combos');
-  setSectionTitle('sec-mode', 'Mode');
-  setSectionTitle('sec-provider', 'Provider');
-  setSectionTitle('sec-progress', 'Progress');
-  setSectionTitle('sec-history', 'History');
-  const refTitle = document.querySelector('#pane-reference .db9-section-title');
-  if (refTitle) refTitle.textContent = 'Reference image';
-
-  const refHelp = document.querySelector('#pane-reference .small');
-  if (refHelp) refHelp.textContent = 'Upload a reference image, let Gemini describe it, then inject that description into the prompt.';
-
-  const savedEmpty = document.querySelector('#customList .small');
-  if (savedEmpty) savedEmpty.textContent = 'No combos saved yet - pick presets/negatives then click "Save combo...".';
-
-  const dualHeader = document.querySelector('.db9-modal-header');
-  if (dualHeader) dualHeader.textContent = 'Compare results and choose one to apply';
-  const dualTitles = document.querySelectorAll('.db9-modal-cell h4');
-  if (dualTitles[0]) dualTitles[0].textContent = 'Gemini';
-  if (dualTitles[1]) dualTitles[1].textContent = 'ChatGPT';
-
-  const modeLabels = document.querySelectorAll('input[name="mode"]');
-  modeLabels.forEach((input) => {
-    const label = input.closest('label');
-    if (!label) return;
-    const text = input.value === 'new' ? 'New' : input.value === 'regen' ? 'Regen' : 'Refine';
-    label.innerHTML = '';
-    label.appendChild(input);
-    label.appendChild(document.createTextNode(' ' + text));
-  });
-
-  const providerLabels = document.querySelectorAll('input[name="provider"]');
-  providerLabels.forEach((input) => {
-    const label = input.closest('label');
-    if (!label) return;
-    const text = input.value === 'gemini' ? 'Gemini' : input.value === 'chatgpt' ? 'ChatGPT' : 'Both (compare)';
-    label.innerHTML = '';
-    label.appendChild(input);
-    label.appendChild(document.createTextNode(' ' + text));
-  });
-
-  document.querySelectorAll('.db9-tab').forEach((tab) => {
-    const map = {
-      'pane-main': 'Main',
-      'pane-prompt': 'Prompt',
-      'pane-presets': 'Style',
-      'pane-negative': 'Negative',
-      'pane-reference': 'Reference',
-      'pane-saved': 'Combos',
-      'pane-log': 'Logs',
-    };
-    tab.textContent = map[tab.dataset.tab] || 'Tab';
-  });
-}
-
-function selectedProviderFromUI() {
-  return document.querySelector('input[name="provider"]:checked')?.value || 'gemini';
-}
-
-function providerReadyForSelection() {
-  const selected = selectedProviderFromUI();
-  if (!bridgeOnline) return false;
-  if (selected === 'both') {
-    return providersOnline.includes('gemini') && providersOnline.includes('chatgpt');
-  }
-  return providersOnline.includes(selected);
-}
-
 function syncGenerateAvailability() {
   const btn = $('btn-generate');
   if (!btn) return;
-  const providerReady = providerReadyForSelection();
+  const providerReady = bridgeOnline && providersOnline.includes('gemini');
   btn.disabled = !providerReady || !!activeJob;
   if (activeJob) btn.textContent = 'GENERATING...';
-  else btn.textContent = 'GENERATE';
+  else btn.textContent = '🚀 GENERATE INPAINT';
+  
   if (!bridgeOnline) {
-    btn.title = 'Bridge offline - start bridge server and open provider tab';
+    btn.title = 'Bridge offline - start bridge server';
   } else if (!providerReady) {
-    btn.title = 'Selected provider is not connected in Chrome';
+    btn.title = 'Gemini is not connected in Chrome extension';
   } else {
     btn.title = '';
   }
 }
 
-// ===== Local FS read for presets/negatives =====
-// UXP quirk: fetch() on relative paths doesn't work in all PS versions.
-// We try 4 strategies in order: plugin://, fetch(name), fs read with utf8 format, fs read with plain string.
-async function loadJsonFile(name) {
-  const attempts = [];
-
-  // A: fetch with plugin: URL
-  try {
-    const r = await fetch('plugin:/' + name);
-    if (r && r.ok) { const t = await r.text(); return JSON.parse(t); }
-  } catch (e) { attempts.push('plugin:/ ' + e.message); }
-
-  // B: fetch relative
-  try {
-    const r = await fetch(name);
-    if (r && r.ok) { const t = await r.text(); return JSON.parse(t); }
-  } catch (e) { attempts.push('fetch ' + e.message); }
-
-  // C: pluginFolder.getEntry + read with formats.utf8
-  try {
-    const pluginFolder = await fsLfs.getPluginFolder();
-    const file = await pluginFolder.getEntry(name);
-    const fmt = (formats && formats.utf8) || 'utf-8';
-    const text = await file.read({ format: fmt });
-    return JSON.parse(text);
-  } catch (e) { attempts.push('fs.utf8 ' + e.message); }
-
-  // D: same but with { format: "utf8" } legacy
-  try {
-    const pluginFolder = await fsLfs.getPluginFolder();
-    const file = await pluginFolder.getEntry(name);
-    const text = await file.read();
-    return JSON.parse(text);
-  } catch (e) { attempts.push('fs.default ' + e.message); }
-
-  log('❌ failed to load ' + name + '\n  ' + attempts.join('\n  '));
-  return null;
+// ===== Splash Screen Manager =====
+function updateSplashProgress(percent, statusText) {
+  const bar = $('splash-bar');
+  const text = $('splash-status');
+  if (bar) bar.style.width = percent + '%';
+  if (text) text.textContent = statusText;
 }
 
-async function loadBundledBinaryImage(name) {
-  const pluginFolder = await fsLfs.getPluginFolder();
-  const file = await pluginFolder.getEntry(name);
-  const buf = await file.read({ format: formats.binary });
-  const bytes = new Uint8Array(buf);
-  let bin = '';
-  for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
-  const lower = name.toLowerCase();
-  const mime = lower.endsWith('.png') ? 'image/png'
-    : lower.endsWith('.webp') ? 'image/webp'
-    : 'image/jpeg';
-  return { imageBase64: btoa(bin), mime, name };
-}
-
-async function loadPresets() {
-  presetLib = await loadJsonFile('presets.json');
-  if (!presetLib) { log('❌ presets.json missing'); return; }
-  log('✓ loaded presets ' + (presetLib.version || ''));
-  renderPresetGroups();
-}
-
-async function loadNegatives() {
-  negativeLib = await loadJsonFile('negatives.json');
-  if (!negativeLib) { log('❌ negatives.json missing'); return; }
-  log('✓ loaded negatives ' + (negativeLib.version || ''));
-  // Apply defaults on first load
-  for (const cat of Object.keys(negativeLib.categories || {})) {
-    for (const item of negativeLib.categories[cat]) {
-      if (item.default) selectedNegative.add(item.id);
-    }
-  }
-  renderNegativeGroups();
-}
-
-function renderPresetGroups() {
-  const root = $('presetGroups');
-  if (!root || !presetLib) return;
-  root.innerHTML = '';
-  for (const cat of Object.keys(presetLib.categories)) {
-    const items = presetLib.categories[cat] || [];
-    const det = document.createElement('details');
-    det.style.cssText = 'border:1px solid var(--db9-border);border-radius:var(--db9-radius-sm);margin-bottom:4px;background:var(--db9-surface);';
-    const sum = document.createElement('summary');
-    sum.style.cssText = 'padding:6px 8px;cursor:pointer;font-size:11px;color:#94a3b8;font-weight:500;';
-    const selCount = items.filter(i => selectedPositive.has(i.id)).length;
-    sum.textContent = `${cat} (${selCount}/${items.length})`;
-    det.appendChild(sum);
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'padding:6px 8px;display:flex;flex-wrap:wrap;gap:4px;';
-    for (const item of items) {
-      if (presetSearchQ) {
-        const hay = (item.label + ' ' + (item.labelEn||'') + ' ' + (item.prompt||'')).toLowerCase();
-        if (!hay.includes(presetSearchQ)) continue;
-      }
-      const chip = document.createElement('span');
-      const isOn = selectedPositive.has(item.id);
-      chip.className = 'db9-chip';
-      chip.style.cssText = `display:inline-block;padding:3px 8px;border-radius:var(--db9-radius-sm);font-size:10px;cursor:pointer;border:1px solid ${isOn ? 'var(--db9-accent)' : 'var(--db9-border)'};background:${isOn ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255, 255, 255, 0.02)'};color:${isOn ? '#ffffff' : '#cbd5e1'};transition:background 120ms, border-color 120ms;`;
-      chip.textContent = (item.icon || '') + ' ' + (item.label || item.labelEn || item.id);
-      chip.title = item.prompt || '';
-      chip.onclick = () => {
-        if (selectedPositive.has(item.id)) {
-          selectedPositive.delete(item.id);
-        } else {
-          if (selectedPositive.size >= PRESET_MAX) { log('⚠ max ' + PRESET_MAX + ' presets'); return; }
-          selectedPositive.add(item.id);
-        }
-        renderPresetGroups();
-        updatePresetCount();
-      };
-      wrap.appendChild(chip);
-    }
-    det.appendChild(wrap);
-    root.appendChild(det);
-  }
-  updatePresetCount();
-}
-
-function renderNegativeGroups() {
-  const root = $('negativeGroups');
-  if (!root || !negativeLib) return;
-  root.innerHTML = '';
-  for (const cat of Object.keys(negativeLib.categories)) {
-    const items = negativeLib.categories[cat] || [];
-    const det = document.createElement('details');
-    det.style.cssText = 'border:1px solid var(--db9-border);border-radius:var(--db9-radius-sm);margin-bottom:4px;background:var(--db9-surface);';
-    const sum = document.createElement('summary');
-    sum.style.cssText = 'padding:6px 8px;cursor:pointer;font-size:11px;color:#94a3b8;font-weight:500;';
-    const selCount = items.filter(i => selectedNegative.has(i.id)).length;
-    sum.textContent = `${cat} (${selCount}/${items.length})`;
-    det.appendChild(sum);
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'padding:6px 8px;display:flex;flex-wrap:wrap;gap:4px;';
-    for (const item of items) {
-      if (negativeSearchQ) {
-        const hay = (item.label + ' ' + (item.labelEn||'') + ' ' + (item.prompt||'')).toLowerCase();
-        if (!hay.includes(negativeSearchQ)) continue;
-      }
-      const chip = document.createElement('span');
-      const isOn = selectedNegative.has(item.id);
-      chip.style.cssText = `display:inline-block;padding:3px 8px;border-radius:var(--db9-radius-sm);font-size:10px;cursor:pointer;border:1px solid ${isOn ? 'var(--db9-danger)' : 'var(--db9-border)'};background:${isOn ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255, 255, 255, 0.02)'};color:${isOn ? '#ffffff' : '#cbd5e1'};transition:background 120ms, border-color 120ms;`;
-      chip.textContent = (item.icon || '🚫') + ' ' + (item.label || item.labelEn || item.id);
-      chip.title = item.prompt || '';
-      chip.onclick = () => {
-        if (selectedNegative.has(item.id)) selectedNegative.delete(item.id);
-        else selectedNegative.add(item.id);
-        renderNegativeGroups();
-      };
-      wrap.appendChild(chip);
-    }
-    det.appendChild(wrap);
-    root.appendChild(det);
-  }
-}
-
-function updatePresetCount() {
-  const el = $('presetCount');
-  if (el) el.textContent = `${selectedPositive.size}/${PRESET_MAX} presets selected`;
+function dismissSplashScreen() {
+  if (!splashScreenActive) return;
+  splashScreenActive = false;
+  updateSplashProgress(100, 'TUNNEL ESTABLISHED! READY.');
+  setTimeout(() => {
+    const splash = $('db9-splash');
+    if (splash) splash.classList.add('fade-out');
+  }, 400);
 }
 
 // ===== Vietnamese detection + structured prompt =====
 function detectVietnamese(text) {
   if (!text) return false;
-  return /[ăâêôơưđĂÂÊÔƠƯĐàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵÀÁẢÃẠẰẮẲẴẶẦẤẨẪẬÈÉẺẼẸỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌỒỐỔỖỘỜỚỞỠỢÙÚỦŨỤỪỨỬỮỰỲÝỶỸỴ]/.test(text);
+  return /[ăâêôơưđĂÂÊÔƠƯĐàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵÀÁẢÃẠẰẮClarIFYẰẮẲẴẶẦẤẨẪẬÈÉẺẼẸỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌỒỐỔỖỘỜỚỞỠỢÙÚỦŨỤỪỨỬỮỰỲÝỶỸỴ]/.test(text);
 }
 
 function buildStructuredPrompt(state) {
@@ -355,147 +101,15 @@ function selectionWorkflowOptionsFromUI() {
   const px = Number.isFinite(pxRaw) ? Math.max(0, Math.min(1024, Math.round(pxRaw))) : 96;
   settings.selectionExpandMode = mode;
   settings.selectionExpandPx = px;
-  try { localStorage.setItem('db9_settings', JSON.stringify(settings)); } catch (_) {}
+  try { localStorage.setItem('pts2gg_settings', JSON.stringify(settings)); } catch (_) {}
   return { mode, px };
 }
 
-function buildSelectionContext(dims, squareBounds, options) {
-  if (!dims || !squareBounds) return '';
-  return [
-    'Edit only the masked central selection while preserving the surrounding architectural context.',
-    'The input image is a square 1:1 crop expanded around the user selection.',
-    `Original selection ${Math.round(dims.originalW)}x${Math.round(dims.originalH)} px; expanded square ${Math.round(dims.w)}x${Math.round(dims.h)} px.`,
-    `Expansion mode ${options?.mode || 'auto'}, margin ${Math.round(options?.px || 0)} px before square fitting.`,
-    'Match perspective, lighting direction, materials, scale, camera angle, color temperature, shadows, reflections, and edge continuity with the visible surroundings.',
-    'Generate a seamless replacement suitable for being clipped by the original Photoshop selection mask.'
-  ].join(' ');
-}
 function getStateFromUI() {
   const userPrompt = $('promptInput')?.value || '';
-  const userNegative = $('negativePrompt')?.value || '';
-  const provider = selectedProviderFromUI();
-  const mode = document.querySelector('input[name="mode"]:checked')?.value || 'new';
-  const positiveItems = [];
-  const negativeItems = [];
-  if (presetLib) {
-    for (const cat of Object.keys(presetLib.categories)) {
-      for (const it of presetLib.categories[cat]) {
-        if (selectedPositive.has(it.id)) positiveItems.push(it);
-      }
-    }
-  }
-  if (negativeLib) {
-    for (const cat of Object.keys(negativeLib.categories)) {
-      for (const it of negativeLib.categories[cat]) {
-        if (selectedNegative.has(it.id)) negativeItems.push(it);
-      }
-    }
-  }
-  return { userPrompt, userNegative, provider, mode, positiveItems, negativeItems };
-}
-
-// ===== Saved combos =====
-function loadSavedCombos() {
-  try {
-    const raw = localStorage.getItem('db9_custom_presets');
-    savedCombos = raw ? JSON.parse(raw) : [];
-  } catch (e) { savedCombos = []; }
-  renderSavedCombos();
-}
-
-function persistSavedCombos() {
-  localStorage.setItem('db9_custom_presets', JSON.stringify(savedCombos));
-}
-
-function renderSavedCombos() {
-  const root = $('customList');
-  if (!root) return;
-  if (!savedCombos.length) {
-    root.innerHTML = '<span class="small">No combos saved yet — pick presets/negatives then click "Save combo as…"</span>';
-    return;
-  }
-  root.innerHTML = '';
-  root.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;';
-  for (const c of savedCombos) {
-    const chip = document.createElement('span');
-    chip.style.cssText = 'display:inline-block;padding:4px 8px;border-radius:var(--db9-radius-sm);font-size:10px;cursor:pointer;border:1px solid var(--db9-accent);background:rgba(59, 130, 246, 0.1);color:#ffffff;';
-    chip.textContent = '💾 ' + c.name;
-    chip.title = `${c.positive?.length || 0} presets · ${c.negative?.length || 0} negatives · provider=${c.provider}`;
-    chip.onclick = () => loadCombo(c.id);
-    chip.oncontextmenu = (e) => {
-      e.preventDefault();
-      if (confirm('Delete combo "' + c.name + '"?')) {
-        savedCombos = savedCombos.filter(x => x.id !== c.id);
-        persistSavedCombos();
-        renderSavedCombos();
-      }
-    };
-    root.appendChild(chip);
-  }
-}
-
-function saveCurrentCombo() {
-  const name = prompt('Tên combo:');
-  if (!name) return;
-  const state = getStateFromUI();
-  const combo = {
-    id: 'custom-' + Date.now(),
-    name: name.trim(),
-    positive: [...selectedPositive],
-    negative: [...selectedNegative],
-    userPrompt: state.userPrompt,
-    userNegative: state.userNegative,
-    provider: state.provider,
-  };
-  savedCombos.push(combo);
-  persistSavedCombos();
-  renderSavedCombos();
-  log('💾 saved combo "' + combo.name + '"');
-}
-
-function loadCombo(id) {
-  const c = savedCombos.find(x => x.id === id);
-  if (!c) return;
-  selectedPositive = new Set(c.positive || []);
-  selectedNegative = new Set(c.negative || []);
-  $('promptInput').value = c.userPrompt || '';
-  $('negativePrompt').value = c.userNegative || '';
-  const r = document.querySelector(`input[name="provider"][value="${c.provider}"]`);
-  if (r) r.checked = true;
-  renderPresetGroups();
-  renderNegativeGroups();
-  log('📂 loaded combo "' + c.name + '"');
-}
-
-function exportCombos() {
-  const json = JSON.stringify(savedCombos, null, 2);
-  try {
-    navigator.clipboard.writeText(json);
-    log('⬆ exported ' + savedCombos.length + ' combo(s) to clipboard');
-  } catch (e) {
-    prompt('Copy this JSON:', json);
-  }
-}
-
-function importCombos() {
-  const json = prompt('Paste combos JSON:');
-  if (!json) return;
-  try {
-    const arr = JSON.parse(json);
-    if (!Array.isArray(arr)) throw new Error('not an array');
-    let added = 0;
-    for (const c of arr) {
-      if (!savedCombos.find(x => x.id === c.id)) {
-        savedCombos.push(c);
-        added++;
-      }
-    }
-    persistSavedCombos();
-    renderSavedCombos();
-    log('⬇ imported ' + added + ' combo(s)');
-  } catch (e) {
-    log('❌ import failed: ' + e.message);
-  }
+  const modeElement = document.querySelector('input[name="mode"]:checked');
+  const mode = modeElement ? modeElement.value : 'new';
+  return { userPrompt, provider: 'gemini', mode };
 }
 
 // ===== Health polling =====
@@ -534,9 +148,34 @@ function xhrPost(url, bodyStr, timeoutMs = 30000) {
   });
 }
 
+async function ensureBridgeServerStarted() {
+  if (bridgeAutostartAttempted) return;
+  bridgeAutostartAttempted = true;
+  updateSplashProgress(45, 'STARTING LOCAL BRIDGE SERVER...');
+  log('⚡ Bridge offline on startup. Attempting to auto-start bridge server...');
+  try {
+    const pluginFolder = await fsLfs.getPluginFolder();
+    const nativePath = pluginFolder.nativePath;
+    let batPath = '';
+    if (nativePath.endsWith('uxp-plugin')) {
+      batPath = nativePath.replace('uxp-plugin', 'bridge\\start-bridge.bat');
+    } else if (nativePath.endsWith('uxp-plugin\\')) {
+      batPath = nativePath.replace('uxp-plugin\\', 'bridge\\start-bridge.bat');
+    } else {
+      batPath = nativePath + '\\..\\bridge\\start-bridge.bat';
+    }
+    log(`📂 Resolved bat path: ${batPath}`);
+    await uxp.shell.openPath(batPath);
+    log('🚀 Launched start-bridge.bat. Please click "Allow" if Photoshop prompts you.');
+    updateSplashProgress(75, 'AWAITING LOCAL BRIDGE SERVER ONLINE...');
+  } catch (e) {
+    log('❌ Failed to auto-start bridge: ' + e.message);
+    updateSplashProgress(75, 'BRIDGE LAUNCH ERROR. RETRYING...');
+  }
+}
+
 async function pollHealth() {
   try {
-    // v0.4.7.2: use XMLHttpRequest — UXP PS has better localhost support via XHR than fetch
     const text = await xhrGet(BRIDGE + '/health', 3500);
     const data = JSON.parse(text);
     if (!bridgeOnline) log('✓ bridge ONLINE v' + data.version + ' providers=[' + (data.providers || []).join(',') + ']');
@@ -547,6 +186,11 @@ async function pollHealth() {
     setDot('dot-gemini', providersOnline.includes('gemini') ? 'on' : 'off');
     setDot('dot-chatgpt', providersOnline.includes('chatgpt') ? 'on' : 'off');
     syncGenerateAvailability();
+    
+    // Dismiss loading overlay on active server confirmation
+    if (splashScreenActive) {
+      dismissSplashScreen();
+    }
   } catch (e) {
     const errMsg = e.message || String(e);
     if (bridgeOnline !== false || lastBridgeError !== errMsg) {
@@ -558,6 +202,11 @@ async function pollHealth() {
     setDot('dot-gemini', 'off');
     setDot('dot-chatgpt', 'off');
     syncGenerateAvailability();
+    
+    if (splashScreenActive) {
+      updateSplashProgress(30, 'BRIDGE OFFLINE. INITIALIZING...');
+      ensureBridgeServerStarted();
+    }
   }
 }
 
@@ -574,6 +223,23 @@ function unitValue(v) {
 function clampSquareBounds(left, top, right, bottom, docW, docH, options) {
   const selW = Math.max(1, right - left);
   const selH = Math.max(1, bottom - top);
+  
+  if (options?.mode === 'none') {
+    const S = Math.min(Math.max(selW, selH), Math.min(docW, docH));
+    const cx = (left + right) / 2;
+    const cy = (top + bottom) / 2;
+    let sLeft = Math.round(cx - S / 2);
+    let sTop = Math.round(cy - S / 2);
+    let sRight = sLeft + S;
+    let sBottom = sTop + S;
+    if (sLeft < 0) { sRight -= sLeft; sLeft = 0; }
+    if (sTop < 0) { sBottom -= sTop; sTop = 0; }
+    if (sRight > docW) { sLeft -= (sRight - docW); sRight = docW; }
+    if (sBottom > docH) { sTop -= (sBottom - docH); sBottom = docH; }
+    sLeft = Math.max(0, sLeft); sTop = Math.max(0, sTop);
+    return { left: sLeft, top: sTop, right: sRight, bottom: sBottom, size: sRight - sLeft, pad: 0 };
+  }
+
   const autoPad = Math.round(Math.max(selW, selH) * 0.18);
   const pad = options?.mode === 'manual' ? Number(options.px || 0) : Math.max(Number(options?.px || 0), autoPad);
   left -= pad; top -= pad; right += pad; bottom += pad;
@@ -611,35 +277,26 @@ async function prepareSelectionSmartObject(squareBounds, hasSelection) {
 
     let selectionLayerId = null;
     if (hasSelection) {
-      // 1. Copy the original selection to a temporary layer (Ctrl+J-like layer)
       await batchPlay([{ _obj: 'copyToLayer' }], { synchronousExecution: true });
       const selLayer = doc.activeLayers[0];
       if (selLayer) selectionLayerId = selLayer.id;
-      
-      // Select the original layer again to copy the square bounds context
       await selectLayerById(originalLayerId);
     }
 
-    // 2. Select the squareBounds
     await selectRectangle(squareBounds);
-
-    // 3. Copy square bounds to a new layer
     await batchPlay([{ _obj: 'copyToLayer' }], { synchronousExecution: true });
     const contextLayer = doc.activeLayers[0];
     if (!contextLayer) throw new Error('Failed to create context layer');
 
-    // 4. Convert context layer to a Smart Object
     await batchPlay([{ _obj: 'newPlacedLayer' }], { synchronousExecution: true });
     const smartObjectLayer = doc.activeLayers[0];
     if (!smartObjectLayer) throw new Error('Failed to create Smart Object layer');
     if (smartObjectLayer) {
-      smartObjectLayer.name = 'DB9 Inpaint Smart Object ' + new Date().toLocaleTimeString();
+      smartObjectLayer.name = 'PTS2GG Inpaint Smart Object ' + new Date().toLocaleTimeString();
     }
 
-    // 5. Apply the mask if there was a selection
     if (hasSelection && selectionLayerId) {
       try {
-        // Load the temporary layer transparency as the active document selection.
         await selectLayerById(selectionLayerId);
         await batchPlay([{
           _obj: 'set',
@@ -647,10 +304,8 @@ async function prepareSelectionSmartObject(squareBounds, hasSelection) {
           to: { _ref: 'channel', _enum: 'channel', _value: 'transparencyEnum' }
         }], { synchronousExecution: true });
 
-        // Select the Smart Object layer again, keeping the loaded selection active.
         await selectLayerById(smartObjectLayer.id);
 
-        // Create the user mask revealing the original selection.
         try {
           await batchPlay([{
             _obj: 'make',
@@ -687,7 +342,7 @@ function base64ToBytes(base64) {
   return bytes;
 }
 
-async function writeTempPng(base64, prefix = 'db9_result_') {
+async function writeTempPng(base64, prefix = 'pts2gg_result_') {
   const tmpFolder = await fsLfs.getTemporaryFolder();
   const outFile = await tmpFolder.createFile(prefix + Date.now() + '.png', { overwrite: true });
   const bytes = base64ToBytes(base64);
@@ -725,14 +380,12 @@ async function exportSelectionAsPng(options = {}) {
 
     smartObjectLayerId = await prepareSelectionSmartObject(squareBounds, sel !== null);
 
-    // CORRECT APPROACH: select squareBounds on original doc, copy merged, save
     await selectRectangle(squareBounds);
     await batchPlay([{ _obj: 'copyMerged' }], { synchronousExecution: true });
 
     const tmpFolder = await fsLfs.getTemporaryFolder();
-    const outFile = await tmpFolder.createFile('db9_sel_' + Date.now() + '.png', { overwrite: true });
+    const outFile = await tmpFolder.createFile('pts2gg_sel_' + Date.now() + '.png', { overwrite: true });
 
-    // Create new doc from clipboard at exact squareBounds size, save, close
     const newDoc = await app.createDocument({
       width: squareBounds.size, height: squareBounds.size,
       resolution: doc.resolution, fill: 'transparent', mode: 'RGBColorMode'
@@ -745,7 +398,6 @@ async function exportSelectionAsPng(options = {}) {
     const buf = await outFile.read({ format: formats.binary });
     const bytes = new Uint8Array(buf);
 
-    // Validate PNG header dimensions (bytes 16-23 = IHDR width/height)
     const view = new DataView(bytes.buffer);
     const pngW = view.getUint32(16, false);
     const pngH = view.getUint32(20, false);
@@ -753,16 +405,14 @@ async function exportSelectionAsPng(options = {}) {
       throw new Error(`Export dimension mismatch: got ${pngW}x${pngH}, expected ${dims.w}x${dims.h}. Aborting.`);
     }
     log(`✓ export validated ${pngW}x${pngH} ${Math.round(bytes.byteLength/1024)}KB smartObjectId=${smartObjectLayerId}`);
-    if (bytes.byteLength > 10 * 1024 * 1024) {
-      throw new Error(`Export too large: ${Math.round(bytes.byteLength/1024/1024)}MB. Reduce selection size.`);
-    }
-
+    
     let bin = '';
     for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
     base64 = btoa(bin);
-  }, { commandName: 'DB9 prepare selection Smart Object + export 1:1' });
+  }, { commandName: 'PTS2GG prepare selection Smart Object + export 1:1' });
   return { base64, dims, squareBounds, smartObjectLayerId };
 }
+
 async function selectLayerById(layerId) {
   if (!layerId) return false;
   try {
@@ -780,33 +430,28 @@ async function selectLayerById(layerId) {
 
 async function replaceSmartObjectContents(base64, label, context = lastInpaintContext) {
   if (!context?.smartObjectLayerId) return false;
-  const outFile = await writeTempPng(base64, 'db9_smart_replace_');
+  const outFile = await writeTempPng(base64, 'pts2gg_smart_replace_');
   const token = await fsLfs.createSessionToken(outFile);
   
   await executeAsModal(async () => {
     const selected = await selectLayerById(context.smartObjectLayerId);
-    if (!selected) throw new Error('Target DB9 smart object layer is not available');
+    if (!selected) throw new Error('Target Smart Object layer is not available');
     
-    // 1. Open the smart object
     await batchPlay([{ _obj: 'placedLayerEditContents' }], { synchronousExecution: true });
-    
     const soDoc = app.activeDocument;
     
-    // 2. Place the new image (Photoshop auto-scales to fit the canvas bounds)
     await batchPlay([{
       _obj: 'placeEvent',
       null: { _path: token, _kind: 'local' },
       freeTransformCenterState: { _enum: 'quadCenterState', _value: 'QCSAverage' }
     }], { synchronousExecution: true });
     
-    // 3. Rename the newly placed layer
     const layer = soDoc.activeLayers[0];
-    if (layer) layer.name = 'DB9 ' + (label || 'Gemini') + ' Smart Result ' + new Date().toLocaleTimeString();
+    if (layer) layer.name = 'PTS2GG ' + (label || 'Gemini') + ' Result ' + new Date().toLocaleTimeString();
     
-    // 4. Save and close the smart object to update the parent document
     await soDoc.save();
     await soDoc.close();
-  }, { commandName: 'DB9 Smart Object auto-scale replace' });
+  }, { commandName: 'PTS2GG Smart Object replace content' });
   
   log('✅ updated Smart Object with auto-scaling' + (label ? ' (' + label + ')' : ''));
   return true;
@@ -848,12 +493,13 @@ async function applyResultToPS(base64, label, placementBounds, context = lastInp
             }], { synchronousExecution: true });
             log(`  ↪ moved layer to selection center (Δ ${Math.round(dx)},${Math.round(dy)})`);
           }
-          layer.name = 'DB9 ' + (label || 'gen') + ' ' + new Date().toLocaleTimeString();
+          layer.name = 'PTS2GG ' + (label || 'gen') + ' ' + new Date().toLocaleTimeString();
         }
       } catch (e) { log('  ⚠ post-place adjust skipped: ' + e.message); }
     }
-  }, { commandName: 'DB9 apply result as new layer' });
+  }, { commandName: 'PTS2GG apply result as new layer' });
 }
+
 async function runGenerate() {
   if (activeJob) { log('⚠ job in progress, please wait'); return; }
   if (!bridgeOnline) { log('❌ bridge offline'); return; }
@@ -862,10 +508,9 @@ async function runGenerate() {
 
   const state = getStateFromUI();
   const finalPrompt = buildStructuredPrompt(state);
-  log(`▶ generate provider=${state.provider} mode=${state.mode} presets=${state.positiveItems.length} negatives=${state.negativeItems.length}`);
-  console.log('[DB9] final prompt:\n' + finalPrompt);
+  log(`▶ generate provider=${state.provider} mode=${state.mode}`);
+  console.log('[PTS2GG] final prompt:\n' + finalPrompt);
 
-  // sec-progress is now always visible
   $('progressLog').textContent = '';
   $('progressSteps').innerHTML = '<div class="db9-step active">📤 Exporting selection…</div>';
 
@@ -897,11 +542,7 @@ async function runGenerate() {
     const data = JSON.parse(respText);
     log('✓ job ' + (data.jobId || data.parentId) + ' queued');
 
-    if (state.provider === 'both') {
-      await runDualPolling(data.parentId || data.jobId, finalPrompt);
-    } else {
-      await runSinglePolling(data.jobId, state.provider, finalPrompt);
-    }
+    await runSinglePolling(data.jobId, state.provider, finalPrompt);
   } catch (e) {
     log('❌ ' + e.message);
     $('progressSteps').innerHTML += '<div class="db9-step error">❌ ' + e.message + '</div>';
@@ -925,94 +566,12 @@ async function runSinglePolling(jobId, provider, prompt) {
     if (j.status === 'done' && resultBase64) {
       log('✓ result received');
       await applyResultToPS(resultBase64, provider, window.__db9_lastSquareBounds);
-      pushHistory({ jobId, prompt, provider, base64: resultBase64 });
       $('progressSteps').innerHTML += '<div class="db9-step done">✅ Done</div>';
       return;
     }
     if (j.status === 'error') throw new Error(j.error || 'job error');
   }
   throw new Error('timeout');
-}
-
-async function runDualPolling(parentId, prompt) {
-  activeJob = parentId;
-  $('progressSteps').innerHTML += '<div class="db9-step active">⚔ Dual generating (Gemini + ChatGPT)…</div>';
-  openDualModal();
-  dualState = { parentId, gemini: { status: 'pending' }, chatgpt: { status: 'pending' } };
-
-  for (let i = 0; i < 240; i++) {
-    await new Promise(r => setTimeout(r, 2000));
-    let j;
-    try {
-      const txt = await xhrGet(BRIDGE + '/job/' + parentId + '/dual', 5000);
-      j = JSON.parse(txt);
-    } catch (e) { continue; }
-    for (const p of ['gemini', 'chatgpt']) {
-      const child = j.results?.[p];
-      if (!child) continue;
-      const statusEl = $('dual-status-' + p);
-      const imgEl = $('dual-img-' + p);
-      const useBtn = $('dual-use-' + p);
-      const resultBase64 = child.resultBase64 || child.imageBase64 || null;
-      if (child.status === 'done' && resultBase64) {
-        if (dualState[p].status !== 'done') {
-          dualState[p] = { status: 'done', base64: resultBase64 };
-          imgEl.src = 'data:image/png;base64,' + resultBase64;
-          statusEl.textContent = '✓ ready';
-          useBtn.disabled = false;
-          pushHistory({ jobId: parentId + '-' + p, prompt, provider: p, base64: resultBase64 });
-          log('✓ ' + p + ' done');
-        }
-      } else if (child.status === 'error') {
-        dualState[p] = { status: 'error' };
-        statusEl.textContent = '❌ ' + (child.error || 'error');
-      } else {
-        statusEl.textContent = child.status || 'running…';
-      }
-    }
-    if (j.status === 'complete' || (dualState.gemini.status !== 'pending' && dualState.chatgpt.status !== 'pending')) {
-      $('progressSteps').innerHTML += '<div class="db9-step done">✅ Both finished — choose result</div>';
-      return;
-    }
-  }
-  throw new Error('dual timeout');
-}
-
-function openDualModal() {
-  $('dualModal').style.display = 'flex';
-  $('dual-img-gemini').src = '';
-  $('dual-img-chatgpt').src = '';
-  $('dual-status-gemini').textContent = 'waiting…';
-  $('dual-status-chatgpt').textContent = 'waiting…';
-  $('dual-use-gemini').disabled = true;
-  $('dual-use-chatgpt').disabled = true;
-}
-function closeDualModal() { $('dualModal').style.display = 'none'; dualState = null; }
-
-// ===== History =====
-function pushHistory(entry) {
-  history.unshift({ ...entry, ts: Date.now() });
-  if (history.length > 30) history.pop();
-  renderHistory();
-}
-function renderHistory() {
-  const root = $('historyGrid');
-  if (!root) return;
-  if (!history.length) { root.innerHTML = '<div class="db9-history-empty">No generations yet</div>'; return; }
-  root.innerHTML = '';
-  for (const h of history) {
-    const cell = document.createElement('div');
-    cell.className = 'db9-history-cell';
-    cell.title = h.provider + ' · ' + new Date(h.ts).toLocaleString();
-    const img = document.createElement('img');
-    img.src = 'data:image/png;base64,' + h.base64;
-    cell.appendChild(img);
-    cell.onclick = async () => {
-      log('🔁 re-applying from history');
-      await applyResultToPS(h.base64, h.provider, null);
-    };
-    root.appendChild(cell);
-  }
 }
 
 async function runRegenerate() {
@@ -1029,7 +588,6 @@ async function runRegenerate() {
   const state = getStateFromUI();
   const finalPrompt = buildStructuredPrompt(state);
   log(`▶ regenerate provider=${state.provider} mode=${state.mode} smartObjectId=${lastInpaintContext.smartObjectLayerId}`);
-  console.log('[DB9] final prompt:\n' + finalPrompt);
 
   $('progressLog').textContent = '';
   $('progressSteps').innerHTML = '<div class="db9-step active">📡 Posting regenerate to bridge…</div>';
@@ -1046,14 +604,8 @@ async function runRegenerate() {
     const data = JSON.parse(respText);
     log('✓ regenerate job ' + (data.jobId || data.parentId) + ' queued');
 
-    // Update the prompt in the context
     lastInpaintContext.prompt = finalPrompt;
-
-    if (state.provider === 'both') {
-      await runDualPolling(data.parentId || data.jobId, finalPrompt);
-    } else {
-      await runSinglePolling(data.jobId, state.provider, finalPrompt);
-    }
+    await runSinglePolling(data.jobId, state.provider, finalPrompt);
   } catch (e) {
     log('❌ ' + e.message);
     $('progressSteps').innerHTML += '<div class="db9-step error">❌ ' + e.message + '</div>';
@@ -1071,252 +623,35 @@ function wire() {
   }
 
   $('btn-generate').onclick = () => runGenerate().catch(e => log('❌ ' + e.message));
-  $('btn-clear').onclick = () => {
-    selectedPositive.clear();
-    renderPresetGroups();
-    log('🧹 cleared presets');
-  };
-  $('btn-save-custom').onclick = () => saveCurrentCombo();
-  $('btn-export').onclick = () => exportCombos();
-  $('btn-import').onclick = () => importCombos();
-  $('btn-open-gemini').onclick = () => {
-    try { uxp.shell.openExternal('https://gemini.google.com/app'); } catch (e) { log('❌ ' + e.message); }
-  };
-  $('btn-open-chatgpt').onclick = () => {
-    try { uxp.shell.openExternal('https://chatgpt.com/'); } catch (e) { log('❌ ' + e.message); }
-  };
-  // Tab switching
-  document.querySelectorAll('.db9-tab').forEach(t => {
-    t.onclick = () => {
-      const target = t.dataset.tab;
-      document.querySelectorAll('.db9-tab').forEach(x => x.classList.remove('active'));
-      t.classList.add('active');
-      document.querySelectorAll('.db9-pane').forEach(p => p.classList.remove('active'));
-      // For main tab, activate all 3 main panes (header sections)
-      if (target === 'pane-main') {
-        ['pane-main','pane-main-bottom','pane-main-history'].forEach(id => {
-          const e = document.getElementById(id); if (e) e.classList.add('active');
-        });
-      } else {
-        const e = document.getElementById(target); if (e) e.classList.add('active');
-      }
-    };
-  });
-
-  // Test buttons (send dummy prompt to each provider)
-  const testGem = document.createElement('button');
-  testGem.textContent = 'Test Gemini';
-  testGem.style.cssText = 'font-size:10px;padding:3px 6px;margin-left:4px;border-radius:var(--db9-radius-sm);';
-  testGem.onclick = () => testProvider('gemini');
-  const testCG = document.createElement('button');
-  testCG.textContent = 'Test ChatGPT';
-  testCG.style.cssText = 'font-size:10px;padding:3px 6px;margin-left:4px;border-radius:var(--db9-radius-sm);';
-  testCG.onclick = () => testProvider('chatgpt');
-  const providerExtra = document.querySelector('.provider-extra');
-  if (providerExtra) { providerExtra.appendChild(testGem); providerExtra.appendChild(testCG); }
-
-  $('btn-settings').onclick = () => {
-    settings.useStructuredPrompt = !settings.useStructuredPrompt;
-    localStorage.setItem('db9_settings', JSON.stringify(settings));
-    log('⚙ structured prompt: ' + (settings.useStructuredPrompt ? 'on' : 'off'));
-    updateHint();
-  };
-  $('promptInput').oninput = updateHint;
-  const ps = $('presetSearch');
-  if (ps) ps.oninput = (e) => { presetSearchQ = e.target.value.toLowerCase(); renderPresetGroups(); };
-  const ns = $('negativeSearch');
-  if (ns) ns.oninput = (e) => { negativeSearchQ = e.target.value.toLowerCase(); renderNegativeGroups(); };
-
-  // Dual modal handlers
-  $('dual-use-gemini').onclick = async () => {
-    if (dualState?.gemini?.base64) {
-      await applyResultToPS(dualState.gemini.base64, 'gemini', window.__db9_lastSquareBounds);
-      closeDualModal();
-    }
-  };
-  $('dual-use-chatgpt').onclick = async () => {
-    if (dualState?.chatgpt?.base64) {
-      await applyResultToPS(dualState.chatgpt.base64, 'chatgpt', window.__db9_lastSquareBounds);
-      closeDualModal();
-    }
-  };
-  $('dual-cancel').onclick = () => closeDualModal();
-
-  // Persist provider choice
-  for (const r of document.querySelectorAll('input[name="provider"]')) {
-    r.onchange = () => {
-      localStorage.setItem('db9_provider', r.value);
-      syncGenerateAvailability();
-    };
+  
+  // Reconnect button
+  const recBtn = $('btn-reconnect');
+  if (recBtn) {
+    recBtn.onclick = () => { log('🔄 forcing reconnect...'); pollHealth(); };
   }
-  const savedProvider = localStorage.getItem('db9_provider');
-  if (savedProvider) {
-    const r = document.querySelector(`input[name="provider"][value="${savedProvider}"]`);
-    if (r) r.checked = true;
-  }
-}
-
-function updateHint() {
-  const el = $('promptHint');
-  if (!el) return;
-  const txt = $('promptInput')?.value || '';
-  const isVN = detectVietnamese(txt);
-  el.innerHTML = `Auto-translate VN→EN: <b>${settings.autoTranslateVN ? 'on' : 'off'}</b> · Structured: <b>${settings.useStructuredPrompt ? 'on' : 'off'}</b> · Detected: <b>${isVN ? 'VN' : 'EN'}</b> · ${txt.length} chars`;
 }
 
 // ===== Init =====
-async function testProvider(provider) {
-  log('🧪 testing ' + provider + '...');
-  try {
-    let payload;
-    try {
-      payload = await loadBundledBinaryImage('Gemini_Generated_Image_tielljtielljtiel.jpg');
-      log('✓ loaded bundled test image: ' + payload.name);
-    } catch (e) {
-      // Fallback if the bundled test image is missing
-      payload = {
-        imageBase64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
-        mime: 'image/png',
-        name: 'fallback-red-pixel.png',
-      };
-      log('⚠ bundled test image missing, using fallback pixel: ' + e.message);
-    }
-    const body = {
-      imageBase64: payload.imageBase64,
-      mime: payload.mime,
-      prompt: 'thêm 1 con mèo vào',
-      provider,
-      mode: 'new',
-    };
-    const txt = await xhrPost(BRIDGE + '/generate', JSON.stringify(body), 15000);
-    const data = JSON.parse(txt);
-    log('✓ test job queued: ' + (data.jobId || data.parentId));
-  } catch (e) {
-    log('❌ test failed: ' + e.message);
-  }
-}
-
-
-  // Reference image handlers (v0.4.7.2)
-  const refBtn = $('btn-ref-upload');
-  if (refBtn) refBtn.onclick = async () => {
-    try {
-      const file = await fsLfs.getFileForOpening({ types: ['jpg','jpeg','png','webp'] });
-      if (!file) return;
-      const buf = await file.read({ format: formats.binary });
-      const bytes = new Uint8Array(buf);
-      let bin = '';
-      for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
-      const b64 = btoa(bin);
-      const mime = file.name.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
-      refImage = { base64: b64, mime, description: '' };
-      const img = $('refImagePreview');
-      img.src = 'data:' + mime + ';base64,' + b64;
-      img.classList.add('has-image');
-      $('btn-ref-describe').disabled = false;
-      log('📂 reference loaded: ' + file.name + ' (' + Math.round(b64.length * 0.75 / 1024) + ' KB)');
-    } catch (e) { log('❌ ref upload: ' + e.message); }
-  };
-  const refDescBtn = $('btn-ref-describe');
-  if (refDescBtn) refDescBtn.onclick = async () => {
-    if (!refImage) return;
-    log('🤖 requesting description via Gemini tab...');
-    try {
-      // Send to bridge with a special "describe" provider flag
-      const body = {
-        imageBase64: refImage.base64,
-        prompt: 'You are an architectural visualization expert. Describe this reference image in ENGLISH, covering: architectural style, materials, lighting, mood, color palette, composition, notable details. Keep it concise (3-5 sentences) and use terminology suitable for image-gen prompting.',
-        provider: 'gemini',
-        mode: 'describe-only',
-      };
-      const txt = await xhrPost(BRIDGE + '/generate', JSON.stringify(body), 20000);
-      const data = JSON.parse(txt);
-      log('  ✓ describe job queued ' + (data.jobId || '?') + ' — waiting for result...');
-      // Poll
-      for (let i = 0; i < 120; i++) {
-        await new Promise(r => setTimeout(r, 2000));
-        try {
-          const t = await xhrGet(BRIDGE + '/job/' + data.jobId, 4000);
-          const j = JSON.parse(t);
-          if (j.status === 'done') {
-            refImage.description = j.text || j.description || '(empty description)';
-            const box = $('refDescBox');
-            box.textContent = refImage.description;
-            box.classList.add('has-desc');
-            log('  ✓ description ready (' + refImage.description.length + ' chars)');
-            return;
-          }
-          if (j.status === 'error') { log('  ❌ describe failed: ' + j.error); return; }
-        } catch (e) {}
-      }
-      log('  ⚠ describe timeout');
-    } catch (e) { log('❌ describe: ' + e.message); }
-  };
-  const refClearBtn = $('btn-ref-clear');
-  if (refClearBtn) refClearBtn.onclick = () => {
-    refImage = null;
-    const img = $('refImagePreview');
-    img.src = ''; img.classList.remove('has-image');
-    const box = $('refDescBox');
-    box.textContent = ''; box.classList.remove('has-desc');
-    $('btn-ref-describe').disabled = true;
-    log('🗑 reference cleared');
-  };
-  const refSaveBtn = $('btn-ref-save-preset');
-  if (refSaveBtn) refSaveBtn.onclick = () => {
-    if (!refImage || !refImage.description) { log('⚠ need reference + description first'); return; }
-    const cat = prompt('Category (Architecture / Furniture / People / Custom):', 'Architecture');
-    const name = prompt('Preset name:');
-    if (!name) return;
-    const preset = {
-      id: 'ref-' + Date.now(),
-      name: name.trim(),
-      category: cat || 'Custom',
-      kind: 'reference',
-      description: refImage.description,
-      thumbBase64: refImage.base64.slice(0, 2000), // store tiny thumb only
-    };
-    savedCombos.push({ id: preset.id, name: preset.name, positive: [], negative: [], userPrompt: preset.description, userNegative: '', provider: 'gemini', kind: 'reference' });
-    persistSavedCombos();
-    renderSavedCombos();
-    log('💾 saved reference preset "' + name + '"');
-  };
-
-  // Reconnect button
-  const recBtn = $('btn-reconnect');
-  if (recBtn) recBtn.onclick = () => { log('🔄 forcing reconnect...'); pollHealth(); };
-
-  // Auto horizontal layout when panel wide (landscape orientation)
-  const applyLayout = () => {
-    if (window.innerWidth > window.innerHeight) document.body.classList.add('h-layout');
-    else document.body.classList.remove('h-layout');
-  };
-  applyLayout();
-  window.addEventListener('resize', applyLayout);
-
 async function init() {
-  log('🍌 DB9 Multi-Provider v' + VERSION + ' starting…');
+  log('⚡ PTS2GG Inpaint HUD v' + VERSION + ' starting…');
+  
+  // Simulated initial loading animations for splash loading screen
+  updateSplashProgress(15, 'INITIALIZING ADOBE UXP ENGINE...');
+  setTimeout(() => {
+    if (splashScreenActive) updateSplashProgress(35, 'CONNECTING SECURE TUNNEL...');
+  }, 350);
+  
   try {
-    const s = localStorage.getItem('db9_settings');
+    const s = localStorage.getItem('pts2gg_settings');
     if (s) {
       const saved = JSON.parse(s);
       settings = { ...settings, ...saved };
-      if (!saved.promptModeVersion) {
-        settings.useStructuredPrompt = false;
-        settings.promptModeVersion = VERSION;
-        localStorage.setItem('db9_settings', JSON.stringify(settings));
-      }
     }
   } catch (e) {}
-  sanitizeUiCopy();
+  
   wire();
-  await loadPresets();
-  await loadNegatives();
-  loadSavedCombos();
   startHealthPolling();
-  updateHint();
-  syncGenerateAvailability();
-  log('✓ ready');
+  log('✓ core ready');
 }
 
 init().catch(e => log('❌ init: ' + e.message));
