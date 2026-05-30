@@ -712,75 +712,70 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         chrome.debugger.onEvent.addListener(eventListener);
         await chrome.debugger.sendCommand({ tabId }, 'Network.enable');
         
+        // BUG-106 FIX: Use Network.loadNetworkResource instead of page-world fetch()
+        // This bypasses CORS completely and includes page credentials/cookies
+        await chrome.debugger.sendCommand({ tabId }, 'Page.enable');
+        
+        // Get the main frame ID for loadNetworkResource
+        const frameTree = await chrome.debugger.sendCommand({ tabId }, 'Page.getFrameTree');
+        const frameId = frameTree.frameTree.frame.id;
+        log(`CDP got frameId: ${frameId}`);
+        
         for (let hop = 1; hop <= maxHops; hop++) {
           const urlHost = new URL(currentUrl).hostname;
-          log(`[CDP Hop ${hop}] Fetching via page-world: Host=${urlHost}, URL=${currentUrl.slice(0, 80)}`);
+          log(`[CDP Hop ${hop}] Loading via Network.loadNetworkResource (CORS-bypass): Host=${urlHost}, URL=${currentUrl.slice(0, 80)}`);
           
-          targetRequestId = null;
-          loadingFinished = false;
-          loadingError = null;
-          responseMimeType = null;
-          
-          // Trigger the fetch in page-world context (cookies/creds included natively)
-          const evalResult = await chrome.debugger.sendCommand({ tabId }, 'Runtime.evaluate', {
-            expression: `
-              (async () => {
-                try {
-                  const r = await fetch(${JSON.stringify(currentUrl)}, { cache: 'no-store' });
-                  return { ok: r.ok, status: r.status, contentType: r.headers.get('content-type') };
-                } catch(e) {
-                  return { ok: false, error: e.message };
-                }
-              })()
-            `,
-            returnByValue: true,
-            awaitPromise: true
+          // Network.loadNetworkResource bypasses CORS and uses page cookies
+          const loadResult = await chrome.debugger.sendCommand({ tabId }, 'Network.loadNetworkResource', {
+            frameId: frameId,
+            url: currentUrl,
+            options: { disableCache: true, includeCredentials: true }
           });
           
-          const pageResult = evalResult.result.value;
-          log(`[CDP Hop ${hop} Result]`, JSON.stringify(pageResult));
-          
-          if (pageResult && !pageResult.ok) {
-            throw new Error(`Page-world fetch failed on hop ${hop}: ${pageResult.error || 'HTTP ' + pageResult.status}`);
+          const resource = loadResult.resource;
+          if (!resource.success) {
+            throw new Error(`Network.loadNetworkResource failed on hop ${hop}: HTTP ${resource.httpStatusCode || 'unknown'} for ${currentUrl.slice(0, 80)}`);
           }
           
-          // Wait for CDP loading event to finish (max 10 seconds)
-          const startWait = Date.now();
-          while (!loadingFinished && Date.now() - startWait < 10000) {
-            await new Promise(r => setTimeout(r, 100));
+          log(`[CDP Hop ${hop}] Resource loaded: status=${resource.httpStatusCode}, stream=${resource.stream ? 'yes' : 'no'}`);
+          
+          if (!resource.stream) {
+            throw new Error(`Network.loadNetworkResource returned no stream on hop ${hop}`);
           }
           
-          if (!targetRequestId) {
-            throw new Error(`CDP did not capture requestId on hop ${hop} for ${currentUrl.slice(0, 50)}`);
-          }
-          if (loadingError) {
-            throw new Error(`CDP Network loading failed on hop ${hop}: ${loadingError}`);
-          }
-          if (!loadingFinished) {
-            throw new Error(`CDP Network loading timed out on hop ${hop}`);
-          }
-          
-          // Retrieve response body via CDP getResponseBody
-          log(`[CDP Hop ${hop}] Invoking Network.getResponseBody for: ${targetRequestId}`);
-          const bodyResult = await chrome.debugger.sendCommand({ tabId }, 'Network.getResponseBody', {
-            requestId: targetRequestId
-          });
-          
-          if (!bodyResult || !bodyResult.body) {
-            throw new Error(`CDP Network.getResponseBody returned empty body on hop ${hop}`);
+          // Read the entire stream
+          let allData = '';
+          let isBase64 = false;
+          let eof = false;
+          while (!eof) {
+            const chunk = await chrome.debugger.sendCommand({ tabId }, 'IO.read', {
+              handle: resource.stream,
+              size: 1024 * 1024 * 4  // 4MB chunks
+            });
+            allData += chunk.data;
+            isBase64 = chunk.base64Encoded;
+            eof = chunk.eof;
           }
           
-          let responseText = bodyResult.body;
-          if (bodyResult.base64Encoded && (responseMimeType || '').includes('text/plain')) {
-            responseText = atob(bodyResult.body);
-          }
+          // Close the stream
+          try {
+            await chrome.debugger.sendCommand({ tabId }, 'IO.close', { handle: resource.stream });
+          } catch (_) {}
           
-          const isText = (responseMimeType || '').includes('text/plain') || 
-                         (pageResult && (pageResult.contentType || '').includes('text/plain'));
+          // Determine content type from headers
+          const headers = resource.headers || {};
+          const contentType = headers['content-type'] || headers['Content-Type'] || '';
+          log(`[CDP Hop ${hop}] Stream read complete: base64Encoded=${isBase64}, dataLength=${allData.length}, contentType=${contentType}`);
           
+          // Check for soft redirect (text/plain containing URL)
+          const isText = contentType.includes('text/plain');
           if (isText) {
+            let responseText = allData;
+            if (isBase64) {
+              responseText = atob(allData);
+            }
             const nextUrl = responseText.trim();
-            log(`[CDP Hop ${hop} Soft-Redirect] host=${urlHost}, mime=${responseMimeType}, bodyLength=${nextUrl.length}`);
+            log(`[CDP Hop ${hop} Soft-Redirect] host=${urlHost}, mime=${contentType}, bodyLength=${nextUrl.length}`);
             
             if (nextUrl.startsWith('http://') || nextUrl.startsWith('https://')) {
               currentUrl = nextUrl;
@@ -791,11 +786,18 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           }
           
           // Final binary content reached!
-          finalBase64 = bodyResult.body;
-          if (!bodyResult.base64Encoded) {
-            finalBase64 = btoa(unescape(encodeURIComponent(bodyResult.body)));
+          finalBase64 = allData;
+          if (!isBase64) {
+            // Convert raw text to base64
+            const encoder = new TextEncoder();
+            const bytes = encoder.encode(allData);
+            let binary = '';
+            for (let i = 0; i < bytes.length; i++) {
+              binary += String.fromCharCode(bytes[i]);
+            }
+            finalBase64 = btoa(binary);
           }
-          finalMime = responseMimeType || (pageResult && pageResult.contentType) || 'image/png';
+          finalMime = contentType.split(';')[0].trim() || 'image/png';
           
           log(`[CDP Hop ${hop} Final Log] host=${urlHost}, mime=${finalMime}, base64Length=${finalBase64.length}`);
           break;
