@@ -241,6 +241,7 @@
     });
   }
   let baselineImageKeys = new Set();
+  let baselineImageElements = new Set();
   function imageKey(img) {
     return img.currentSrc || img.src || '';
   }
@@ -981,7 +982,7 @@
     
     while (attempts < 5) {
       if (attempts > 0 && (uniqueCandidates.length === 0 || uniqueCandidates.every(c => c.url.startsWith('blob:')))) {
-        log('[DB9] CDP retry: attempting simulated download/media click...');
+        log('[DB9] Hunting for HD: attempting simulated download/media click...');
         realClick(mediaEl);
         await sleep(3000);
       }
@@ -1122,6 +1123,9 @@
               if (dims.w < 256 || dims.h < 256) {
                 throw new Error(`Resolution too low: ${dims.w}x${dims.h}. Expected at least 256x256.`);
               }
+              if (attempts < 4 && (dims.w <= 1024 || dims.h <= 1024)) {
+                throw new Error(`Resolution too low for early attempt: ${dims.w}x${dims.h}. Expected > 1024. Re-fetching HD...`);
+              }
             }
             
             reportProgress('downloading', 96, 'Downloading asset binary package...');
@@ -1170,6 +1174,9 @@
             log(`Candidate downloaded dimensions: ${dims.w}x${dims.h}`);
             if (dims.w < 256 || dims.h < 256) {
               throw new Error(`Resolution too low: ${dims.w}x${dims.h}. Expected at least 256x256.`);
+            }
+            if (attempts < 4 && (dims.w <= 1024 || dims.h <= 1024)) {
+              throw new Error(`Resolution too low for early attempt: ${dims.w}x${dims.h}. Expected > 1024. Re-fetching HD...`);
             }
           }
           
@@ -1257,8 +1264,37 @@
       reader.readAsDataURL(blob);
     });
   }
+  
+  async function clickRetry() {
+    reportProgress('generating', 70, 'Finding and clicking Retry button for next variant...');
+    
+    let retryBtn = null;
+    for (let i = 0; i < 40; i++) { // Wait up to 20s
+      const buttons = qAllDeep('button, [role="button"]').filter(b => {
+        const txt = (b.getAttribute('aria-label') || b.textContent || '').toLowerCase();
+        const hasIcon = !!b.querySelector('[data-mat-icon-name="refresh"]');
+        return hasIcon || txt.includes('thử lại') || txt.includes('khôi phục') || txt.includes('retry') || txt.includes('regenerate');
+      });
+      
+      // We want the most recent button that is visible
+      retryBtn = buttons.reverse().find(b => visible(b));
+      if (retryBtn) break;
+      await sleep(500);
+    }
+    
+    if (!retryBtn) {
+      log('Retry button not found! Falling back...');
+      throw new Error('Retry button not found');
+    }
+    
+    log('Clicking retry button for new variant');
+    realClick(retryBtn);
+    await sleep(1500);
+  }
+
   function countBaseline() {
     const allImages = qAllDeep('img');
+    baselineImageElements = new Set(allImages);
     baselineImageKeys = new Set(allImages.map(img => img.currentSrc || img.src).filter(Boolean));
     const images = generatedImages();
     const videos = generatedVideos();
@@ -1325,6 +1361,7 @@
     countBaseline,
     waitReady,
     uploadPreviewImages,
+    clickRetry,
   };
 
   log('provider module loaded');

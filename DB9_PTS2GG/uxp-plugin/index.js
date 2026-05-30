@@ -81,7 +81,13 @@ function dismissSplashScreen() {
   updateSplashProgress(100, 'TUNNEL ESTABLISHED! READY.');
   setTimeout(() => {
     const splash = $('db9-splash');
-    if (splash) splash.classList.add('fade-out');
+    if (splash) {
+      splash.style.display = 'none';
+    }
+    const header = $('main-header');
+    if (header) header.style.display = 'flex';
+    const pane = $('main-pane');
+    if (pane) pane.style.display = 'flex';
   }, 400);
 }
 
@@ -92,7 +98,8 @@ function detectVietnamese(text) {
 }
 
 function buildStructuredPrompt(state) {
-  return (state.userPrompt || '').trim();
+  const p = (state.userPrompt || '').trim();
+  return p || 'Seamlessly fill this area with matching background and lighting.';
 }
 
 function selectionWorkflowOptionsFromUI() {
@@ -428,7 +435,7 @@ async function selectLayerById(layerId) {
   }
 }
 
-async function replaceSmartObjectContents(base64, label, context = lastInpaintContext) {
+async function replaceSmartObjectContents(base64, label, context = lastInpaintContext, variantIndex = -1) {
   if (!context?.smartObjectLayerId) return false;
   const outFile = await writeTempPng(base64, 'pts2gg_smart_replace_');
   const token = await fsLfs.createSessionToken(outFile);
@@ -447,9 +454,21 @@ async function replaceSmartObjectContents(base64, label, context = lastInpaintCo
     }], { synchronousExecution: true });
     
     const layer = soDoc.activeLayers[0];
-    if (layer) layer.name = 'PTS2GG ' + (label || 'Gemini') + ' Result ' + new Date().toLocaleTimeString();
+    if (layer) {
+      if (variantIndex >= 0) {
+        layer.name = `PTS2GG Variant ${variantIndex + 1}`;
+      } else {
+        layer.name = 'PTS2GG ' + (label || 'Gemini') + ' Result ' + new Date().toLocaleTimeString();
+      }
+    }
     
-    await soDoc.save();
+    try {
+      await batchPlay([{ _obj: 'save', _target: [{ _ref: 'document', _enum: 'ordinal', _value: 'targetEnum' }] }], { synchronousExecution: true });
+    } catch (saveErr) {
+      log('  [WARN] Save with layers failed (legacy format). Flattening...');
+      await batchPlay([{ _obj: 'flattenImage' }], { synchronousExecution: true });
+      await batchPlay([{ _obj: 'save', _target: [{ _ref: 'document', _enum: 'ordinal', _value: 'targetEnum' }] }], { synchronousExecution: true });
+    }
     await soDoc.close();
   }, { commandName: 'PTS2GG Smart Object replace content' });
   
@@ -457,9 +476,9 @@ async function replaceSmartObjectContents(base64, label, context = lastInpaintCo
   return true;
 }
 
-async function applyResultToPS(base64, label, placementBounds, context = lastInpaintContext) {
+async function applyResultToPS(base64, label, placementBounds, context = lastInpaintContext, variantIndex = -1) {
   try {
-    if (await replaceSmartObjectContents(base64, label, context)) return;
+    if (await replaceSmartObjectContents(base64, label, context, variantIndex)) return;
   } catch (e) {
     log('  [WARN] smart object replace failed, placing result layer: ' + e.message);
   }
@@ -500,6 +519,8 @@ async function applyResultToPS(base64, label, placementBounds, context = lastInp
   }, { commandName: 'PTS2GG apply result as new layer' });
 }
 
+let generatedVariants = [null, null, null];
+
 async function runGenerate() {
   if (activeJob) { log('[WARN] job in progress, please wait'); return; }
   if (!bridgeOnline) { log('[ERR] bridge offline'); return; }
@@ -508,7 +529,7 @@ async function runGenerate() {
 
   const state = getStateFromUI();
   const finalPrompt = buildStructuredPrompt(state);
-  log(`[RUN] generate provider=${state.provider} mode=${state.mode}`);
+  log(`[RUN] generate 3 variants provider=${state.provider} mode=${state.mode}`);
   console.log('[PTS2GG] final prompt:\n' + finalPrompt);
 
   $('progressLog').textContent = '';
@@ -530,19 +551,31 @@ async function runGenerate() {
     if (btnRegen) btnRegen.disabled = false;
     log(`[OK] exported ${dims?.w}x${dims?.h} (${Math.round((base64?.length || 0) * 0.75 / 1024)} KB)`);
 
-    $('progressSteps').innerHTML += '<div class="db9-step active">Posting to bridge…</div>';
+    // Reset thumbnails and UI state
+    generatedVariants = [null, null, null];
     const body = {
       imageBase64: base64,
       prompt: finalPrompt,
       provider: state.provider,
       mode: state.mode,
     };
-    log('[POST] POST /generate provider=' + body.provider + ' bytes=' + (body.imageBase64?.length || 0));
+    
+    $('progressSteps').innerHTML += `<div class="db9-step active">Posting job to bridge…</div>`;
     const respText = await xhrPost(BRIDGE + '/generate', JSON.stringify(body), 20000);
     const data = JSON.parse(respText);
-    log('[OK] job ' + (data.jobId || data.parentId) + ' queued');
+    log(`[OK] generate job ` + (data.jobId || data.parentId) + ' queued');
 
-    await runSinglePolling(data.jobId, state.provider, finalPrompt);
+    const resultBase64 = await runSinglePollingWithoutApply(data.jobId, state.provider, finalPrompt, 1);
+    
+    if (resultBase64) {
+      generatedVariants[0] = resultBase64;
+      // Auto-apply as layer into the Smart Object
+      await applyResultToPS(resultBase64, state.provider, window.__db9_lastSquareBounds, lastInpaintContext, 0);
+      applyVariant(0);
+    }
+    
+    $('progressSteps').innerHTML += '<div class="db9-step done">Generation complete.</div>';
+
   } catch (e) {
     log('[ERR] ' + e.message);
     $('progressSteps').innerHTML += '<div class="db9-step error">[ERR] ' + e.message + '</div>';
@@ -552,9 +585,9 @@ async function runGenerate() {
   }
 }
 
-async function runSinglePolling(jobId, provider, prompt) {
+async function runSinglePollingWithoutApply(jobId, provider, prompt, variantNum) {
   activeJob = jobId;
-  $('progressSteps').innerHTML += '<div class="db9-step active">Generating in ' + provider + '…</div>';
+  $('progressSteps').innerHTML += `<div class="db9-step active">Generating variant ${variantNum}…</div>`;
   for (let i = 0; i < 240; i++) { // up to ~8 min
     await new Promise(r => setTimeout(r, 2000));
     let j;
@@ -564,14 +597,54 @@ async function runSinglePolling(jobId, provider, prompt) {
     } catch (e) { continue; }
     const resultBase64 = j.resultBase64 || j.imageBase64 || null;
     if (j.status === 'done' && resultBase64) {
-      log('[OK] result received');
-      await applyResultToPS(resultBase64, provider, window.__db9_lastSquareBounds);
-      $('progressSteps').innerHTML += '<div class="db9-step done">Done</div>';
-      return;
+      log(`[OK] variant ${variantNum} received`);
+      $('progressSteps').innerHTML += `<div class="db9-step done">Variant ${variantNum} Done</div>`;
+      return resultBase64;
     }
     if (j.status === 'error') throw new Error(j.error || 'job error');
   }
   throw new Error('timeout');
+}
+
+async function applyVariant(index) {
+  if (!generatedVariants[index]) return;
+  for (let i = 1; i <= 3; i++) {
+    const thumb = $('thumb-' + i);
+    if (thumb) {
+      if (i - 1 === index) thumb.classList.add('active');
+      else thumb.classList.remove('active');
+    }
+  }
+  
+  if (!lastInpaintContext?.smartObjectLayerId) return;
+  
+  log(`[SYSTEM] toggling variant ${index+1} visibility...`);
+  
+  try {
+    await executeAsModal(async () => {
+      const selected = await selectLayerById(lastInpaintContext.smartObjectLayerId);
+      if (!selected) return;
+      
+      await batchPlay([{ _obj: 'placedLayerEditContents' }], { synchronousExecution: true });
+      const soDoc = app.activeDocument;
+      
+      const variantLayers = soDoc.layers.filter(l => l.name.startsWith('PTS2GG Variant '));
+      
+      for (let i = 0; i < variantLayers.length; i++) {
+        const expectedName = `PTS2GG Variant ${index + 1}`;
+        variantLayers[i].visible = (variantLayers[i].name === expectedName);
+      }
+      
+      try {
+        await batchPlay([{ _obj: 'save', _target: [{ _ref: 'document', _enum: 'ordinal', _value: 'targetEnum' }] }], { synchronousExecution: true });
+      } catch (saveErr) {
+        // Ignore save errs during silent toggle
+      }
+      await soDoc.close();
+    }, { commandName: 'PTS2GG Toggle Variant', interactive: false });
+  } catch (e) {
+    log('[ERR] ' + e.message);
+  }
 }
 
 async function runRegenerate() {
@@ -593,19 +666,56 @@ async function runRegenerate() {
   $('progressSteps').innerHTML = '<div class="db9-step active">Posting regenerate to bridge…</div>';
 
   try {
+    // Reset thumbnails
+    generatedVariants = [null, null, null];
+    for (let i = 1; i <= 3; i++) {
+      const thumb = $('thumb-' + i);
+      if (thumb) {
+        thumb.style.backgroundImage = 'none';
+        thumb.textContent = '...';
+        thumb.classList.remove('active');
+      }
+    }
+
     const body = {
       imageBase64: lastInpaintContext.imageBase64,
       prompt: finalPrompt,
       provider: state.provider,
       mode: state.mode,
     };
-    log('[POST] POST /generate provider=' + body.provider + ' bytes=' + (body.imageBase64?.length || 0));
-    const respText = await xhrPost(BRIDGE + '/generate', JSON.stringify(body), 20000);
-    const data = JSON.parse(respText);
-    log('[OK] regenerate job ' + (data.jobId || data.parentId) + ' queued');
+    
+    for (let variantIndex = 0; variantIndex < 3; variantIndex++) {
+      $('progressSteps').innerHTML += `<div class="db9-step active">Posting variant ${variantIndex+1}/3 to bridge…</div>`;
+      
+      const isRetry = variantIndex > 0;
+      const payload = {
+        ...body,
+        imageBase64: isRetry ? null : lastInpaintContext.imageBase64,
+        mode: isRetry ? 'retry' : state.mode
+      };
+      
+      const respText = await xhrPost(BRIDGE + '/generate', JSON.stringify(payload), 20000);
+      const data = JSON.parse(respText);
+      log(`[OK] variant ${variantIndex+1} job ` + (data.jobId || data.parentId) + (isRetry ? ' (retry)' : '') + ' queued');
 
+      const resultBase64 = await runSinglePollingWithoutApply(data.jobId, state.provider, finalPrompt, variantIndex+1);
+      
+      if (resultBase64) {
+        generatedVariants[variantIndex] = resultBase64;
+        const thumb = $('thumb-' + (variantIndex + 1));
+        if (thumb) {
+          thumb.style.backgroundImage = `url(data:image/png;base64,${resultBase64})`;
+          thumb.textContent = '';
+        }
+        // Auto-apply all variants as layers into the Smart Object
+        await applyResultToPS(resultBase64, state.provider, window.__db9_lastSquareBounds, lastInpaintContext, variantIndex);
+        applyVariant(variantIndex);
+      }
+    }
+    
+    $('progressSteps').innerHTML += '<div class="db9-step done">Regeneration complete.</div>';
     lastInpaintContext.prompt = finalPrompt;
-    await runSinglePolling(data.jobId, state.provider, finalPrompt);
+
   } catch (e) {
     log('[ERR] ' + e.message);
     $('progressSteps').innerHTML += '<div class="db9-step error">[ERR] ' + e.message + '</div>';
@@ -629,6 +739,96 @@ function wire() {
   if (recBtn) {
     recBtn.onclick = () => { log('[SYSTEM] forcing reconnect...'); pollHealth(); };
   }
+
+  // Thumbnails
+  for (let i = 1; i <= 3; i++) {
+    const thumb = $('thumb-' + i);
+    if (thumb) {
+      thumb.onclick = () => applyVariant(i - 1);
+    }
+  }
+
+  // Server Control
+  const btnStart = $('btn-start-server');
+  if (btnStart) {
+    btnStart.onclick = async () => {
+      try {
+        log('[SYSTEM] Starting bridge server...');
+        const lfs = require("uxp").storage.localFileSystem;
+        const pluginFolder = await lfs.getPluginFolder();
+        const entry = await pluginFolder.getEntry('start_server.bat');
+        const { shell } = require("uxp");
+        await shell.openPath(entry);
+        log('[OK] Start request sent. Please allow the popup if Photoshop asks.');
+      } catch (e) {
+        log('[ERR] Start Server failed: ' + (e.message || e));
+      }
+    };
+  }
+
+  const btnStop = $('btn-stop-server');
+  if (btnStop) {
+    btnStop.onclick = async () => {
+      try {
+        log('[SYSTEM] Shutting down bridge server...');
+        await fetch(BRIDGE + '/shutdown');
+        log('[OK] Shutdown signal sent.');
+      } catch (e) {
+        log('[ERR] Server might already be off: ' + e.message);
+      }
+    };
+  }
+  
+  const btnRestart = $('btn-restart-server');
+  if (btnRestart) {
+    btnRestart.onclick = async () => {
+      if (btnStop) await btnStop.onclick();
+      setTimeout(() => {
+        if (btnStart) btnStart.onclick();
+      }, 1500);
+    };
+  }
+
+  // Dynamic selection bounds UI controls
+  const modeSel = $('selectionExpandMode');
+  const marginInput = $('selectionExpandPx');
+  if (modeSel && marginInput) {
+    const updateMarginState = () => {
+      if (modeSel.value === 'manual') {
+        marginInput.removeAttribute('disabled');
+        marginInput.style.opacity = '1.0';
+      } else {
+        marginInput.setAttribute('disabled', 'true');
+        marginInput.style.opacity = '0.35';
+      }
+    };
+    modeSel.onchange = () => {
+      updateMarginState();
+      selectionWorkflowOptionsFromUI();
+    };
+    marginInput.onchange = () => {
+      selectionWorkflowOptionsFromUI();
+    };
+    
+    // Set initial values from saved settings
+    if (settings.selectionExpandMode) modeSel.value = settings.selectionExpandMode;
+    if (settings.selectionExpandPx !== undefined) marginInput.value = settings.selectionExpandPx;
+    
+    updateMarginState();
+  }
+
+  // Dynamic character count
+  const promptInput = $('promptInput');
+  const promptCounter = $('prompt-counter');
+  if (promptInput && promptCounter) {
+    const updateCounter = () => {
+      const val = promptInput.value || '';
+      const len = val.length;
+      promptCounter.textContent = `${len} / 250`;
+    };
+    promptInput.oninput = updateCounter;
+    updateCounter();
+  }
 }
 
 // ===== Init =====
@@ -640,6 +840,14 @@ async function init() {
   setTimeout(() => {
     if (splashScreenActive) updateSplashProgress(35, 'CONNECTING SECURE TUNNEL...');
   }, 350);
+  
+  // Fallback: dismiss splash after 3 seconds so UI is never permanently blocked
+  setTimeout(() => {
+    if (splashScreenActive) {
+      log('[SYSTEM] Splash timeout reached, revealing UI...');
+      dismissSplashScreen();
+    }
+  }, 3000);
   
   try {
     const s = localStorage.getItem('pts2gg_settings');

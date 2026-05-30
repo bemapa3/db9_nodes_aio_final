@@ -4,470 +4,384 @@
   <meta charset="utf-8">
   <title>PTS2GG Inpaint HUD</title>
   <style>
-    :root {
-      --cyber-bg: #131315;
-      --cyber-surface: rgba(32, 31, 33, 0.6);
-      --cyber-input-bg: rgba(5, 5, 7, 0.85);
-      --cyber-border: rgba(58, 73, 75, 0.35);
-      --cyber-border-hover: rgba(0, 220, 230, 0.35);
-      
-      --cyber-text: #e5e1e4;
-      --cyber-muted: #849495;
-      
-      --neon-cyan: #00f3ff;
-      --neon-blue: #0066ff;
-      --neon-green: #39ff14;
-      --neon-red: #e63535;
-      --red-brand: #E31E24;
-      
-      --radius: 6px;
-    }
+    /* 
+      Photoshop UXP Engine CSS Spec:
+      - ONLY basic HTML tags (div, span, button, img, input, textarea, select)
+      - NO semantic tags (header, main, section, footer)
+      - NO CSS variables
+      - NO gap in flex (use margin)
+      - Hardcoded HEX colors for maximum compatibility
+    */
     
     html, body {
       height: 100%;
+      width: 100%;
       margin: 0;
-      min-width: 280px;
+      padding: 0;
       box-sizing: border-box;
-      background: var(--cyber-bg);
-      color: var(--cyber-text);
-      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: 12px;
-      line-height: 1.5;
-      overflow-y: auto;
+      background-color: #131315;
+      color: #e5e1e4;
+      font-family: Arial, sans-serif;
       overflow-x: hidden;
-      position: relative;
+      overflow-y: auto;
     }
     
-    *, *::before, *::after {
-      box-sizing: inherit;
-    }
+    * { box-sizing: border-box; }
     
-    /* Scrollbar Styling */
-    ::-webkit-scrollbar {
-      width: 4px;
-      height: 4px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(0, 243, 255, 0.2);
-      border-radius: 2px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--neon-cyan);
-    }
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background-color: #0a0a0c; }
+    ::-webkit-scrollbar-thumb { background-color: #23232a; border-radius: 4px; border: 1px solid #131315; }
     
-    /* BACKGROUND SCANLINE MATRIX EFFECT */
-    .scanline {
-      width: 100%;
-      height: 100px;
-      z-index: 1;
-      background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(0, 220, 230, 0.02) 50%, rgba(0, 0, 0, 0) 100%);
-      opacity: 0.15;
-      position: absolute;
-      bottom: 100%;
-      animation: scanline 8s linear infinite;
-      pointer-events: none;
-    }
-    @keyframes scanline {
-      0% { bottom: 100%; }
-      100% { bottom: -100px; }
-    }
-    
-    /* SPLASH LOADING OVERLAY */
-    #db9-splash {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: #0d0d10;
+    /* NEO-SKEUOMORPHIC CLASSES */
+    .neo-raised {
+      background-color: #201f21;
+      box-shadow: inset 1px 1px 0px 0px rgba(255, 255, 255, 0.08), inset -1px -1px 0px 0px rgba(0, 0, 0, 0.5), 4px 4px 8px rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
+      flex-direction: column;
     }
-    #db9-splash.fade-out {
-      opacity: 0;
-      visibility: hidden;
+
+    .neo-sunken {
+      background-color: #0e0e10;
+      box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.5), inset -1px -1px 1px rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
     }
-    .db9-splash-content {
-      text-align: center;
-      width: 260px;
-    }
-    .db9-splash-logo {
-      width: 80px;
-      height: 80px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(227, 30, 36, 0.45);
-      margin-bottom: 18px;
-      border: 1px solid rgba(227, 30, 36, 0.35);
-      background: #000;
-      object-fit: contain;
-    }
-    .db9-splash-title {
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 700;
-      font-size: 24px;
-      letter-spacing: 2px;
-      color: #ffffff;
-      text-shadow: 0 0 10px rgba(0, 220, 230, 0.4);
-    }
-    .db9-splash-sub {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 9px;
-      color: var(--cyber-muted);
-      letter-spacing: 1px;
-      margin-top: 6px;
-      margin-bottom: 24px;
-      text-transform: uppercase;
-      opacity: 0.8;
-    }
-    .db9-splash-loader {
-      width: 100%;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 2px;
-      overflow: hidden;
-      margin-bottom: 14px;
-    }
-    .db9-splash-loader-bar {
-      width: 0%;
-      height: 100%;
-      background: linear-gradient(90deg, var(--neon-blue) 0%, var(--neon-cyan) 100%);
-      box-shadow: 0 0 8px var(--neon-cyan);
-      transition: width 0.3s ease;
-    }
-    .db9-splash-status {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 9px;
-      color: var(--neon-cyan);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    /* HEADER HUD */
+
+    /* HEADER */
     .db9-header {
+      background-color: #131315;
+      padding: 10px 14px;
       display: flex;
-      align-items: center;
+      flex-direction: row;
       justify-content: space-between;
-      gap: 12px;
-      padding: 14px 16px;
-      border-b: 1px solid rgba(58, 73, 75, 0.3);
-      background: rgba(19, 19, 21, 0.85);
-      backdrop-filter: blur(8px);
-      z-index: 10;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
       position: relative;
+      width: 100%;
     }
     
-    #db9-title {
-      font-family: 'JetBrains Mono', monospace;
+    .db9-title {
       font-weight: 700;
       font-size: 13px;
-      letter-spacing: 0.8px;
-      color: #ffffff;
       display: flex;
+      flex-direction: row;
       align-items: center;
-      gap: 8px;
+      color: #e5e1e4;
     }
     
     .db9-header-logo {
-      width: 20px;
-      height: 20px;
-      border-radius: 4px;
-      object-fit: cover;
-      box-shadow: 0 0 6px rgba(227, 30, 36, 0.55);
-      border: 1px solid rgba(227, 30, 36, 0.2);
+      width: 18px;
+      height: 18px;
+      border-radius: 2px;
+      margin-right: 8px;
     }
     
     .db9-header-status {
       display: flex;
+      flex-direction: row;
       align-items: center;
-      gap: 6px;
     }
     
-    .db9-dot {
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      vertical-align: middle;
-    }
-    .db9-dot-off { background: #475569; }
-    .db9-dot-on  { background: var(--neon-green); box-shadow: 0 0 6px var(--neon-green); }
-    .db9-dot-busy{ background: var(--neon-cyan); box-shadow: 0 0 6px var(--neon-cyan); }
-    .db9-dot-err { background: var(--neon-red); box-shadow: 0 0 6px var(--neon-red); }
-    
-    .db9-dot-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 9px;
-      color: var(--cyber-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .status-group {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      margin-right: 12px;
     }
     
-    .db9-main-pane {
-      padding: 16px;
-      z-index: 5;
-      position: relative;
-    }
-    
-    /* Obsidian Glass Panel Cards (Premium design matching Stitch specifications) */
-    .glass-panel {
-      background: var(--cyber-surface);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--cyber-border);
-      border-radius: var(--radius);
-      padding: 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .glass-panel:hover {
-      border-color: var(--cyber-border-hover);
-      box-shadow: 0 8px 36px rgba(0, 220, 230, 0.05);
-    }
-    
-    .db9-section-title {
-      font-size: 9px;
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: var(--neon-cyan);
-      letter-spacing: 1.5px;
-      margin-bottom: 12px;
+    .status-led-socket {
+      width: 10px;
+      height: 10px;
+      border-radius: 5px;
+      background-color: #000000;
+      border: 1px solid #222222;
       display: flex;
       align-items: center;
-      gap: 6px;
-      opacity: 0.9;
+      justify-content: center;
+      margin-right: 4px;
     }
     
-    /* Custom Styled Inputs & Toggles */
-    input[type="text"], input[type="number"], textarea, select {
-      background: var(--cyber-input-bg);
-      border: 1px solid rgba(58, 73, 75, 0.4);
-      color: var(--cyber-text);
+    .db9-dot { width: 4px; height: 4px; border-radius: 2px; display: inline-block; }
+    .db9-dot-off  { background-color: #353437; }
+    .db9-dot-on   { background-color: #39ff14; box-shadow: 0 0 4px #39ff14; }
+    .db9-dot-busy { background-color: #00dbe7; box-shadow: 0 0 4px #00dbe7; }
+    .db9-dot-err  { background-color: #ffb4ab; box-shadow: 0 0 4px #ffb4ab; }
+    
+    .db9-dot-label {
+      font-family: Consolas, monospace;
+      font-size: 8px;
+      color: #849495;
+      font-weight: 700;
+    }
+
+    #btn-reconnect {
+      background-color: #131315;
+      border: 1px solid #03dbe7;
+      color: #03dbe7;
+      padding: 4px 8px;
       border-radius: 4px;
-      padding: 8px 10px;
-      font-size: 12px;
+      font-size: 9px;
+      font-family: Consolas, monospace;
+      cursor: pointer;
+    }
+    #btn-reconnect:active { background-color: #03dbe7; color: #131315; }
+
+    /* MAIN CONTAINER */
+    .db9-main-pane {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
       width: 100%;
-      box-sizing: border-box;
-      transition: all 0.2s ease;
-      font-family: inherit;
     }
-    
-    input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
-      outline: none;
-      border-color: var(--neon-cyan);
-      box-shadow: 0 0 10px rgba(0, 220, 230, 0.2);
-      background: rgba(0, 0, 0, 0.9);
+
+    .section-label {
+      font-family: Consolas, monospace;
+      font-size: 10px;
+      font-weight: 700;
+      color: #bac9cb;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
     }
-    
-    textarea {
-      min-height: 84px;
-      resize: vertical;
-      line-height: 1.5;
-    }
-    
-    /* Selection layout controls flow (Flexible flow to avoid overlapping in UXP) */
-    .selection-controls-row {
+
+    /* FORMS & INPUTS */
+    .input-row {
       display: flex;
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      margin-top: 6px;
+      margin-bottom: 12px;
+      width: 100%;
     }
-    
-    .selection-control-item {
+
+    .input-row span {
+      font-size: 12px;
+      color: #e5e1e4;
+    }
+
+    /* Wrap native UXP inputs in a consistent div so they lay out nicely */
+    .input-wrapper {
       display: flex;
       flex-direction: row;
-      align-items: center;
-      gap: 8px;
     }
     
-    .selection-control-item span {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: var(--cyber-muted);
-      text-transform: uppercase;
-    }
-    
-    .small { font-size: 10px; color: var(--cyber-muted); line-height: 1.5; opacity: 0.85; }
-    
-    /* Cyber Primary Red Button (Shimmer animation sweep on hover) */
-    .db9-btn-primary {
-      background: var(--red-brand);
-      background-size: 200% 100%;
-      color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      cursor: pointer;
-      font-size: 11px;
-      border-radius: var(--radius);
-      padding: 12px;
+    textarea {
       width: 100%;
-      transition: all 0.2s ease;
-      box-shadow: 0 0 16px rgba(227, 30, 36, 0.25);
+      height: 80px;
+      padding: 8px;
+      color: #03dbe7;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      resize: none;
+      background-color: transparent;
+      border: none;
+      outline: none;
     }
     
-    .db9-btn-primary:hover:not(:disabled) {
-      background: linear-gradient(45deg, var(--red-brand) 0%, #ff4d4d 50%, var(--red-brand) 100%);
-      background-size: 200% 100%;
-      animation: shimmer 1.2s infinite;
-      box-shadow: 0 0 20px rgba(227, 30, 36, 0.45);
+    select, input[type="number"] {
+      background-color: transparent;
+      border: none;
+      color: #03dbe7;
+      font-family: Consolas, monospace;
+      outline: none;
     }
-    @keyframes shimmer {
-      0% { background-position: 100% 0; }
-      100% { background-position: -100% 0; }
-    }
-    
-    .db9-btn-primary:disabled {
-      background: rgba(30, 10, 12, 0.8);
-      color: var(--cyber-muted);
-      box-shadow: none;
-      cursor: not-allowed;
-      opacity: 0.4;
-      border-color: rgba(255,255,255,0.02);
-    }
-    
-    /* Secondary Technical Buttons */
-    .neon-btn {
-      background: transparent;
-      border: 1px solid var(--neon-cyan);
-      color: var(--neon-cyan);
-      border-radius: var(--radius);
-      padding: 8px 14px;
-      cursor: pointer;
-      font-size: 11px;
+
+    /* BUTTONS */
+    .db9-btn-primary {
+      width: 100%;
+      height: 48px;
+      background-color: #201f21;
+      border: 1px solid rgba(3, 219, 231, 0.2);
+      box-shadow: inset 1px 1px 0px 0px rgba(255, 255, 255, 0.08), inset -1px -1px 0px 0px rgba(0, 0, 0, 0.5), 2px 2px 6px rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      color: #03dbe7;
+      font-size: 14px;
       font-weight: 700;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      transition: all 0.2s ease;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
     }
     
-    .neon-btn:hover:not(:disabled) {
-      background: rgba(0, 243, 255, 0.08);
-      box-shadow: 0 0 12px rgba(0, 243, 255, 0.25);
+    .db9-btn-primary:active {
+      box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+      background-color: #1a1a1f;
+    }
+
+    .db9-btn-secondary {
+      width: 100%;
+      height: 32px;
+      background-color: #131315;
+      border: 1px solid #3b494a;
+      border-radius: 4px;
+      color: #bac9cb;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 16px;
     }
     
-    .neon-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-      border-color: var(--cyber-border);
-      color: var(--cyber-muted);
+    .db9-btn-secondary:active { background-color: #0a0a0c; }
+
+    /* HISTORY FRAME */
+    .history-container {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      padding: 12px;
     }
-    
-    /* Terminal Console */
+
+    .history-thumbnail {
+      width: 72px;
+      height: 72px;
+      background-color: #0e0e10;
+      box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.5), inset -1px -1px 1px rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3b494a;
+      font-size: 20px;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin: 0 6px;
+      border: 2px solid transparent;
+    }
+
+    .history-thumbnail.active {
+      border: 2px solid #03dbe7;
+      box-shadow: 0px 0px 12px rgba(3, 219, 231, 0.4);
+    }
+
+    /* TERMINAL */
     #progressLog {
-      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-family: Consolas, monospace;
       font-size: 10px;
-      color: var(--neon-green);
-      background: #040406;
-      border: 1px solid rgba(58, 73, 75, 0.5);
-      border-radius: var(--radius);
-      padding: 10px;
-      max-height: 150px;
+      color: #39ff14;
+      background-color: #040406;
+      border: 1px solid #000000;
+      border-radius: 4px;
+      padding: 8px;
+      max-height: 100px;
       overflow-y: auto;
-      white-space: pre-wrap;
-      box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.95);
-      margin-top: 10px;
       line-height: 1.4;
+      width: 100%;
     }
-    
-    #progressSteps {
+    #progressSteps { font-size: 11px; margin-bottom: 8px; width: 100%; }
+    .db9-step { color: #849495; margin-bottom: 4px; }
+    .db9-step.active { color: #00dbe7; font-weight: bold; }
+    .db9-step.done { color: #39ff14; }
+    .db9-step.error { color: #ffb4ab; }
+
+    /* SPLASH */
+    #db9-splash {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #0a0a0c;
+      z-index: 100;
       display: flex;
       flex-direction: column;
-      gap: 5px;
-      font-size: 11px;
+      align-items: center;
+      justify-content: center;
     }
-    
-    .db9-step { color: var(--cyber-muted); padding: 2px 0; font-weight: 500; }
-    .db9-step.active { color: var(--neon-cyan); font-weight: 600; }
-    .db9-step.done { color: var(--neon-green); }
-    .db9-step.error { color: var(--neon-red); }
+    .splash-logo { width: 48px; height: 48px; margin-bottom: 16px; border-radius: 4px; }
+    .splash-title { color: #00dbe7; font-weight: 700; font-size: 18px; margin-bottom: 16px; }
+    #splash-status { font-family: Consolas, monospace; font-size: 10px; color: #849495; }
   </style>
 </head>
 <body>
 
-  <!-- BACKGROUND SCANLINE ANIMATION -->
-  <div class="scanline"></div>
-
-  <!-- SPLASH LOADING SCREEN -->
+  <!-- SPLASH -->
   <div id="db9-splash">
-    <div class="db9-splash-content">
-      <img src="assets/logo.jpg" class="db9-splash-logo" alt="PTS2GG Logo">
-      <div class="db9-splash-title">PTS2GG</div>
-      <div class="db9-splash-sub">Photoshop Inpaint Automation Client</div>
-      <div class="db9-splash-loader">
-        <div class="db9-splash-loader-bar" id="splash-bar"></div>
+    <img src="assets/logo.jpg" class="splash-logo" alt="PTS2GG">
+    <div class="splash-title">PTS2GG AI</div>
+    <div id="splash-status">INITIALIZING SYSTEM...</div>
+  </div>
+
+  <!-- HEADER -->
+  <div class="db9-header" id="main-header" style="display: none;">
+    <div class="db9-title">
+      <img src="assets/logo.jpg" class="db9-header-logo" alt="logo">
+      <span>PTS2GG</span>
+    </div>
+    <div class="db9-header-status">
+      <div class="status-group">
+        <div class="status-led-socket"><span class="db9-dot db9-dot-off" id="dot-bridge"></span></div>
+        <span class="db9-dot-label">BRG</span>
       </div>
-      <div class="db9-splash-status" id="splash-status">Establishing Tunnel connection...</div>
+      <div class="status-group">
+        <div class="status-led-socket"><span class="db9-dot db9-dot-off" id="dot-gemini"></span></div>
+        <span class="db9-dot-label">GEM</span>
+      </div>
+      <button id="btn-reconnect">RECONNECT</button>
     </div>
   </div>
 
-  <!-- HEADER HUD (Static block layout to resolve UXP overlapping bugs) -->
-  <header class="db9-header">
-    <div id="db9-title">
-      <img src="assets/logo.jpg" class="db9-header-logo" alt="logo">
-      PTS2GG
-    </div>
-    <div class="db9-header-status">
-      <span class="db9-dot-label">Bridge</span><span class="db9-dot db9-dot-off" id="dot-bridge" title="bridge status"></span>
-      <span class="db9-dot-label" style="margin-left: 6px;">Gemini</span><span class="db9-dot db9-dot-off" id="dot-gemini" title="gemini provider"></span>
-      <button id="btn-reconnect" class="neon-btn" style="padding: 4px 8px; font-size: 9px; margin-left: 10px;">FORCE RECONNECT</button>
-    </div>
-  </header>
-
-  <!-- MAIN HUD PANES -->
-  <div class="db9-main-pane">
+  <!-- MAIN PANE -->
+  <div class="db9-main-pane" id="main-pane" style="display: none;">
     
-    <!-- 1. PHOTOSHOP SELECTION ADJUSTMENT -->
-    <section class="glass-panel" id="sec-selection">
-      <div class="db9-section-title">[PHOTOSHOP SELECTION BOUNDS]</div>
-      <div class="selection-controls-row">
-        <div class="selection-control-item">
-          <span>Expand:</span>
-          <select id="selectionExpandMode" style="height: 28px; padding: 4px 8px; font-size: 11px; width: 140px;">
+    <!-- SERVER CONTROL -->
+    <div class="neo-raised" style="margin-bottom: 12px; padding: 10px;">
+      <div class="section-label" style="margin-bottom: 4px;"><span>SERVER CONTROL</span></div>
+      <div style="display: flex; flex-direction: row; justify-content: space-between; gap: 8px;">
+        <button id="btn-start-server" class="db9-btn-secondary" style="margin-bottom: 0; color: #39ff14; flex: 1;">▶ Bật</button>
+        <button id="btn-restart-server" class="db9-btn-secondary" style="margin-bottom: 0; color: #03dbe7; flex: 1;">🔄 Restart</button>
+        <button id="btn-stop-server" class="db9-btn-secondary" style="margin-bottom: 0; color: #ffb4ab; flex: 1;">⏹ Tắt</button>
+      </div>
+    </div>
+    
+    <!-- BOUNDS CONTROLS -->
+    <div class="neo-raised">
+      <div class="section-label"><span>REGION CONTROLS</span></div>
+      
+      <div class="input-row">
+        <span>Expand Mode</span>
+        <div class="input-wrapper">
+          <select id="selectionExpandMode">
             <option value="auto" selected>Auto Expand</option>
             <option value="manual">Manual Margin</option>
-            <option value="none">Keep Original (None)</option>
+            <option value="none">Original (None)</option>
           </select>
         </div>
-        <div class="selection-control-item">
-          <span>Margin:</span>
-          <input id="selectionExpandPx" type="number" min="0" max="1024" step="8" value="96" style="height: 28px; padding: 4px 8px; font-size: 11px; width: 64px;">
-          <span style="text-transform: lowercase; color: var(--cyber-text);">px</span>
+      </div>
+      
+      <div class="input-row" style="margin-bottom: 0;">
+        <span>Margin (px)</span>
+        <div class="input-wrapper">
+          <input id="selectionExpandPx" type="number" min="0" max="1024" step="8" value="96" style="width: 80px;">
         </div>
       </div>
-      <div class="small" style="margin-top: 10px;">Dynamically expands Photoshop selected pixels to form a stable 1:1 context Smart Object.</div>
-    </section>
+    </div>
 
-    <!-- 2. INPAINT PROMPT FIELD -->
-    <section class="glass-panel" id="sec-prompt">
-      <div class="db9-section-title">[GENERATION PROMPT]</div>
-      <textarea id="promptInput" placeholder="Mô tả ý tưởng bạn muốn thêm/sửa vào vùng chọn... (Tự động dịch sang Tiếng Anh)"></textarea>
-    </section>
+    <!-- PROMPT INPUT -->
+    <div class="neo-raised">
+      <div class="section-label">
+        <span>INPAINT PROMPT</span>
+        <span id="prompt-counter" style="color: #00dbe7;">0 / 250</span>
+      </div>
+      <textarea id="promptInput" placeholder="Enter generative prompt... (Auto-translate to EN)"></textarea>
+    </div>
 
-    <!-- 3. MAIN ACTION ACTIONS -->
-    <section class="glass-panel" id="sec-actions" style="border: none; padding: 0; background: transparent; box-shadow: none;">
-      <button id="btn-generate" class="db9-btn-primary">GENERATE INPAINT</button>
-      <button id="btn-regenerate" class="neon-btn" style="width: 100%; margin-top: 8px;" disabled>REGENERATE LAST RESULT</button>
-    </section>
+    <!-- ACTIONS -->
+    <button id="btn-generate" class="db9-btn-primary">GENERATE</button>
 
-    <!-- 4. MONOSPACED CONSOLE TERMINAL -->
-    <section class="glass-panel" id="sec-progress" style="margin-top: 12px;">
-      <div class="db9-section-title">[AUTOMATION LOGGER]</div>
+    <!-- TERMINAL LOG -->
+    <div class="neo-raised" style="margin-bottom: 0;">
+      <div class="section-label"><span>SYSTEM TERMINAL</span></div>
       <div id="progressSteps"></div>
       <div id="progressLog"></div>
-    </section>
-    
+    </div>
+
   </div>
 
   <script src="index.js"></script>
