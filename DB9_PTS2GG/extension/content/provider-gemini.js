@@ -909,24 +909,35 @@
     log('[DB9] BUG-106: Attempting native download approach...');
     document.dispatchEvent(new CustomEvent('db9-automation-start'));
     
-    // Find the download button using Gemini's actual DOM structure
-    let dlBtn = qDeep('[data-test-id="download-generated-image-button"] button')
-      || qDeep('download-generated-image-button button')
-      || qDeep('button[aria-label*="kích thước đầy đủ" i]')
-      || qDeep('button[aria-label*="Tải hình ảnh" i]')
-      || qDeep('button[aria-label*="Download full size" i]')
-      || qDeep('button[aria-label*="full size image" i]');
+    // Find the download button using nearest-ancestor parent traversal (up to 6 levels) near mediaEl
+    let dlBtn = null;
+    let parent = mediaEl.parentElement;
+    let depth = 0;
+    while (parent && depth < 6 && !dlBtn) {
+      dlBtn = qAllDeep('button, a', parent).find(el => {
+        if (!visible(el)) return false;
+        const ariaLabel = (el.getAttribute('aria-label') || '').toLowerCase();
+        const testId = (el.getAttribute('data-test-id') || '').toLowerCase();
+        const text = (el.textContent || '').toLowerCase();
+        return ariaLabel.includes('kích thước') || ariaLabel.includes('full size') || ariaLabel.includes('download') || ariaLabel.includes('tải') ||
+               testId.includes('download') || text.includes('kích thước') || text.includes('full size') || text.includes('tải');
+      });
+      if (dlBtn) {
+        log('[DB9] Found nearest download button inside parent depth ' + depth + ': ' + parent.className);
+        break;
+      }
+      parent = parent.parentElement;
+      depth++;
+    }
     
     if (!dlBtn) {
-      // Fallback: search within the media element's container
-      const container = mediaEl.closest('.image-container, .image-card, [class*="image"], [class*="card"], [class*="bubble"], [class*="element"]');
-      if (container) {
-        dlBtn = qAllDeep('button, a', container).find(el => {
-          if (!visible(el)) return false;
-          const ariaLabel = (el.getAttribute('aria-label') || '').toLowerCase();
-          return ariaLabel.includes('kích thước') || ariaLabel.includes('full size') || ariaLabel.includes('download');
-        });
-      }
+      log('[DB9] Fallback: searching download button document-wide...');
+      dlBtn = qDeep('[data-test-id="download-generated-image-button"] button')
+        || qDeep('download-generated-image-button button')
+        || qDeep('button[aria-label*="kích thước đầy đủ" i]')
+        || qDeep('button[aria-label*="Tải hình ảnh" i]')
+        || qDeep('button[aria-label*="Download full size" i]')
+        || qDeep('button[aria-label*="full size image" i]');
     }
     
     if (dlBtn) {
