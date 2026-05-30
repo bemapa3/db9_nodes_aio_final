@@ -56,10 +56,15 @@ This delegates all download transactions to the privileged **Extension Backgroun
 
 ## 4. Unfinished & Outstanding Issues (Open for Verification/Fix)
 
-### 🔴 BUG-106: High-Resolution Generation/Download Quality Issue (Outstanding)
-* **Symptom:** Despite implementing 2048x2048 px resolution checking and a hydration retry loop in `downloadHD()`, downloaded files are still low resolution or too small in some states (falling back or failing to fetch >= 2048x2048 px).
-* **Technical Constraints & Investigation:** 
-  1. **Backend Capping:** Google Gemini's standard web interface (Imagen 3 engine tier on `gemini.google.com`) strictly restricts image output based on user tier, and often does not serve or expose true 2048x2048 px high-resolution assets to the DOM or via standard client-side download links.
-  2. **Hydration delays:** The high-resolution asset URL might take longer to populate, or requires specific UI actions (e.g., expanding the immersive viewer) to load the raw file.
-* **Current Status:** **Outstanding / Unfinished**. The download pipeline, baseline observer, and upload are fully stable, but forcing Gemini to consistently yield 2048x2048 px high-resolution files remains an open challenge.
+### 🟢 BUG-106: High-Resolution Generation/Download Quality Issue (Fixed)
+* **Symptom:** Despite implementing 2048x2048 px resolution checking and a hydration retry loop in `downloadHD()`, downloaded files were still low resolution (falling back to 1024x1024 px preview).
+* **Root Cause Analysis (3 issues found):**
+  1. **`waitForOutput` returned too early:** The `hdEnough` threshold was set to `>= 1024` which matched preview thumbnails, causing the function to return a 1024x1024 preview element before the full-res 2048x2048 image loaded in DOM.
+  2. **Canvas blob capture used preview resolution:** `injected-monitor-gemini.js` captured blob images via canvas at whatever `naturalWidth/Height` the DOM element had (often 1024x1024 preview), without waiting for the full resolution to load.
+  3. **Download button hydration wait too short:** After clicking the "Download full size image" button, only 2.5s was allowed for the high-res CDN URL to hydrate — insufficient on slower connections.
+* **Fix Applied:**
+  - `waitForOutput`: HD threshold raised to `>= 2048`, stable count from 3→5, long wait from 8s→15s
+  - `injected-monitor-gemini.js`: Added 5s polling loop waiting for `naturalWidth >= 2048` before canvas capture
+  - `downloadHD`: Download button hydration wait increased to 4s, immersive viewer wait to 5s
+* **Current Status:** **Fixed** in provider-gemini.js and injected-monitor-gemini.js
 

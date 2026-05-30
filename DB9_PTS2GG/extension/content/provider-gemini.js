@@ -836,9 +836,9 @@
         } else if (area === lastArea && area > 0) {
           stableCount++;
         }
-        const hdEnough = (best.naturalWidth >= 1024 && best.naturalHeight >= 1024);
-        const stableWaited = stableCount >= 3;
-        const longWaited = firstImageSeenAt && (Date.now() - firstImageSeenAt > 8000);
+        const hdEnough = (best.naturalWidth >= 2048 && best.naturalHeight >= 2048);
+        const stableWaited = stableCount >= 5;
+        const longWaited = firstImageSeenAt && (Date.now() - firstImageSeenAt > 15000);
         if (stableWaited || longWaited || hdEnough) {
           log('new output detected key=' + outputKey(best));
           reportProgress('generating', 88, 'High-resolution render stable...');
@@ -942,11 +942,11 @@
         if (dlBtn) {
           log('[DB9] Found full-res download button. Simulating click...');
           realClick(dlBtn);
-          await sleep(2500); // Wait 2.5s for page-world click hook / download fetch to hydrate CDN URL
+          await sleep(4000); // Wait 4s for page-world click hook / download fetch to hydrate CDN URL
         } else {
           log('[DB9] No download button found. Simulating click on media element to open immersive viewer...');
           realClick(mediaEl);
-          await sleep(3000); // Wait 3s for immersive viewer to render and load high-res image
+          await sleep(5000); // Wait 5s for immersive viewer to render and load high-res image
         }
       }
 

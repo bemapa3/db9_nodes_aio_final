@@ -280,8 +280,20 @@
           });
         }
 
-        const w = img.naturalWidth || img.width || 1024;
-        const h = img.naturalHeight || img.height || 1024;
+        // BUG-106 FIX: Wait up to 5s for full resolution (2048x2048) to load
+        const resStart = Date.now();
+        while ((img.naturalWidth < 2048 || img.naturalHeight < 2048) && (Date.now() - resStart < 5000)) {
+          console.log('[DB9-Monitor] Waiting for full resolution... current:', img.naturalWidth + 'x' + img.naturalHeight);
+          await new Promise(r => setTimeout(r, 500));
+        }
+
+        const w = img.naturalWidth || img.width || 0;
+        const h = img.naturalHeight || img.height || 0;
+        
+        if (w < 2048 || h < 2048) {
+          console.warn('[DB9-Monitor] WARNING: Image resolution is below 2048x2048:', w + 'x' + h, '- canvas capture may be low quality');
+        }
+        
         const canvas = document.createElement('canvas');
         canvas.width = w;
         canvas.height = h;
